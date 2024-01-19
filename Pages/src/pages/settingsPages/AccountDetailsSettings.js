@@ -148,7 +148,7 @@ let notem =[]
         };
     });
 
-   console.log(notem);
+   
 
     const PostMethod = () => { };
     const PutMethod = () => { };
