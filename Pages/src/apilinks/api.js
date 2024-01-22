@@ -3,6 +3,7 @@ export const ApiLink = {
     //officePut:"https://localhost:7129/api/OfficeLocation/id:int?id=49",
     employedetails:"https://localhost:7129/api/EmployeeDetails",
     roledetails:"https://localhost:7129/api/Role",
-    account:"https://localhost:7129/api/AccountDetails"
+    account:"https://localhost:7129/api/AccountDetails",
+    department:"https://localhost:7129/api/Department"
   };
   

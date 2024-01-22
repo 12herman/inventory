@@ -122,15 +122,23 @@ const RoleSettings = ({ BackToSetting }) => {
 
     //put method
     const PutMethod = async () => {
+        const PreviousValue = RoleDatas.filter(el => el.id === putRole.id);
+
+        console.log(PreviousValue);
+        
+
+
         if (!Role.rollName) {
             message.error("Fill the field");
         }
         else {
-            const putData = {
-                id: putRole.id,
-                rollname: Role.rollName,
-                isdeleted: putRole.isdeleted
-            }
+        const putData = {
+            id: PreviousValue[0].id,
+            rollname: Role.rollName,
+            createdDate:PreviousValue[0].createdDate,
+            createdBy:PreviousValue[0].createdBy,
+            isdeleted: false
+        }
             await dispatch(putrole(putData));
             dispatch(getroledetails());
             ModelClose();
@@ -142,17 +150,19 @@ const RoleSettings = ({ BackToSetting }) => {
     //Delete
     const DeleteMethod = async (key) => {
         // Soft Delete
-        const PreviousValue = TableDatas.filter(pr => pr.key === key);
+         const PreviousValue = RoleDatas.filter(el => el.id === key);
         const DeleteData = {
-            id: PreviousValue[0].key,
-            rollname: PreviousValue[0].rollname,
+            id: PreviousValue[0].id,
+            rollname: PreviousValue[0].rollName,
+            createdDate:PreviousValue[0].createdDate,
+            createdBy:PreviousValue[0].createdBy,
             isdeleted: true
         }
         await dispatch(putrole(DeleteData));
-            dispatch(getroledetails());
-        message.success("Deleted successfully")
+        dispatch(getroledetails());
+        message.success("Deleted successfully");
         
-        // //Hard Delete
+        //Hard Delete
         // await dispatch(deleterole(key));
         // dispatch(getroledetails());
     }

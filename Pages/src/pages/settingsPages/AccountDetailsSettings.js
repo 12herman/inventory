@@ -1,29 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash, faPen } from '@fortawesome/free-solid-svg-icons';
-import { Button, Form, Table, message, Modal, Input, Popconfirm,Select } from "antd";
+import { Button, Form, Table, message, Modal, Input, Popconfirm, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { getaccount } from "../../redux/slices/accountdetailsSlice";
+import { deletedaccount, getaccount, postaccount, putaccount } from "../../redux/slices/accountdetailsSlice";
 import { getEmployees } from "../../redux/slices/employeeSlice";
 
 const AccountDetailSettings = ({ BackToSetting }) => {
 
-
+    const [form] = Form.useForm();
     const columns = [
         {
             title: 'S.No',
             dataIndex: 'serialno',
             width: '5%',
         },
-        {
-            title: 'Id',
-            dataIndex: 'employeeName',
-            width: '5%',
-        },
+       
         {
             title: 'Employee',
             dataIndex: 'employeeid',
             width: '25%',
+        },
+        {
+            title: 'Branch Name',
+            dataIndex: 'branchname',
+            width: '15%',
         },
         {
             title: 'Bank',
@@ -57,12 +58,12 @@ const AccountDetailSettings = ({ BackToSetting }) => {
                         okText="Yes"
                         cancelText="No"
                         okButtonProps={{ style: { backgroundColor: 'red', color: 'white' } }}
-                        onConfirm={() => Delete(record.key)}
+                        onConfirm={() => Delete(record)}
                     >
                         <Button><FontAwesomeIcon icon={faTrash} /></Button>
                     </Popconfirm>
 
-                    <Button onClick={() => Edit(record.key)}><FontAwesomeIcon icon={faPen} /></Button>
+                    <Button onClick={() => Edit(record)}><FontAwesomeIcon icon={faPen} /></Button>
 
                 </div>
 
@@ -73,10 +74,8 @@ const AccountDetailSettings = ({ BackToSetting }) => {
     const dispatch = useDispatch();
     const { account } = useSelector(state => state.account);
     const { employee } = useSelector(state => state.employee);
-
-    const [datas, setDatas] = useState([]);
-    const [emdata, setEmdata] = useState([]);
-
+    const [dataid,setDataid] =useState([]);
+    
     //input filed value
     const headingValue = "Account";
     const [accountInput, setAccountInput] = useState({
@@ -87,6 +86,8 @@ const AccountDetailSettings = ({ BackToSetting }) => {
         ifsc: ""
     });//Modify
     const [putAccount, setPutAccount] = useState([]);
+    const [placeHolderName, setPlaceHolderName] = useState("Select a person");// dropdown slection
+    const [accountId, setAccountId] = useState(''); //Account table Id
     const clearFileds = () => {
         setAccountInput({
             bankName: "",
@@ -106,9 +107,11 @@ const AccountDetailSettings = ({ BackToSetting }) => {
     const saveBtnOff = () => setsaveBtn(false);
     // add new filed open
     const AddNewBtn = () => {
+        setDropDownName(null);
         clearFileds();
         saveBtnOff();
         ModelOpen();
+        setPlaceHolderName("Select a person");
     }
     //input data 
     const InputDataFilelds = (e) => {
@@ -119,56 +122,146 @@ const AccountDetailSettings = ({ BackToSetting }) => {
         }));
     };
 
+
+
+    // option Name or not equal ids with option fn
+    const notEqualObjects = employee.filter((a) => !account.some((b) => a.id === b.employeeId))
+    const optionIsFalse = notEqualObjects.filter(notIds => notIds.isDeleted === false);
+    
+    const options = [
+        ...optionIsFalse.map(emp => ({
+            value: emp.id,
+            label: emp.firstName + ' ' + emp.lastName
+        }))
+    ];
+    const [dropDownId, setDropDownId] = useState();//Employee foreginkey
+    const [dropDownName, setDropDownName] = useState(null);
+    const dropDownValue = (value, label) => {
+        setDropDownName(label.label);
+        setDropDownId(value);
+    };
+    const onSearch = (value) => {
+        console.log('search:', value);
+    };
+    const filterOption = (input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+
+
+  
+  const filterAccountData = account.filter(acc => acc.isDeleted === false);
+  const TableDatas =filterAccountData.length > 0 ? filterAccountData.map( (data,i)=>({
+    key: data.accountId,
+    id: data.accountId,
+    serialno: i + 1,
+    bankname: data.bankName,
+    branchname: data.branchName,
+    employeeid: `${ data.employeeFirstName} ${ data.employeeLastName}`,
+    employeeName: data.employeeId,
+    bankLocation: data.bankLocation,
+    accountNumber: data.accountNumber,
+    ifsc: data.ifsc,
+  })): [];
+    // console.log(Tables);
+  
+    //Post method
+    const [NumberValidate,setNumberValidate] = useState(false)
+    const PostMethod =async () => {
+        const accountno = accountInput.accountNumber;
+        if (accountInput.bankName === "" ||
+            accountInput.branchName === "" ||
+            accountInput.bankLocation === "" ||
+            accountInput.accountNumber === "" ||
+            accountInput.ifsc === "" || dropDownName === null) {
+            message.error("Fill all the fields");
+        } 
+        else if (isNaN(accountno) === true){//true
+            setNumberValidate(true);
+            message.error("please check the account number");
+        }
+        else if(!isNaN(accountno) === false){ //false
+            setNumberValidate(false)
+        }
+        else if(!isNaN(accountno) != (!accountInput.bankName || !accountInput.branchName || !accountInput.bankLocation || !accountInput.accountNumber || !accountInput.ifsc) === true){
+       await dispatch(postaccount({ employeeId: dropDownId, ...accountInput }));
+        message.success("Successfully Added");
+        ModelClose();
+       await setNumberValidate(false);
+       await dispatch(getaccount());
+        }
+    };
+
+    //Put method
+    // pencil icon click
+    const Edit = async (record) => {
+        saveBtnOn();
+        ModelOpen();
+       await setDropDownId(record.employeeName);//Forgin key
+       await setAccountId(record.id);//Account Table id
+    //    console.log(record);
+        const placeholderFilter = employee.filter((emp => emp.id === record.employeeName));
+        setPlaceHolderName(placeholderFilter[0].firstName + " " + placeholderFilter[0].lastName);
+        const inputFiledFilter = account.filter((acc => acc.accountId === record.key));
+        setAccountInput({
+            id:record.key,
+            bankName: inputFiledFilter[0].bankName,
+            branchName: inputFiledFilter[0].branchName,
+            bankLocation: inputFiledFilter[0].bankLocation,
+            accountNumber: inputFiledFilter[0].accountNumber,
+            ifsc: inputFiledFilter[0].ifsc
+        });
+    };
+    const PutMethod =async (record) => {
+        const accountno = accountInput.accountNumber;
+        if (accountInput.bankName === "" ||
+            accountInput.branchName === "" ||
+            accountInput.bankLocation === "" ||
+            accountInput.accountNumber === "" ||
+            accountInput.ifsc === "" || 
+            accountInput.bankName === null ||
+            accountInput.branchName === null ||
+            accountInput.bankLocation === null ||
+            accountInput.ifsc === null) {
+            message.error("Fill all the fields");
+        } 
+        else if (isNaN(accountno) === true ||  accountInput.accountNumber === null){//true
+            setNumberValidate(true);
+            message.error("please check the account number");
+        }
+        else if(!isNaN(accountno) === false){ //false
+            setNumberValidate(false)
+        }
+        else if(!isNaN(accountno) != (!accountInput.bankName || !accountInput.branchName || !accountInput.bankLocation || !accountInput.accountNumber || !accountInput.ifsc) === true){
+        
+        const filterAcc = await account.filter(data => data.accountId === accountId);
+
+        console.log(filterAcc);
+        await dispatch(putaccount({ employeeId: dropDownId, ...accountInput,isdeleted:false,createdDate:filterAcc[0].createdDate,createdBy:filterAcc[0].createdBy,modifiedBy:filterAcc[0].modifiedBy,modifiedDate:filterAcc[0].modifiedDate }));
+        console.log({ employeeId: dropDownId, ...accountInput });
+        message.success("Successfully Updated");
+        ModelClose();
+        setNumberValidate(false);
+        await dispatch(getaccount());
+        }
+    };
+
+   //Delete
+   const Delete =async (recod) => {
+   await dispatch(deletedaccount(recod.id));
+   await dispatch(getaccount());
+    console.log( recod.id);
+}
+
     useEffect(() => {
         dispatch(getEmployees());
         dispatch(getaccount());
-        setEmdata(employee);
-        setDatas(account);
-    }, [dispatch])
+    }, [dispatch]);
 
-    console.log(datas);
-    console.log(emdata);
+    //  useEffect(()=>{
+    //     setData(account);
+    //  },[dispatch])
 
-let notem =[]
-    const TableDatas = datas.map((data, i) => {
-        const employee = emdata.find(emp => emp.id === data.employeeId);
-        const notDefinedEmp = emdata.find(emp => !datas.some(data => data.employeeId === emp.id));
-        if (notDefinedEmp) {
-            notem.push(notDefinedEmp);
-          }
-        return {
-            key: data.id,
-            serialno: i + 1,
-            bankname: data.bankName,
-            employeeid: employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown Employee',
-            employeeName: data.employeeId,
-            bankLocation: data.bankLocation,
-            accountNumber: data.accountNumber,
-            ifsc: data.ifsc,
-        };
-    });
-
-   
-
-    const PostMethod = () => { };
-    const PutMethod = () => { };
-    const Edit = () => {
-        console.log("Edit");
-    };
-    const Delete = () => {
-        console.log("Delete");
-    }
-
-    const options = [];
-    for (let i = 10; i < 36; i++) {
-        options.push({
-            value: i.toString(36) + i,
-            label: i.toString(36) + i,
-        });
-    }
-    const handleChange = (value) => {
-        console.log(`selected ${value}`);
-    };
+    // useEffect(()=>{
+    //     setFillAccData(fillAccData);
+    // },[account])
     return (
         <>
             <div className="flex items-center justify-between" >
@@ -196,20 +289,35 @@ let notem =[]
                     <Button type='text' key="2" danger="red" style={{ border: "0.5px solid red" }} onClick={() => ModelClose()}>Close</Button>
                 ]}>
 
-                <Form>
-                <Form.Item label="Employee" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select
-                
-                            mode="tags"
-                            style={{
-                                float: "right", width: "380px"
-                            }}
-                            onChange={handleChange}
-                            tokenSeparators={[',']}
+                <Form >
+                    <Form.Item label="Employee" style={{ marginBottom: 0, marginTop: 10 }}>
+
+                        {saveBtn === true ? <Select
+                            showSearch
+                            placeholder={placeHolderName}
+                            optionFilterProp="children"
+                            style={{ float: "right", width: "380px" }}
+                            onChange={dropDownValue}
+                            onSearch={onSearch}
+                            filterOption={filterOption}
                             options={options}
-                        />
+                            value={saveBtn === true ? placeHolderName : ''}
+                            disabled={true}
+                        /> : <Select
+                            showSearch
+                            placeholder={placeHolderName}
+                            optionFilterProp="children"
+                            style={{ float: "right", width: "380px" }}
+                            onChange={dropDownValue}
+                            onSearch={onSearch}
+                            filterOption={filterOption}
+                            options={options}
+                            value={dropDownName}
+                        />}
+
+
                     </Form.Item>
-                    
+
                     {/* officename */}
                     <Form.Item label="Bank Name" style={{ marginBottom: 0, marginTop: 10 }}>
                         <Input style={{ float: "right", width: "380px" }} placeholder='bank name' name='bankName' value={accountInput.bankName} onChange={InputDataFilelds} />
@@ -226,7 +334,17 @@ let notem =[]
                     </Form.Item>
 
                     {/* State */}
-                    <Form.Item label="Account No" style={{ marginBottom: 0, marginTop: 10 }}>
+                    <Form.Item rules={[
+
+                        {
+                            type: 'number',
+                            message: 'Please enter a valid number!',
+                        },
+                    ]}
+                       
+                        validateStatus={ NumberValidate ? 'error' : ''}
+                        help={form.getFieldError('accountNumber')}
+                        pattern="[0-9]*" label="Account No" style={{ marginBottom: 0, marginTop: 10 }}>
                         <Input style={{ float: "right", width: "380px" }} placeholder='account no' name='accountNumber' value={accountInput.accountNumber} onChange={InputDataFilelds} />
                     </Form.Item>
 
