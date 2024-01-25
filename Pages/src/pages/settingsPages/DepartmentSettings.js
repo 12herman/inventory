@@ -81,8 +81,6 @@ const DepartmentSettings = ({ BackToSetting }) => {
 
     const dispatch = useDispatch();
     const { department } = useSelector(state => state.department);
-
-
     useEffect(() => {
         dispatch(getDepartment());
     }, [dispatch])

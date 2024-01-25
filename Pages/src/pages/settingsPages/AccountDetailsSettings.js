@@ -107,6 +107,7 @@ const AccountDetailSettings = ({ BackToSetting }) => {
     const saveBtnOff = () => setsaveBtn(false);
     // add new filed open
     const AddNewBtn = () => {
+        setNumberValidate(false)
         setDropDownName(null);
         clearFileds();
         saveBtnOff();
@@ -147,7 +148,14 @@ const AccountDetailSettings = ({ BackToSetting }) => {
 
 
   
-  const filterAccountData = account.filter(acc => acc.isDeleted === false);
+//   const filterAccountData = account.filter(acc => acc.isDeleted === false);
+// compare two api && return the account data && yes it's possible in js not using backend api get method;
+const filterAccountData = account.filter(acc => 
+    acc.isDeleted === false &&
+    employee.some(em => em.id === acc.employeeId && em.isDeleted === false)
+  );
+  
+console.log(filterAccountData);
   const TableDatas =filterAccountData.length > 0 ? filterAccountData.map( (data,i)=>({
     key: data.accountId,
     id: data.accountId,

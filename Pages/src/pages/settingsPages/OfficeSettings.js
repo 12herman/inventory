@@ -75,7 +75,7 @@ const OfficeSettings = ({ BackToSetting }) => {
             city: '',
             state: '',
             country: '',
-            isdeleted:true
+            isdeleted:false
     });
 
     const [officeId,setOfficeId] = useState('');
@@ -166,7 +166,7 @@ const OfficeSettings = ({ BackToSetting }) => {
             message.error("Fill all the fields");
         }
         else {
-            console.log(officeField);
+            //console.log(officeField);
             const filterOff = await office.filter(data => data.id === officeId);
             const updatedOfficeData = {
                 "id": officeId,
@@ -181,7 +181,7 @@ const OfficeSettings = ({ BackToSetting }) => {
                 "modifiedBy":filterOff[0].modifiedBy,
                 "modifiedDate":filterOff[0].modifiedDate
             };
-            console.log(updatedOfficeData);
+            //console.log(updatedOfficeData);
             dispatch(updateOfficeAsync(updatedOfficeData));
             setOfficeFileld({
                 id: '',
