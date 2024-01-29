@@ -1,101 +1,105 @@
-import React, { useEffect, useState } from 'react'
-import { Form, Input, Select,Switch } from 'antd'
-import { useDispatch, useSelector } from 'react-redux'
-import { getEmployees } from '../redux/slices/employeeSlice';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, forwardRef, useImperativeHandle } from 'react'
+import { Form,Input } from 'antd'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPen, faInfoCircle, faLocationDot, faLandmark, faCircleCheck, faPeopleGroup, faL } from "@fortawesome/free-solid-svg-icons"
 
+const { form } = Form;
 const filedWidth = "760px";
 
+const AddressForm = forwardRef((props, ref) => {
 
-export default function AddressForm({ newempid }) {
-  const [form] = Form.useForm();
-  const dispatch = useDispatch();
-  const { employee } = useSelector(state => state.employee);
+    // Address inputs
+    // type 1 - permanet address
+    // type 2 -current address
+    const { newempid } = props;
+    const [addressFields, setAddressFields] = useState({
+        employeeId: newempid,
+        address1: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
+        isdeleted: false,
+        type:1
+    });
+    const [currentAddFields,setCurrentAddFields] = useState({
+        employeeId: newempid,
+        address1: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
+        isdeleted: false,
+        type:2
+    });
 
-  useEffect(() => {
-    dispatch(getEmployees());
-  }, []);
+    const AddressInputsOnchange = (e) => {
+        const { name, value } = e.target;
+        const type = e.currentTarget.getAttribute('data-type'); 
+        setAddressFields(pre => ({ ...pre, [name]: value, type}));
+    };
 
-  //employee filter
-  const employeeFalseFilter =  employee.filter( em =>  em.isDeleted === false);
-  //employee name
-  const newEmpNameFilter = employeeFalseFilter.filter( emp => emp.id === newempid);
-   
-  // employee data
-  const empOptions = employeeFalseFilter.map( emp => ({
-    value: emp.id,
-    label: `${ emp.firstName} ${ emp.lastName}`
-  }));
-  const empName =  newEmpNameFilter && newEmpNameFilter[0] ? newEmpNameFilter[0].firstName + " " + newEmpNameFilter[0].lastName : '';
-  //var empName;
-  // employees role data
-  const employeeRoleData = employeeFalseFilter.filter( emp =>  emp.roleDetails && emp.roleDetails.length > 0);
-  //leader data
-  const leaderData = employeeRoleData.filter( leader =>   leader.roleDetails && leader.roleDetails[0].roleId === 71);
-  const leaderOption = leaderData.map(le =>({
-    value:le.id,
-    label:le.firstName +" "+ le.lastName
-  }));
+    const cureentInputsOnchange = (e)=>{
+        const {name,value}= e.target;
+        const type = e.currentTarget.getAttribute('data-type'); 
+        setCurrentAddFields(pre => ({...pre,[name]:value, type}));
+    };
 
-  //hr data
-  const hrData = employeeRoleData.filter( leader =>   leader.roleDetails && leader.roleDetails[0].roleId === 70);
-  const hrOption = hrData.map(hr =>({
-    value:hr.id,
-    label:hr.firstName +" "+ hr.lastName
-  }));
-  
-  const [EnableEmp,setEnableEmp]= useState(false);
-  //enable all emp
-  const enableAllemp =()=>{
-    setEnableEmp(!EnableEmp);
-  }
-  
-  useEffect(()=>{
-    if (form) {
-        form.resetFields();
-      }
-},[EnableEmp])
-  //leader employee filed value
-  const [leadeEmp, setLeaderEmp] = useState({
-    employeeId: newempid,
-    leaderId: null,
-    hrManagerId: null
-  });
 
-  return (
-    <section >
-      <div className='mt-5 flex justify-center items-center'><FontAwesomeIcon className='text-2xl ' icon={faPeopleGroup} /></div>
 
-      <Form form={form} className='h-[60.9vh] mt-5'>
+    return (
+        <section >
+            <div className='mt-5 flex justify-center items-center'><FontAwesomeIcon className='text-2xl ' icon={faLocationDot} /></div>
 
-        <Form.Item style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="Employee Name">
-          <h2 className={`px-5 w-[${filedWidth}]`}>{empName}</h2>
-        </Form.Item >
+            <Form form={form} className='h-[60.9vh] mt-5'>
+            <h2 className='mt-5 px-7 text-lg'>Permanet Address :</h2>
+                {/* permanet Address */}
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="Address" name="address1">
+                    <Input style={{ float: "right", width: filedWidth }} data-type="1" placeholder="Address" name="address1" value={addressFields.address1} onChange={AddressInputsOnchange}/>
+                </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="All employee List">  
-        <Switch className={`mx-5 w-[${filedWidth}]`} size="small" checked={EnableEmp} style={{ background: `${ EnableEmp=== false ? "rgba(0, 0, 0, 0.45)" : "#4096ff"}`}} trackBgDisabled onClick={enableAllemp} onChange={enableAllemp}/>
-        </Form.Item>
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="City" name="city">
+                    <Input style={{ float: "right", width: filedWidth }} data-type="1" placeholder="City" name="city" value={addressFields.city} onChange={AddressInputsOnchange}/>
+                </Form.Item>
 
-        <Form.Item name="leader" style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="Leader">
-          <Select
-            showSearch
-            placeholder="select Leader"
-            style={{ float: "right", width: filedWidth }}
-            options={EnableEmp=== false ? leaderOption : empOptions}
-            value={leadeEmp.leaderId} />
-        </Form.Item>
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="State" name="state">
+                    <Input style={{ float: "right", width: filedWidth }} data-type="1" placeholder="State" name="state" value={addressFields.city} onChange={AddressInputsOnchange}/>
+                </Form.Item>
 
-        <Form.Item name="hr" style={{ marginBottom: 0, marginTop: 15, }} className='px-7' label="HR Manager">
-          <Select
-            showSearch
-            placeholder="select HR"
-            style={{ float: "right", width: filedWidth }}
-            options={EnableEmp=== false ? hrOption : empOptions}
-            value={leadeEmp.hrManagerId} />
-        </Form.Item>
-      </Form>
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="Country" name="country">
+                    <Input style={{ float: "right", width: filedWidth }} data-type="1" placeholder="Country" name="country" value={addressFields.country} onChange={AddressInputsOnchange}/>
+                </Form.Item>
 
-    </section>
-  )
-}
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="Postal Code" name="postalCode">
+                    <Input style={{ float: "right", width: filedWidth }} data-type="1" placeholder="postal Code" name="postalCode" value={addressFields.country} onChange={AddressInputsOnchange}/>
+                </Form.Item>
+
+                <h2 className='mt-10 px-7 text-lg'>Current Address :</h2>
+                {/* cureent Address */}
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="Address" name="address1">
+                    <Input data-type="2" style={{ float: "right", width: filedWidth }} placeholder="Address" name="address1" value={currentAddFields.address1} onChange={cureentInputsOnchange}/>
+                </Form.Item>
+
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="City" name="city">
+                    <Input data-type="2" style={{ float: "right", width: filedWidth }} placeholder="City" name="city" value={currentAddFields.city} onChange={cureentInputsOnchange}/>
+                </Form.Item>
+
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="State" name="state">
+                    <Input data-type="2" style={{ float: "right", width: filedWidth }} placeholder="State" name="state" value={currentAddFields.city} onChange={cureentInputsOnchange}/>
+                </Form.Item>
+
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="Country" name="country">
+                    <Input data-type="2" style={{ float: "right", width: filedWidth }} placeholder="Country" name="country" value={currentAddFields.country} onChange={cureentInputsOnchange}/>
+                </Form.Item>
+
+                <Form.Item className='px-7' style={{ marginBottom: 0, marginTop: 10 }} label="Postal Code" name="postalCode">
+                    <Input data-type="2" style={{ float: "right", width: filedWidth }} placeholder="postal Code" name="postalCode" value={currentAddFields.country} onChange={cureentInputsOnchange}/>
+                </Form.Item>
+
+            </Form>
+
+        </section>
+    )
+});
+
+export default AddressForm
