@@ -29,7 +29,7 @@ const Accessories = () => {
   const dispatch = useDispatch();
   const { office, loading } = useSelector(state => state.office);
 
-  const isDeleteOffice = office.filter(off => off.isdeleted === true);
+  const isDeleteOffice = office.filter(off => off.isdeleted === false);
   //console.log(isDeleteOffice);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const Accessories = () => {
 
   const handleMenuClick = (item) => {
     setSelectedMenuItem(item);
-    console.log(`item : ${item.label}`);
+    // console.log(`item : ${item.label}`);
   };
 
 
@@ -296,8 +296,7 @@ const Accessories = () => {
               key: selectedMenuItem.Components, // Ensure a unique key for each component
               officeData: officeData,
             })
-          ) : <Dashboard officeData={officeData} /> }
-         
+          ) : <Dashboard officeData={officeData} />}
 
         </Content>
       </Layout>
