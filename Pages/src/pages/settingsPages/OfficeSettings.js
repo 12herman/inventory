@@ -69,19 +69,18 @@ const OfficeSettings = ({ BackToSetting }) => {
     const [TableofficeData, setTableofficeData] = useState([]);
     const [newOfficePopup, setNewOfficePopup] = useState(false);
     const [officeField, setOfficeFileld] = useState({
-            // id: '',
+            id: '',
             officename: '',
             address: '',
             city: '',
             state: '',
             country: '',
-            isdeleted:false
+            isdeleted:true
     });
 
-    const [officeId,setOfficeId] = useState('');
     const ClearFiled = () => {
         setOfficeFileld({
-            // id: '',
+            id: '',
             officename: '',
             address: '',
             city: '',
@@ -130,7 +129,8 @@ const OfficeSettings = ({ BackToSetting }) => {
         }
     };
 
-    const TbOfficeDataFilter = TableofficeData.length > 0 ? TableofficeData.filter(data => data.isdeleted === false) : [];
+    const TbOfficeDataFilter = TableofficeData.length > 0 ? TableofficeData.filter(data => data.isdeleted === true) : [];
+
     const TbOfficeData = TbOfficeDataFilter.map((office, i) => ({
         key: office.id,
         serialno: i + 1,
@@ -142,11 +142,13 @@ const OfficeSettings = ({ BackToSetting }) => {
         isdeleted: office.isdeleted
     }));
 
-    const EditOfficeIcon = async(key) => {
-       await setOfficeId(key)
+
+    const EditOfficeIcon = (key) => {
+        console.log(key);
         var EditableData = TbOfficeData.filter(x => x.key === key);
+        console.log(EditableData);
         setOfficeFileld({
-            //id: key,
+            id: key,
             officename: EditableData[0].officename,
             address: EditableData[0].address,
             city: EditableData[0].city,
@@ -157,7 +159,9 @@ const OfficeSettings = ({ BackToSetting }) => {
         setPopUpBtnChange(true);
     }
 
+
     const EditOffice = async () => {
+        console.log("Hi edit");
         if (officeField.officename === "" ||
             officeField.address === "" ||
             officeField.city === "" ||
@@ -166,22 +170,17 @@ const OfficeSettings = ({ BackToSetting }) => {
             message.error("Fill all the fields");
         }
         else {
-            //console.log(officeField);
-            const filterOff = await office.filter(data => data.id === officeId);
+            console.log(officeField);
             const updatedOfficeData = {
-                "id": officeId,
+                "id": officeField.id,
                 "officename": officeField.officename,
                 "address": officeField.address,
                 "city": officeField.city,
-                "state": filterOff[0].state,
+                "state": officeField.state,
                 "country": officeField.country,
-                "isdeleted":false,
-                "createdBy":filterOff[0].createdBy,
-                "createdDate":filterOff[0].createdDate,
-                "modifiedBy":filterOff[0].modifiedBy,
-                "modifiedDate":filterOff[0].modifiedDate
+                "isdeleted":true
             };
-            //console.log(updatedOfficeData);
+            console.log(updatedOfficeData);
             dispatch(updateOfficeAsync(updatedOfficeData));
             setOfficeFileld({
                 id: '',
@@ -198,7 +197,8 @@ const OfficeSettings = ({ BackToSetting }) => {
 
     const DleteOffice = (key) => {
         // soft Delete
-        var DeleteData = office.filter(x => x.id === key);
+        var DeleteData = TbOfficeData.filter(x => x.key === key);
+        console.log(DeleteData[0]);
         const IsFalseOffice = {
             id: key,
             officename: DeleteData[0].officename,
@@ -206,13 +206,9 @@ const OfficeSettings = ({ BackToSetting }) => {
             city: DeleteData[0].city,
             state: DeleteData[0].state,
             country: DeleteData[0].country,
-            isdeleted: true,
-            modifiedBy:DeleteData[0].modifiedBy,
-            modifiedDate:DeleteData[0].modifiedDate,
-            createdBy:DeleteData[0].createdBy,
-            createdDate:DeleteData[0].createdDate
+            isdeleted: false
         };
-        // console.log(IsFalseOffice);
+        console.log(IsFalseOffice);
         dispatch(updateOfficeAsync(IsFalseOffice));
         message.success("Office deleted successfully");
         

@@ -1,37 +1,22 @@
-import React, { useEffect, useState ,useRef} from 'react';
-import { ConfigProvider, Steps, Popconfirm, Form, Modal, Space, Table, Tag, Button, Col, Row, Statistic, Divider, Input, Checkbox, Select, DatePicker, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Form,Modal,Space, Table, Tag, Button, Col, Row, Statistic, Divider, Input,  Checkbox, Select } from 'antd';
+
 import CountUp from 'react-countup';
 import { useDispatch, useSelector } from 'react-redux';
-import { getEmployees, postEmployees, putEmployees } from '../redux/slices/employeeSlice';
-import { getrole } from '../redux/slices/roleSlice';
+import { getEmployees } from '../redux/slices/employeeSlice';
+import { getroledetails } from '../redux/slices/roleDetailSlice';
 import '../css/user.css';
 import { CountriesAPI } from '../apilinks/countrycode'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faPen, faInfoCircle, faLocationDot, faLandmark, faCircleCheck, faPeopleGroup, faL } from "@fortawesome/free-solid-svg-icons"
-import { LoadingOutlined, SmileOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons';
-import { getDepartment } from '../redux/slices/departmentSlice';
-import { postRoleDetail } from '../redux/slices/roleDetailsSlice';
-import TeamForm from '../components/TeamForm';
-import AddressForm from '../components/AddressForm';
-import AccountForm from '../components/AccountForm';
-import FinishForm from '../components/FinishForm';
-const dateFormat = 'YYYY-MM-DD';
+
 const formatter = (value) => <CountUp end={value} />;
-const headingValue = 'Employee';
+
+
 const { Option } = Select;
+
+
 
 const Users = ({ officeData }) => {
 
-  //Emil validation
-  function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-  //Mobile number validation
-  function validateMobileNumber(mobileNumber) {
-    const mobileNumberRegex = /^\d{10}$/;
-    return mobileNumberRegex.test(mobileNumber);
-  }
 
   const [searchText, setSearchText] = useState('');
   const columns = [
@@ -102,29 +87,17 @@ const Users = ({ officeData }) => {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <div className="flex gap-x-2">
-          <Popconfirm
-            title="Are you sure to delete this?"
-            okText="Yes"
-            cancelText="No"
-            okButtonProps={{ style: { backgroundColor: 'red', color: 'white' } }}
-            onConfirm={() => DeleteIcon(record)}
-          >
-            <Button><FontAwesomeIcon icon={faTrash} /></Button>
-          </Popconfirm>
-
-          <Button onClick={() => EditPencilIcon(record)}><FontAwesomeIcon icon={faPen} /></Button>
-        </div>
+        <Space size="middle">
+          <a>Edit</a>
+          <a>Delete</a>
+        </Space>
       ),
     },
   ];
 
-  // API calls
   const dispatch = useDispatch();
   const { employee, loading } = useSelector(state => state.employee);
-  const { role } = useSelector(state => state.role);
-  const { office } = useSelector(state => state.office);
-  const { department } = useSelector(state => state.department);
+  const { roledetails, roledetailloading } = useSelector(state => state.roledetails)
 
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
@@ -133,19 +106,19 @@ const Users = ({ officeData }) => {
 
   useEffect(() => {
     dispatch(getEmployees());
-    dispatch(getrole());
-    dispatch(getDepartment());
+    dispatch(getroledetails());
   }, []);
 
   useEffect(() => {
-    setRoledetailData(role);
+    setRoledetailData(roledetails);
     setEmpData(employee);
     DataLoading();
-  }, [employee, officeData, role]);
+  }, [employee, officeData, roledetails]);
+
 
 
   function DataLoading() {
-    var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
+    var numberOfOffice = officeData.filter((off) => off.officename);
     var officeNames = numberOfOffice.map((off) => {
       return off.officename;
     });
@@ -158,6 +131,7 @@ const Users = ({ officeData }) => {
       setTableData(empData);
     }
   }
+
 
   function calculateAge(birthdate) {
     const birthDateObj = new Date(birthdate);
@@ -183,746 +157,308 @@ const Users = ({ officeData }) => {
     }
   }
 
-  const filterEmployeeDatas = tableData && tableData.length > 0 ? tableData.filter(el => el.isDeleted === false) : [];
-  const Tbdata = filterEmployeeDatas && filterEmployeeDatas.length > 0
-    ? filterEmployeeDatas.map((el, i) => {
-      const roleName = el.roleDetails && el.roleDetails.length > 0 ? roleCheck(el.roleDetails[0].roleId) : "Not Assigned";
-      return {
-        sno: i + 1,
-        key: el.id || '',
-        name: `${el.firstName + " " + el.lastName}` || '',
-        lastname: el.lastName || '',
-        age: calculateAge(el.dateOfBirth),
-        position: [el.departmentId && el.departmentId.departmentName, roleName],
-        mobilenumber: el.mobileNumber || '',
-      };
-    })
+
+
+  const Tbdata = tableData && tableData.length > 0
+    ? tableData.map((el, i) => ({
+      sno: i + 1,
+      key: el.id || '',
+      name: `${el.firstName + " " + el.lastName}` || '',
+      lastname: el.lastName || '',
+      age: calculateAge(el.dateOfBirth),
+      position: [el.departmentId.departmentName, roleCheck(el.roleDetails.length < 1 ? "Not Assigned" : el.roleDetails[0].roleId)],
+      mobilenumber: el.mobileNumber || '',
+    }))
     : [];
 
 
-
-  // popup-window
-  const [modelOpen, setModelOpen] = useState(false);
-  const ModelOpen = () => setModelOpen(true);
-  const ModelClose = () => { setModelOpen(false);  };
-  // save (or) add btn state
-  const [saveBtn, setsaveBtn] = useState(false);
-  const saveBtnOn = () => setsaveBtn(true);
-  const saveBtnOff = () => setsaveBtn(false);
-
-  //new emp id
-  const [newempid, setNewempId] = useState('');
-
-  // Modal
-  // post methods
-  // 1.information
-  const informationPostBtn = async () => { 
-   
-    //check all empty fields
-      if (
-        !EmployeeInput.firstName.trim() ||
-        !EmployeeInput.lastName.trim() ||
-        !String(EmployeeInput.gender).trim() || // Convert to string
-        !EmployeeInput.personalEmail.trim() ||
-        !EmployeeInput.officeEmail.trim() ||
-        !EmployeeInput.mobileNumber.trim() ||
-        !EmployeeInput.dateOfBirth.trim() ||
-        !EmployeeInput.dateOfJoin.trim() ||
-        !EmployeeInput.bloodGroup.trim() ||
-        !EmployeeInput.alternateContactNo.trim() ||
-        !EmployeeInput.contactPersonName.trim() ||
-        !String(EmployeeInput.relationship).trim() || // Convert to string
-        !String(EmployeeInput.maritalStatus).trim() || // Convert to string
-        !String(EmployeeInput.officeLocationId).trim() || // Convert to string
-        !String(EmployeeInput.departmentId).trim() // Convert to string
-      ) {
-        message.error("Fill all the fields");
-      }
-      // check the personal email 
-      else if (validateEmail(EmployeeInput.personalEmail) === false) {
-        message.error("Personal email is not a valid email");
-      }
-      // check the office email 
-      else if (validateEmail(EmployeeInput.officeEmail) === false) {
-        message.error("Office email is not a valid email");
-      }
-      // check the mobile number 
-      else if(validateMobileNumber(EmployeeInput.mobileNumber) === false){
-        message.error("please check the mobile number");
-      } 
-      // check the alternate mobile number
-      else if(validateMobileNumber(EmployeeInput.alternateContactNo) === false){
-        message.error("please check the alternate number");
-      }
-      // employee && role details post method
-      else {
-        // post employee details
-         const employeeDatas =await dispatch(postEmployees(EmployeeInput));
-        // post role details
-         if(employeeDatas && employeeDatas.payload.id){
-          console.log({ employeeId:employeeDatas.payload.id,...RoleValue}); 
-          await dispatch(postRoleDetail({ employeeId:employeeDatas.payload.id,...RoleValue}));
-          setNewempId(employeeDatas.payload.id);
-         }
-        infoPostProcessBar();
-      };
-    // infoPostProcessBar();
-    // setNewempId(3);
+  //pop-up details
+  const [popupData, setPopupData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  function showModal() {
+    setIsModalOpen(true);
+  };
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
   };
 
+  const [componentDisabled, setComponentDisabled] = useState(true);
 
-  // Model Edit Btn
-  const ModelEditBtn = () => {
-    ModelClose();
-  };
-
-  // Table Delete Icon 
-  const DeleteIcon = (data) => {
-    console.log(data.key);
-  };
-
-  // Table Edit Icon
-  const EditPencilIcon = (data) => {
-    saveBtnOn();
-    ModelOpen();
-    console.log(data.key);
+  const tailFormItemLayout = {
+    wrapperCol: {
+      xs: {
+        span: 24,
+        offset: 0,
+      },
+      sm: {
+        span: 16,
+        offset: 8,
+      },
+    },
   };
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [gender, setGender] = useState('');
+  const [personalEmail, setPersonalEmail] = useState('');
+  const [officeEmail, setOfficeEmail] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [countryCode, setCountryCode] = useState();
+  const [countryCodeFiled, setCountryCodeFiled] = useState(false);
+  const [alternateContactNo, setAlternativeContactNo] = useState('');
+  const [contactPersonName, setContactPersonName] = useState('');
+  const [relationship, setRelationship] = useState('');
+  const [dateOfBirth, setDataOfBirth] = useState('');
+  const [dateOfJoin, setDateOfJoin] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [maritalStatus, setMaritalStatus] = useState('');
 
+  const prefixSelector = (
+    <Form.Item name="prefix" noStyle initialValue={countryCode} >
+      <span>{countryCode}</span>
+    </Form.Item>
+  );
 
-  // Employee Inputs
-  const filedWidth = "730px";
-  const [EmployeeInput, setEmployeeInput] = useState({
-    firstName: "",
-    lastName: "",
-    gender: null,
-    personalEmail: "",
-    officeEmail: "",
-    mobileNumber: "",
-    dateOfBirth: "",
-    dateOfJoin: "",
-    bloodGroup: "",
-    alternateContactNo: "",
-    contactPersonName: "",
-    relationship: null,
-    maritalStatus: null,
-    officeLocationId: null,
-    departmentId: null,
-    isDeleted: false
-  });
-  // all fields set
-  const EmployeeInputsOnchange = (e) => {
-    const { name, value } = e.target;
-    setEmployeeInput(pre => ({
-      ...pre,
-      [name]: value
-    }));
-  };
-  // gender set
-  const GengerDropDown = (data) => {
-    setEmployeeInput(prevState => ({ ...prevState, gender: data }));
-  };
-  // date of birth set
-  const DateOfBirthValue = (date, dateString) => {
-    setEmployeeInput(prevState => ({ ...prevState, dateOfBirth: dateString }));
-  };
-  // date of join set
-  const DateOfJoinValue = (date, dateString) => {
-    setEmployeeInput(prevState => ({ ...prevState, dateOfJoin: dateString }));
-  };
-  // bloodGroup set
-  const BloodGroupValue = (value) => {
-    // const bloodArray = Object.values(value);
-    // const bloodGroupString = bloodArray.join(''); // Join the values without any separator
-    setEmployeeInput(prevState => ({ ...prevState, bloodGroup: value }));
-  };
-  // maritalStatus set
-  const MarriedDropDown = (data) => {
-    setEmployeeInput(prevState => ({ ...prevState, maritalStatus: data }));
-  };
-  // relationship set
-  const relationShipValue = (data) => {
-    setEmployeeInput(prevState => ({ ...prevState, relationship: data }));
-  };
-  // officeLocationId set
-  const officeFilterFalse = office.filter(off => off.isdeleted === false);
-  const officeOption = [
-    ...officeFilterFalse.map(off => ({
-      key: off.id,
-      value: off.id,
-      label: off.officename
-    }))
-  ];
-  const officeLocationDropDown = (data) => {
-    setEmployeeInput(prevState => ({ ...prevState, officeLocationId: data }));
-  };
-  // departmentId set
-  const departmentFilterFalse = department.filter(dep => dep.isdeleted === false);
-  const departmentOption = [
-    ...departmentFilterFalse.map(dep => ({
-      key: dep.id,
-      value: dep.id,
-      label: dep.departmentName
-    }))
-  ];
-  const departmentDropDown = (data) => {
-    setEmployeeInput(prevState => ({ ...prevState, departmentId: data }));
-  };
-  // clear the fields
-  const ClearEmployeeInputs = () => {
-    setEmployeeInput({
-      firstName: "",
-      lastName: "",
-      gender: null,
-      personalEmail: "",
-      officeEmail: "",
-      mobileNumber: "",
-      dateOfBirth: "",
-      dateOfJoin: "",
-      bloodGroup: "",
-      alternateContactNo: "",
-      contactPersonName: "",
-      relationship: null,
-      maritalStatus: null,
-      officeLocationId: null,
-      departmentId: null,
-      isDeleted: false
-    })
-  };
-
-  // Roll Details 
-  const [RoleValue, setRoleValue] = useState({
-    roleId: null,
-    isdeleted: false
-  });
-  // drop down set
-  const roleDropDown = (data) => {
-    setRoleValue(pre => ({ ...pre, roleId: data }));
-    //console.log(data);
-  };
-  // role clear
-  const roleClear = () => {
-    setRoleValue({
-      roleId: null,
-      isdeleted: false
-    })
-  };
-  // role drop down data
-  const roleFilter = role.filter(roles => roles.isdeleted === false);
-  const optionRoles = [
-    ...roleFilter.map(roles => ({
-      key: roles.id,
-      value: roles.id,
-      label: roles.rollName
-    }))
-  ];
-  const [form] = Form.useForm();
-  // Employee Add|+| Btn
-  const AddEmployeeBtn = () => {
-    ClearEmployeeInputs(); //clear employee
-    roleClear(); //clear role
-    if (form) {
-      form.resetFields(["firstName","lastName","gender","personalEmail","officeEmail","mobileNumber","dateOfBirth","dateOfJoin","bloodGroup","alternateContactNo","contactPersonName","relationship","maritalStatus","officeLocationId","departmentId","isDeleted","Role"]);
-    }
-    setProcessBar({
-      info: 'process',
-      team: 'wait',
-      address: 'wait',
-      account: 'wait',
-      done: 'wait'
-    })
-    saveBtnOff();
-    ModelOpen();
-  };
-
-
-
-
-  // process bar 
-  const [processbar, setProcessBar] = useState({
-    info: 'process',
-    team: 'wait',
-    address: 'wait',
-    account: 'wait',
-    done: 'wait'
-  });
-  //info
-  const infoPostProcessBar = () => {
-    setProcessBar(pre => ({ ...pre, info: "finish" }));
-    setProcessBar(pre => ({ ...pre, team: 'process' }));
-  };
-  //team
-  const teamPostProcessBar = () => {
-    setProcessBar(pre => ({ ...pre, address: "process" }));
-    setProcessBar(pre => ({ ...pre, team: 'finish' }));
-  };
-  // address
-  const addressPostProcessBar = () => {
-    console.log("address Post");
-    setProcessBar(pre => ({ ...pre, address: "finish" }));
-    setProcessBar(pre => ({ ...pre, account: 'process' }));
-  };
-  // account
-  const accountPostProcessBar = () => {
-    console.log("account Post");
-    setProcessBar(pre => ({ ...pre, account: "finish" }));
-    setProcessBar(pre => ({ ...pre, done: 'finish' }));
-  };
-
-
-
-
-  
-
-// child to parent function
-const teamFormRef = useRef();
-const postTeam = () => {
-  if (teamFormRef.current) {
-    teamFormRef.current.teamValidateData();
+  function onChange(value) {
+    console.log(`selected ${value}`);
+    var countryName = CountriesAPI.filter(x => x.name === value);
+    setCountryCode(countryName[0].code);
   }
-};
 
+  function onSearch(val) {
+    console.log('search:', val);
+  }
 
+  function SubmitBtn() {
+    console.log(mobileNumber.length);
+    if (mobileNumber.length < 11) {
 
+    }
+  }
   return (
     <div >
-
       <Row gutter={[16, 16]} align='middle'>
         <Col span={3}><Statistic title="User Count" value={empCounts} formatter={formatter} /></Col>
         <Col span={17} style={{ left: '0%' }}> <Input.Search placeholder='Search here....'
           onSearch={(value) => { setSearchText(value) }}
           onChange={(e) => { setSearchText(e.target.value) }} style={{ width: `30%` }} /></Col>
-        <Col span={4}  ><Button onClick={AddEmployeeBtn} type="primary" className='bg-blue-500'>{`Add ${headingValue}`}</Button></Col>
+        <Col span={4}  ><Button type="primary" className='bg-blue-500'>Add User</Button></Col>
       </Row>
 
-
       <Divider />
-
+      {/* <Row> */}
 
       <Col span={25}>
+
+
         <Table columns={columns}
           dataSource={Tbdata}
-          pagination={{ pageSize: 5 }} />
+          pagination={{ pageSize: 5 }}
+          //rowSelection={rowSelection}
+          onRow={(record, rowindex) => {
+            return {
+              onClick: event => {
+                // console.log(record);
+
+                // setEmpDetailPopup(true);
+                var fullDetail = empData.filter(em => em.id === record.key);
+                // console.log(fullDetail[0].personalEmail === null || "PersonalEmail" || "String" ? "Not mention" : fullDetail[0].personalEmail);
+                setPopupData(fullDetail);
+                showModal();
+                setFirstName(fullDetail[0].firstName);
+                setLastName(fullDetail[0].lastName);
+                setGender(fullDetail[0].gender === null || "String" ? "Not mention" : fullDetail[0].gender);
+                setPersonalEmail(fullDetail[0].personalEmail === null || "PersonalEmail" || "String" ? "Not mention" : fullDetail[0].personalEmail);
+                setOfficeEmail(fullDetail[0].officeEmail === "OfficeEmail" || null || "String" ? "Not mention" : fullDetail[0].officeEmail);
+                setMobileNumber(fullDetail[0].mobilenumber === "MobileNumber" || null ? "Not mention" : fullDetail[0].mobileNumber);
+                
+               
+                
+               var fullNumber = fullDetail[0].mobilenumber === "MobileNumber" || null ? "Not mention" : fullDetail[0].mobileNumber
+              
+              //  var codes = ful
+              }
+            }
+          }}
+        />
+
       </Col>
 
-      <Modal title={[<h2 className='text-center pt-2'>{`Add New ${headingValue}`}</h2>,
-      <Steps
-        className='mt-3 px-[100px]'
-        size='small'
-        items={[
-          {
-            title: 'Info',
-            status: processbar.info,
-            icon: processbar.info === 'process' ? <LoadingOutlined /> : <FontAwesomeIcon icon={faInfoCircle} />,
-            //&& <LoadingOutlined />
-          },
-          {
-            title: 'Team',
-            status: processbar.team,
-            icon: processbar.team === 'process' ? <LoadingOutlined /> : <FontAwesomeIcon icon={faPeopleGroup} />,
-            //&& <LoadingOutlined />
-          },
-          {
-            title: 'Address',
-            status: processbar.address,
-            icon: processbar.address === 'process' ? <LoadingOutlined /> : <FontAwesomeIcon icon={faLocationDot} />,
-          },
-          {
-            title: 'Account',
-            status: processbar.account,
-            icon: processbar.account === 'process' ? <LoadingOutlined /> : <FontAwesomeIcon icon={faLandmark} />,
-          },
-          {
-            title: 'Done',
-            status: processbar.done,
-            icon: processbar.done === 'process' ? <LoadingOutlined /> : <FontAwesomeIcon icon={faCircleCheck} />,
-          },
-        ]}
-      />]}
-        open={modelOpen}
-        centered
-        onCancel={ModelClose}
-        width={1000}
-        footer={[
-          //info back
-          // backbtn.infoback === true
-          //   ? <Button onClick={InfoBack}>Back</Button>
-          //   : "",
-          //saveBtn === false ? <Button key="submit" onClick={informationPostBtn}>Next</Button> : <Button key="1" onClick={ModelEditBtn} >Save</Button>,
+      {/* <Col span={1} align='center'><Divider type='vertical'style={{ height: '100%' }}/></Col> */}
 
-         
-          //next btns
-          processbar.info === 'process'//condition
-            ? <Button key="submit" onClick={informationPostBtn}>Next</Button>
-            : processbar.team === 'process'//condition
-              ? <Button key="submit" onClick={teamPostProcessBar}>Next</Button>
-              : processbar.address === 'process'//condition
-                ? <Button key="submit" onClick={addressPostProcessBar}>Next</Button>
-                : processbar.account === 'process'//condition
-                  ? <Button key="submit" onClick={accountPostProcessBar}>Next</Button>
-                  : "" ,
-                  /*
-                  processbar.info === 'process'//condition
-                  ? <Button key="submit" onClick={informationPostBtn}>Next</Button>
-                  : 
-                  processbar.team === 'process' ? <Button key="submit" onClick={postTeam}>Next</Button> : <Button key="submit" onClick={teamPostProcessBar}>Next</Button>,
-                  */
-          // close && finish btn
-          processbar.done === 'finish'//condition
-            ? <Button onClick={()=>ModelClose()} style={{ borderColor: '#00b96b', color: '#00b96b' }}>Finish</Button>
-            : <Button type='text' key="2" danger="red" style={{ border: "0.5px solid red" }} onClick={() => ModelClose()}>Close</Button>
-        ]}>
 
-        {/* (i)Employee-Details-section */}
-        {processbar.info === "process" ?
-          <section>
-            {/* <h1 className='font-bold mt-2 text-center'>Employee Details</h1> */}
-            <Form form={form}
-            >
-              {/* firstName */}
-              <Form.Item
-                name="firstName" label="First Name" style={{ marginBottom: 0, marginTop: 10, }} className='px-7' >
-                <Input style={{ float: "right", width: filedWidth }} placeholder='first name' name='firstName' value={EmployeeInput.firstName} onChange={EmployeeInputsOnchange} />
-              </Form.Item>
+      {/* <Col span={25}> */}
 
-              {/* lastName */}
-              <Form.Item name="lastName" label="Last Name" style={{ marginBottom: 0, marginTop: 10 }} className='px-7'>
-                <Input style={{ float: "right", width: filedWidth }} placeholder='last name' name='lastName' value={EmployeeInput.lastName} onChange={EmployeeInputsOnchange} />
-              </Form.Item >
+      {/* </Col> */}
 
-              {/* gender */}
-              <Form.Item name="gender" rules={[{ message: 'Please select your gender!', type: 'string' },]}
-                label="Gender" style={{ marginBottom: 0, marginTop: 10 }}
-                className='px-7'>
-                <Select optionFilterProp="children"
 
-                  placeholder="select gender"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={GengerDropDown}
-                  options={[
+      {/* </Row> */}
+
+
+
+
+      <Modal 
+      //bodyStyle={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }} 
+      popupData={popupData} footer={[]} title="Details" open={isModalOpen} width={1000}  onOk={handleOk} onCancel={handleCancel}>
+
+        {popupData.map(el => {
+          return (
+            <section key={el.id} className=''>
+
+              <div className='flex gap-x-2'>
+                <h2 className='font-bold'>Personal Details</h2>
+                <Checkbox checked={componentDisabled} onChange={(e) => setComponentDisabled(e.target.checked)}></Checkbox>
+              </div>
+
+              <Form disabled={componentDisabled} style={{ maxWidth: 300, }}>
+                <h2 className='mt-2'><label >Employee ID :</label> <span>{el.id}</span> </h2>
+                {/* name */}
+                <Form.Item label="Name" style={{ marginBottom: 0, marginTop: 10 }}>
+                  <Row>
+                    <Col><Input className='text-gray-600' onChange={(e) => setFirstName(e.target.value)} value={firstName} /> </Col>
+                    <Col><Input className='text-gray-600 inline-block' onChange={(e) => setFirstName(e.target.value)} value={lastName} /></Col>
+                  </Row>
+                </Form.Item>
+
+
+                {/* Gender */}
+                <Form.Item label="Gender" style={{ marginBottom: 0, marginTop: 10 }}><Input className='text-gray-600' onChange={(e) => setGender(e.target.value)} value={gender} /></Form.Item>
+
+
+                {/* personal-email */}
+                <Form.Item name="personal-email"
+                  label="Presonal Email"
+                  rules={[
                     {
-                      key: 1,
-                      value: "Male",
-                      label: "Male"
+                      type: 'email',
+                      message: 'The input is not valid E-mail!',
                     },
                     {
-                      key: 2,
-                      value: "Female",
-                      label: "Female"
-                    },
-                    {
-                      key: 3,
-                      value: "Other",
-                      label: "Other"
+                      message: 'Please input your E-mail!',
                     },
                   ]}
-                  value={EmployeeInput.gender}
-                />
-              </Form.Item >
+                  initialValue={personalEmail}
+                  style={{ marginBottom: 0, marginTop: 10 }}>
+                  <Input className='text-gray-600' onChange={(e) => setPersonalEmail(e.target.value)} value={personalEmail} />
+                </Form.Item>
 
-              {/* personalEmail */}
-              <Form.Item rules={[{ type: 'email', }]} className='px-7'
-                label="Personal Email"
-                name='personalEmail'
-                style={{ marginBottom: 0, marginTop: 10 }}>
-                <Input style={{ float: "right", width: filedWidth }} placeholder='personal email' name='personalEmail' value={EmployeeInput.personalEmail} onChange={EmployeeInputsOnchange} />
-              </Form.Item >
 
-              {/* officeEmail */}
-              <Form.Item rules={[{ type: 'email', }]} className='px-7'
-                name='officeEmail' label="Office Email" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Input style={{ float: "right", width: filedWidth }} placeholder='office email' name='officeEmail' value={EmployeeInput.officeEmail} onChange={EmployeeInputsOnchange} />
-              </Form.Item >
+                {/* office-email */}
+                <Form.Item name="office-email"
+                  label="Office Email"
+                  rules={[
+                    {
+                      type: 'email',
+                      message: 'The input is not valid E-mail!',
+                    },
+                    {
 
-              {/* mobileNumber */}
-              <Form.Item className='px-7'
-                style={{ marginBottom: 0, marginTop: 10 }}
-                label="Mobile Number"
-                name="mobileNumber"
-                rules={[
-                  { message: 'Please enter your mobile number' },
-                  {
-                    pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    message: 'Please enter a valid 10-digit mobile number',
-                  },
-                ]}
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="Mobile Number"
-                  name="mobileNumber"
-                  value={EmployeeInput.mobileNumber}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
-
-              {/* dateOfBirth*/}
-              <Form.Item
-                name="dateOfBirth"
-                className='px-7' label="Date Of Birth" style={{ marginBottom: 0, marginTop: 10 }}>
-                <DatePicker style={{ float: "right", width: filedWidth }} format={dateFormat} onChange={DateOfBirthValue} />
-              </Form.Item >
-
-              {/* dateOfJoin*/}
-              <Form.Item
-                name="dateOfJoin"
-                className='px-7' label="Date Of Join" style={{ marginBottom: 0, marginTop: 10 }}>
-                <DatePicker style={{ float: "right", width: filedWidth }} format={dateFormat} onChange={DateOfJoinValue} />
-              </Form.Item >
-
-              {/* bloodGroup */}
-              <Form.Item
-                name="bloodGroup"
-                className='px-7' label="Blood Group" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select
-                  //mode="multiple"
-                  //size={size}
-                  placeholder="select blood group"
-                  onChange={BloodGroupValue}
-                  style={{ float: "right", width: filedWidth }}
-                  options={[
-                    {
-                      key: 1,
-                      value: "A+",
-                      label: "A+"
+                      message: 'Please input your E-mail!',
                     },
-                    {
-                      key: 2,
-                      value: "A-",
-                      label: "A-"
-                    },
-                    {
-                      key: 3,
-                      value: "B+",
-                      label: "B+"
-                    },
-                    {
-                      key: 4,
-                      value: "B-",
-                      label: "B-"
-                    },
-                    {
-                      key: 5,
-                      value: "O+",
-                      label: "O+"
-                    },
-                    {
-                      key: 6,
-                      value: "O-",
-                      label: "O-"
-                    },
-                    {
-                      key: 7,
-                      value: "AB+",
-                      label: "AB+"
-                    },
-                    {
-                      key: 8,
-                      value: "AB-",
-                      label: "AB-"
-                    }
                   ]}
-                />
-              </Form.Item >
+                  initialValue={officeEmail}
+                  style={{ marginBottom: 0, marginTop: 10 }}>
+                  <Input className='text-gray-600' onChange={(e) => setOfficeEmail(e.target.value)} value={officeEmail} />
+                </Form.Item>
 
-              {/* alternateContactNo */}
-              <Form.Item
 
-                className='px-7'
-                style={{ marginBottom: 0, marginTop: 10 }}
-                label="Alternate Contact No"
-                name="alternateContactNo"
-                rules={[
-                  { message: 'Please enter your mobile number' },
-                  {
-                    pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    message: 'Please enter a valid 10-digit mobile number',
-                  },
-                ]}
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="alternate contact no"
-                  name="alternateContactNo"
-                  value={EmployeeInput.alternateContactNo}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
+                {/* countrycode */}
+                {
+                  componentDisabled === false ? <Form.Item label="Country" style={{ marginBottom: 0, marginTop: 10 }}>
+                    <Select
+                      showSearch
+                      style={{ width: 200 }}
+                      placeholder="Select a country"
+                      optionFilterProp="children"
+                      onChange={onChange}
+                      // onFocus={onFocus}
+                      // onBlur={onBlur}
+                      
+                      onSearch={onSearch}
+                      filterOption={(input, option) =>
+                        option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      }
+                    >
+                      {
+                        CountriesAPI.map((el, i) => {
+                          return (
+                            <Option key={i} value={el.name}>{el.name}</Option>
+                          )
+                        })
+                      }
+                    </Select>
+                  </Form.Item> : ""
+                }
 
-              {/* Relationship */}
-              <Form.Item
+                {/* mobile-number */}
+                <Form.Item
+                  name="mobile-number"
+                  label="Mobile NO"
+                  rules={[
+                    {
 
-                name="relationship" className='px-7' label="Relationship" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select
-
-                  optionFilterProp="children"
-                  placeholder="select relationship"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={relationShipValue}
-                  options={[
-                    {
-                      key: 1,
-                      value: "Father",
-                      label: "Father"
+                      message: 'Please input your phone number!',
                     },
-                    {
-                      key: 2,
-                      value: "Mother",
-                      label: "Mother"
-                    },
-                    {
-                      key: 3,
-                      value: "Son",
-                      label: "Son"
-                    },
-                    {
-                      key: 4,
-                      value: "Daughter",
-                      label: "Daughter"
-                    },
-                    {
-                      key: 5,
-                      value: "Husband",
-                      label: "Husband"
-                    },
-                    {
-                      key: 6,
-                      value: "Wife",
-                      label: "Wife"
-                    },
-                    {
-                      key: 7,
-                      value: "Brother",
-                      label: "Brother"
-                    },
-                    {
-                      key: 8,
-                      value: "Sister",
-                      label: "Sister"
-                    },
-                    {
-                      key: 9,
-                      value: "Grandfather",
-                      label: "Grandfather"
-                    },
-                    {
-                      key: 10,
-                      value: "Grandmother",
-                      label: "Grandmother"
-                    },
-                    {
-                      key: 11,
-                      value: "Grandson",
-                      label: "Grandson"
-                    },
-                    {
-                      key: 12,
-                      value: "Uncle",
-                      label: "Uncle"
-                    },
-                    {
-                      key: 13,
-                      value: "Aunt",
-                      label: "Aunt"
-                    },
-                    {
-                      key: 14,
-                      value: "Nephew",
-                      label: "Nephew"
-                    },
-                    {
-                      key: 15,
-                      value: "Niece",
-                      label: "Niece"
-                    },
-                    {
-                      key: 16,
-                      value: "Cousins",
-                      label: "Cousins"
-                    }
-
                   ]}
-                  value={EmployeeInput.relationship}
-                />
+                  initialValue={mobileNumber === "MobileNumber" ? "Not Mention" : mobileNumber}
+                  style={{ marginBottom: 0, marginTop: 10 }}>
+                  <Input addonBefore={prefixSelector}  onChange={(e) => { setMobileNumber(e.target.value) }} className='text-gray-600' />
+                </Form.Item>
 
-              </Form.Item>
 
-              {/* contactPersonName */}
-              <Form.Item
-                name="contactPersonName"
-                className='px-7' label="Contact Person Name" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Input style={{ float: "right", width: filedWidth }} placeholder='contact person name' name='contactPersonName' value={EmployeeInput.contactPersonName} onChange={EmployeeInputsOnchange} />
-              </Form.Item>
+                <Form.Item {...tailFormItemLayout}>
+                  <Button type="primary" htmlType="submit" onClick={() => SubmitBtn()}>Register </Button>
+                </Form.Item>
 
-              {/* maritalStatus */}
-              <Form.Item
+              </Form>
 
-                name="maritalStatus" className='px-7' label="Marital Status" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select optionFilterProp="children"
-                  placeholder="select marital status"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={MarriedDropDown}
-                  options={[
-                    {
-                      value: "Married",
-                      label: "Married"
-                    },
-                    {
-                      value: "Unmarried",
-                      label: "Unmarried"
-                    }
-                  ]}
-                  value={EmployeeInput.maritalStatus}
-                />
-              </Form.Item >
 
-              {/* officeLocationId */}
-              <Form.Item
-                name="officeLocationId" className='px-7' label="Office Location" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select optionFilterProp="children"
-                  placeholder="select office location"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={officeLocationDropDown}
-                  options={officeOption}
-                  value={EmployeeInput.officeLocationId}
-                />
-              </Form.Item >
+              {/* grid-1 */}
+              <div>
+                <h2 className='font-bold '>Personal Details</h2>
+                <label>Employee ID :</label> <span>{el.id}</span> <br />
+                <label>Name :</label> <span>{el.firstName + " " + el.lastName}</span> <br />
+                <label>Gender :</label> {el.gender === null || "String" ? <span className='text-red-500'>Not Mention</span> : <span>{el.gender}</span>} <br />
+                <label>Personal Email :</label> {el.personalEmail === "PersonalEmail" || null || "String" ? <span className='text-red-500'>Not Mention</span> : <span>{el.personalEmail}</span>} <br />
+                <label>Office Email :</label> {el.officeEmail === "OfficeEmail" || null || "String" ? <span className='text-red-500'>Not Mention</span> : <span>{el.officeEmail}</span>} <br />
+                <label>Mobile Number :</label> {el.mobileNumber === "MobileNumber" || null || "String" ? <span className='text-red-500'>Not Mention</span> : <span>{el.mobileNumber}</span>} <br />
+                <label>AlternateContact Number :</label> {el.alternateContactNo === "Alternate" || null || "String" ? <span className='text-red-500'>Not Mention</span> : <span>{el.alternateContactNo}</span>} <br />
+                <label>Contact Person Name :</label> <span>{el.contactPersonName}</span> <br />
+                <label>Relationship :</label> <span>{el.relationship}</span> <br />
+                <label>Date of Birth :</label> {el.dateOfBirth === "String" || null ? <span className='text-red-500'>Not Mention</span> : <span>{el.dateOfBirth} <br /> <label> Age :</label> <span>{calculateAge(el.dateOfBirth)}</span></span>} <br />
+                <label>Date of Join :</label> <span>{el.dateOfJoin}</span> <br />
+                <label>Blood Group :</label> <span>{el.bloodGroup}</span> <br />
+                <label>Marital Status :</label> <span>{el.maritalStatus}</span> <br />
+              </div>
 
-              {/* departmentId */}
-              <Form.Item
-                name="departmentId" className='px-7' label="Department" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select optionFilterProp="children"
-                  placeholder="select department"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={departmentDropDown}
-                  options={departmentOption}
-                  value={EmployeeInput.departmentId}
-                />
-              </Form.Item >
+              {/* grid-2 */}
+              <div>
+                <h2 className='font-bold ' >Office</h2>
+                <label>Office Name :</label><span>{el.officeLocationId.officename}</span> <br />
+                {/* <label className='underline'>Address</label> <br/> */}
+                <span>{el.officeLocationId.address}</span> <br />
+                <span>{el.officeLocationId.city}</span> <br />
+                <span>{el.officeLocationId.state}</span> <br />
+                <span>{el.officeLocationId.country}</span> <br />
+              </div>
 
-              {/* Roll Detail */}
-              <Form.Item
-                name="Role" className='px-7' label="Role" style={{ marginBottom: 0, marginTop: 10 }}>
-                <Select optionFilterProp="children"
-                  placeholder="select role"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={roleDropDown}
-                  options={optionRoles}
-                  value={RoleValue.roleId}
-                />
-              </Form.Item >
-
-            </Form>
-          </section>
-          : processbar.team === "process"
-            ? <TeamForm newempid={newempid} teamPostProcessBar={teamPostProcessBar} ref={teamFormRef}/>
-            : processbar.address === "process"
-              ? <AddressForm newempid={newempid} />
-              : processbar.account === "process"
-                ? <AccountForm newempid={newempid}/>
-                : processbar.done === "finish"
-                  ? <FinishForm newempid={newempid}/> : ''}
+              {/* grid-3 */}
+              <div>
+                <h2 className='font-bold ' >Account</h2>
+                <label>Bank Name :</label> {el.accountDetails.length > 0 ? <span>{el.accountDetails[0].bankName}</span> : <span className='text-red-500'>Not Mention</span>} <br />
+                <label>Account No :</label> {el.accountDetails.length > 0 ? <span>{el.accountDetails[0].accountNumber}</span> : <span className='text-red-500'>Not Mention</span>} <br />
+                <label>IFSC :</label> {el.accountDetails.length > 0 ? <span>{el.accountDetails[0].ifsc}</span> : <span className='text-red-500'>Not Mention</span>} <br />
+                <label>Branch Name :</label> {el.accountDetails.length > 0 ? <span>{el.accountDetails[0].branchName}</span> : <span className='text-red-500'>Not Mention</span>} <br />
+                <label>Bank Location :</label> {el.accountDetails.length > 0 ? <span>{el.accountDetails[0].bankLocation}</span> : <span className='text-red-500'>Not Mention</span>} <br />
+              </div>
+            </section>
+          )
+        })}
       </Modal>
+
     </div>
 
   );
