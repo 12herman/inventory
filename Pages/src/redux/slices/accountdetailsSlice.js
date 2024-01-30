@@ -27,7 +27,7 @@ export const putaccount = createAsyncThunk(`${apiName}/put${apiName}`,async(putd
 
 //Delete
 export const deletedaccount = createAsyncThunk(`${apiName}/delete${apiName}`,async(id)=>{
-    return Axios.delete(`${apilink}/${id}`)
+    return Axios.delete(`${apilink}?id=${id}`)
                 .then(()=>id);
 });
 

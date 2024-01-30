@@ -1,6 +1,6 @@
 /* Your CSS file or style block */
 .ant-modal-body {
-    max-height: 70vh; /* Set the maximum height for the scrollbar to appear */
+    max-height: 300px; /* Set the maximum height for the scrollbar to appear */
     overflow-y: auto; /* Enable vertical scrollbar */
     scrollbar-width: thin; /* Set the width of the scrollbar on Firefox */
     scrollbar-color: darkgrey lightgrey; /* Set the color of the scrollbar on Firefox */
