@@ -6,9 +6,8 @@ import OfficeSettings from './settingsPages/OfficeSettings';
 import RoleSettings from './settingsPages/RoleSettings';
 import AccountDetailSettings from './settingsPages/AccountDetailsSettings';
 import DepartmentSettings from './settingsPages/DepartmentSettings';
-import AccessoriesSettings from './settingsPages/AccessoriesSettings';
-import BrandSettings from './settingsPages/BrandSettings';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser} from '@fortawesome/free-solid-svg-icons';
 
 
 
@@ -28,48 +27,47 @@ const Settings = () => {
       key: 1,
       settingname: "Office",
       componets: <OfficeSettings />,
-      props: { BackToSetting : () => setsettingsBack(true) }
+      icon: faBuilding,
+      props: { BackToSetting : () => setsettingsBack(true) },
+      
     },
     {
       key: 2,
       settingname: "Role",
       componets: <RoleSettings />,
-      props: { BackToSetting : () => setsettingsBack(true) }
+      icon: faToolbox,
+      props: { BackToSetting : () => setsettingsBack(true) },
+      
     },
     {
       key: 3,
       settingname: "Account Details",
       componets: <AccountDetailSettings />,
+      icon: faBuildingColumns,
       props: { BackToSetting : () => setsettingsBack(true) }
     },
     {
       key: 4,
       settingname: "Department",
       componets: <DepartmentSettings />,
+      icon: faBuildingUser,
       props: { BackToSetting : () => setsettingsBack(true) }
     },
-    {
-      key: 4,
-      settingname: "Accessories",
-      componets: <AccessoriesSettings />,
-      props: { BackToSetting : () => setsettingsBack(true) }
-    },
-    {
-      key: 5,
-      settingname: "Brand",
-      componets: <BrandSettings />,
-      props: { BackToSetting : () => setsettingsBack(true) }
-    }
   ];
+
 
   const curdPage = (e) => {
     setsettingsBack(false);
-    const selectedSetting = settingList.find((setting) => setting.settingname === e.target.innerText);
-    if (selectedSetting && selectedSetting.componets) {
-      setPreview(React.cloneElement(selectedSetting.componets, { ...selectedSetting.props, BackToSetting }));
+    const clickedCol = e.target.closest('.cursor-pointer');
+    if (clickedCol) {
+      const settingName = clickedCol.getAttribute('name');
+      const selectedSetting = settingList.find((setting) => setting.settingname === settingName);
+      if (selectedSetting && selectedSetting.componets) {
+        setPreview(React.cloneElement(selectedSetting.componets, { ...selectedSetting.props, BackToSetting }));
+      }
     }
   };
-
+  
   return (
     <div>
       {/* <h3>Theme <Switch checkedChildren="Dark" unCheckedChildren="Light" defaultChecked /></h3> */}
@@ -79,7 +77,7 @@ const Settings = () => {
         {
           settingList.map((settings, i) => {
             return (
-                <Col key={i} onClick={curdPage} className='cursor-pointer w-full py-2 hover:text-gray-500'>{settings.settingname} <Divider style={{ marginTop: 0, marginBottom: 3 }} /></Col>
+                <Col key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer block w-full py-2 hover:text-gray-500 z-50'> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span>{settings.settingname}</span>  <Divider style={{ marginTop: 0, marginBottom: 3 }} /></Col>
             )
           })
         }
