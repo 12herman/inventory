@@ -7,9 +7,9 @@ import RoleSettings from './settingsPages/RoleSettings';
 import AccountDetailSettings from './settingsPages/AccountDetailsSettings';
 import DepartmentSettings from './settingsPages/DepartmentSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser} from '@fortawesome/free-solid-svg-icons';
-
-
+import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright} from '@fortawesome/free-solid-svg-icons';
+import BrandSettings  from './settingsPages/BrandSettings';
+import AccessoriesSettings from './settingsPages/AccessoriesSettings';
 
 
 const Settings = () => {
@@ -51,6 +51,20 @@ const Settings = () => {
       settingname: "Department",
       componets: <DepartmentSettings />,
       icon: faBuildingUser,
+      props: { BackToSetting : () => setsettingsBack(true) }
+    },
+    {
+      key: 5,
+      settingname: "Brand",
+      componets: <BrandSettings />,
+      icon: faCopyright,
+      props: { BackToSetting : () => setsettingsBack(true) }
+    },
+    {
+      key: 6,
+      settingname: "Accessories",
+      componets: <AccessoriesSettings />,
+      icon: faKeyboard,
       props: { BackToSetting : () => setsettingsBack(true) }
     },
   ];
