@@ -3,7 +3,7 @@ import { Button, Form, Table, message, Modal, Input, Popconfirm } from "antd";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash, faPen, faL } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
-import { deleterole, getroledetails, postrole, putrole } from "../../redux/slices/roleDetailSlice";
+import { deleterole, getrole, postrole, putrole } from "../../redux/slices/roleSlice";
 
 const RoleSettings = ({ BackToSetting }) => {
 
@@ -47,8 +47,7 @@ const RoleSettings = ({ BackToSetting }) => {
     ]
 
     const dispatch = useDispatch();
-    const { roledetails } = useSelector(state => state.roledetails);
-    console.log("HI:",roledetails);
+    const { role } = useSelector(state => state.role);
     const [datas, setDatas] = useState([]);
     //input filed value
     const headingValue = "Role";
@@ -99,7 +98,7 @@ const RoleSettings = ({ BackToSetting }) => {
                 message.error("Fill the field");
             } else {
                 await dispatch(postrole(Role));
-                dispatch(getroledetails());
+                dispatch(getrole());
                 message.success(`New ${headingValue} created successfully`);
                 ModelClose();
             }
@@ -123,17 +122,21 @@ const RoleSettings = ({ BackToSetting }) => {
 
     //put method
     const PutMethod = async () => {
+        const PreviousValue = RoleDatas.filter(el => el.id === putRole.id);
+        //console.log(PreviousValue);
         if (!Role.rollName) {
             message.error("Fill the field");
         }
         else {
-            const putData = {
-                id: putRole.id,
-                rollname: Role.rollName,
-                isdeleted: putRole.isdeleted
-            }
+        const putData = {
+            id: PreviousValue[0].id,
+            rollname: Role.rollName,
+            createdDate:PreviousValue[0].createdDate,
+            createdBy:PreviousValue[0].createdBy,
+            isdeleted: false
+        }
             await dispatch(putrole(putData));
-            dispatch(getroledetails());
+            dispatch(getrole());
             ModelClose();
             message.success("save successfully")
         }
@@ -143,31 +146,31 @@ const RoleSettings = ({ BackToSetting }) => {
     //Delete
     const DeleteMethod = async (key) => {
         // Soft Delete
-        const PreviousValue = TableDatas.filter(pr => pr.key === key);
-        console.log("Previous Value:",PreviousValue);
+         const PreviousValue = RoleDatas.filter(el => el.id === key);
         const DeleteData = {
-            id: PreviousValue[0].key,
-            rollname: PreviousValue[0].rollname,
+            id: PreviousValue[0].id,
+            rollname: PreviousValue[0].rollName,
+            createdDate:PreviousValue[0].createdDate,
+            createdBy:PreviousValue[0].createdBy,
             isdeleted: true
         }
         await dispatch(putrole(DeleteData));
-            dispatch(getroledetails());
-        message.success("Deleted successfully")
+        dispatch(getrole());
+        message.success("Deleted successfully");
         
-        // //Hard Delete
+        //Hard Delete
         // await dispatch(deleterole(key));
-        // dispatch(getroledetails());
+        // dispatch(getrole());
     }
 
     useEffect(() => {
-        dispatch(getroledetails());
+        dispatch(getrole());
     }, [dispatch]);
 
     useEffect(() => {
-        setDatas(roledetails);
+        setDatas(role);
     }, [dispatch, PostMethod, PutMethod, DeleteMethod])
 
-console.log("Role details:",datas);
     return (
         <>
             <div className="flex items-center justify-between" >
