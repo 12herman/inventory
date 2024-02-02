@@ -74,7 +74,6 @@ const AccountDetailSettings = ({ BackToSetting }) => {
     const dispatch = useDispatch();
     const { account } = useSelector(state => state.account);
     const { employee } = useSelector(state => state.employee);
-    const [dataid,setDataid] =useState([]);
     
     //input filed value
     const headingValue = "Account";
@@ -85,7 +84,7 @@ const AccountDetailSettings = ({ BackToSetting }) => {
         accountNumber: "",
         ifsc: ""
     });//Modify
-    const [putAccount, setPutAccount] = useState([]);
+
     const [placeHolderName, setPlaceHolderName] = useState("Select a person");// dropdown slection
     const [accountId, setAccountId] = useState(''); //Account table Id
     const clearFileds = () => {
@@ -326,7 +325,7 @@ console.log(filterAccountData);
 
                     </Form.Item>
 
-                    {/* officename */}
+                    {/* bankname */}
                     <Form.Item label="Bank Name" style={{ marginBottom: 0, marginTop: 10 }}>
                         <Input style={{ float: "right", width: "380px" }} placeholder='bank name' name='bankName' value={accountInput.bankName} onChange={InputDataFilelds} />
                     </Form.Item>
@@ -343,7 +342,6 @@ console.log(filterAccountData);
 
                     {/* State */}
                     <Form.Item rules={[
-
                         {
                             type: 'number',
                             message: 'Please enter a valid number!',
@@ -361,7 +359,7 @@ console.log(filterAccountData);
                         <Input style={{ float: "right", width: "380px" }} placeholder='ifsc' name='ifsc' value={accountInput.ifsc} onChange={InputDataFilelds} />
                     </Form.Item>
                 </Form>
-            </Modal >
+            </Modal>
         </>
     )
 }

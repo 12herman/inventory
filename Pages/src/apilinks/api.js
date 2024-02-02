@@ -9,6 +9,7 @@ export const ApiLink = {
     products:"https://localhost:7129/api/Productsquantity",
     accessories:"https://localhost:7129/api/Accessory",
     brand:"https://localhost:7129/api/Brand",
-    consoles:"https://localhost:7129/api/Console"
+    consoles:"https://localhost:7129/api/Console",
+    address:'https://localhost:7129/api/Address' 
   };
   

@@ -24,7 +24,7 @@ const { Header, Sider, Content } = Layout;
 
 
 const Accessories = () => {
-
+  
   // Apis
   const dispatch = useDispatch();
   const { office, loading } = useSelector(state => state.office);
@@ -33,6 +33,7 @@ const Accessories = () => {
   //console.log(isDeleteOffice);
 
   useEffect(() => {
+   
     dispatch(getOffice());
   }, []);
 
@@ -76,12 +77,18 @@ const Accessories = () => {
   };
 
   const officeMenu = (
-    <Menu onClick={({ key }) => handleOfficeSelect(key)}>
-      {officeList.map((office) => (
-        <Menu.Item key={office.key}>{office.label}</Menu.Item>
-      ))}
-    </Menu>
+    <Menu onClick={({ key }) => handleOfficeSelect(key)} items={officeList.map((office) =>({key:office.key,label:office.label}))}/>
   );
+
+  // const officeMenu = (
+  //   <Menu onClick={({ key }) => handleOfficeSelect(key)}>
+  //     {officeList.map((item) => (
+  //       <Menu.Item key={item.key}>
+  //         {item.label}
+  //       </Menu.Item>
+  //     ))}
+  //   </Menu>
+  // );
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -175,7 +182,7 @@ const Accessories = () => {
   //   }
   // };
 
- 
+  
 
   return (
     <Layout style={{ position: 'relative' }}>
@@ -187,18 +194,17 @@ const Accessories = () => {
         <div className="demo-logo-vertical" />
 
         <Menu
+  theme="dark"
+  mode="inline"
+  defaultSelectedKeys={['1']}
+  onClick={({ key }) => handleMenuClick(menuItems.find((item) => item.key === key))}
+  items={menuItems.map((item) => ({
+    key: item.key,
+    icon: item.icon,
+    label: item.label,
+  }))}
+/>
 
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={['1']}
-          onClick={({ key }) => handleMenuClick(menuItems.find((item) => item.key === key))}
-        >
-          {menuItems.map((item) => (
-            <Menu.Item key={item.key} icon={item.icon}>
-              {item.label}
-            </Menu.Item>
-          ))}
-        </Menu>
       </Sider>
 
       <Layout>
@@ -228,51 +234,14 @@ const Accessories = () => {
             <Col justify='flex-end' style={{ right: '1%' }}>
 
               <div>
-                {/* <Row className='flex gap-x-2'> */}
-                  {/* <Button onClick={() => setNewOfficePopup(true)} type='primary' className='bg-blue-500'> <FontAwesomeIcon icon={faPlus} className='icon' /> </Button> */}
-                  <Dropdown overlay={officeMenu} trigger={['click']}>
+                
+                  <Dropdown  overlay={officeMenu} trigger={['click']} placement="bottomLeft">
                     <Button>
                       <Space>
                         {selectedOffice ? selectedOffice : 'All Office'} <DownOutlined />
                       </Space>
                     </Button>
                   </Dropdown>
-                {/* </Row> */}
-                {/* <Modal
-                  title="Add New Office"
-                  open={newOfficePopup}
-                  onCancel={handleCancel}
-                  onOk={handleOk}
-                  footer={[<Button key="1" onClick={createNewOffice}>Add</Button>,
-                            <Button type='text' key="2" danger="red" style={{border:"0.5px solid red"}}  onClick={()=>setNewOfficePopup(false)}>Close</Button>
-                          ]}>
-                  <Form>
-                    
-                    <Form.Item label="Office Name" style={{ marginBottom: 0, marginTop: 10 }}>
-                      <Input style={{float:"right",width:"380px"}} placeholder='office name' name='officename' value={officeField.officename} onChange={officeInputData} />
-                    </Form.Item>
-
-                    
-                    <Form.Item label="Address" style={{ marginBottom: 0, marginTop: 10 }}>
-                      <Input style={{float:"right",width:"380px"}} placeholder='address' name='address' value={officeField.address} onChange={officeInputData} />
-                    </Form.Item>
-
-                  
-                    <Form.Item label="City" style={{ marginBottom: 0, marginTop: 10 }}>
-                      <Input style={{float:"right",width:"380px"}} placeholder='city' name='city' value={officeField.city} onChange={officeInputData} />
-                    </Form.Item>
-
-                  
-                    <Form.Item label="State" style={{ marginBottom: 0, marginTop: 10 }}>
-                      <Input style={{float:"right",width:"380px"}} placeholder='state' name='state' value={officeField.state} onChange={officeInputData} />
-                    </Form.Item>
-
-                   
-                    <Form.Item label="Country" style={{ marginBottom: 10, marginTop: 10 }}>
-                      <Input style={{float:"right",width:"380px"}} placeholder='country' name='country' value={officeField.country} onChange={officeInputData} />
-                    </Form.Item>
-                  </Form>
-                </Modal > */}
               </div>
             </Col>
           </Row>

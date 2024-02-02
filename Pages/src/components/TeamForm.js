@@ -11,7 +11,7 @@ const filedWidth = "760px";
 
 
 const TeamForm = forwardRef((props, ref) => {
-  const { newempid,teamPostProcessBar } = props
+  const { newempid,teamPostProcessBar,receiveTeamData } = props
   const [form] = Form.useForm();
 
   const dispatch = useDispatch();
@@ -83,6 +83,7 @@ const TeamForm = forwardRef((props, ref) => {
 
   // post leader employee details
   const teamValidateData = async () => {
+    
     if (leadeEmp.hrManagerId === null
       || leadeEmp.leaderId ===null
       || leadeEmp.employeeId === null) {
@@ -91,6 +92,9 @@ const TeamForm = forwardRef((props, ref) => {
       await dispatch(postleaderemployee(leadeEmp));
       await teamPostProcessBar();
     }
+    
+  //   receiveTeamData(leadeEmp);
+  //  teamPostProcessBar();
   };
 
   useImperativeHandle(ref, () => {
@@ -107,7 +111,7 @@ const TeamForm = forwardRef((props, ref) => {
 
         <Form.Item style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="Employee Name">
           <h2 className={`px-5 w-[${filedWidth}]`}>{empName}</h2>
-        </Form.Item >
+        </Form.Item>
 
         <Form.Item style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="All employee List">
           <Switch className={`mx-5 w-[${filedWidth}]`} size="small" checked={EnableEmp} style={{ background: `${EnableEmp === false ? "rgba(0, 0, 0, 0.45)" : "#4096ff"}` }} trackBgDisabled onClick={enableAllemp} onChange={enableAllemp} />

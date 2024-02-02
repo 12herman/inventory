@@ -20,7 +20,6 @@ export const postRoleDetail = createAsyncThunk(`${apiName}/post${apiName}`,async
 //Put
 export const putRoleDetail = createAsyncThunk(`${apiName}/put${apiName}`,async(data)=>{
     const {id,...restData} = data;
-    console.log({id,...restData});
     return Axios.put(`${apilink}/${id}`,{id,...restData})
                 .then(res=>res.data);
 });
