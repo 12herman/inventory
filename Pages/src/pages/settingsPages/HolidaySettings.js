@@ -14,16 +14,21 @@ import en_US from "antd/lib/locale/en_US";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { DeleteHoliday, GetHoliday, PostHoliday, PutHoliday } from "../../redux/slices/holidaySlice";
+import {
+  DeleteHoliday,
+  GetHoliday,
+  PostHoliday,
+  PutHoliday,
+} from "../../redux/slices/holidaySlice";
 import { getOffice } from "../../redux/slices/officeSlice";
-import moment, { months } from 'moment'
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+import moment, { months } from "moment";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
-const dateFormat = 'YYYY-MM-DD';
+const dateFormat = "YYYY-MM-DD";
 
 const HolidaySetting = ({ BackToSetting }) => {
-    const [form] = Form.useForm(); 
+  const [form] = Form.useForm();
   //API Get
   //get
   const dispatch = useDispatch();
@@ -39,12 +44,15 @@ const HolidaySetting = ({ BackToSetting }) => {
 
   //open,close popup "modal"
   const [FormPopUp, setFormPopUp] = useState(false);
-  const ClosePopUp = () => {setFormPopUp(false);setFormInData({
-    officeLocationId: null,
-    holidayName: null,
-    date: "",
-    isDeleted: false,
-  }) };
+  const ClosePopUp = () => {
+    setFormPopUp(false);
+    setFormInData({
+      officeLocationId: null,
+      holidayName: null,
+      date: "",
+      isDeleted: false,
+    });
+  };
   const OpenPopUp = () => setFormPopUp(true);
 
   //create,edit "btn" change
@@ -59,14 +67,16 @@ const HolidaySetting = ({ BackToSetting }) => {
     date: "",
     isDeleted: false,
   });
-  const clearFormInData=()=> {
-    setFormInData({officeLocationId: null,
-        holidayName: null,
-        date: "",
-        isDeleted: false,});
-        form.setFieldsValue({
-          DatePicker:  "",
-        });
+  const clearFormInData = () => {
+    setFormInData({
+      officeLocationId: null,
+      holidayName: null,
+      date: "",
+      isDeleted: false,
+    });
+    form.setFieldsValue({
+      DatePicker: "",
+    });
   };
   const FormOnChange = (e) => {
     const { name, value } = e.target;
@@ -75,7 +85,7 @@ const HolidaySetting = ({ BackToSetting }) => {
   const OfficeDropDownChange = (e) => {
     setFormInData((pre) => ({ ...pre, officeLocationId: e }));
   }; //office dropdown
-  const DateSelect = (e,dateString) => {
+  const DateSelect = (e, dateString) => {
     setFormInData((pre) => ({ ...pre, date: dateString }));
   };
   //table
@@ -86,14 +96,14 @@ const HolidaySetting = ({ BackToSetting }) => {
       label: data.officename,
       value: data.id,
     }));
-    const filterHolidayData =holiday.filter(data=> data.isdeleted === false);
-    const HolidayData= filterHolidayData.map((data,i)=>({
-                            SerialNo:i+1,
-                           key:data.id,
-                           officeLocationId:data.officelocation,
-                           holidayName:data.holidayName,
-                           date:data.date
-                        }));
+  const filterHolidayData = holiday.filter((data) => data.isdeleted === false);
+  const HolidayData = filterHolidayData.map((data, i) => ({
+    SerialNo: i + 1,
+    key: data.id,
+    officeLocationId: data.officelocation,
+    holidayName: data.holidayName,
+    date: data.date,
+  }));
 
   const widthSize = "370px";
   //pick id's
@@ -132,13 +142,15 @@ const HolidaySetting = ({ BackToSetting }) => {
             okButtonProps={{
               style: { backgroundColor: "red", color: "white" },
             }}
-            onConfirm={() => {Delete(record.key) }}
+            onConfirm={() => {
+              Delete(record.key);
+            }}
           >
             <Button>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </Popconfirm>
-          <Button onClick={()=>PencilIconClick(record.key)}>
+          <Button onClick={() => PencilIconClick(record.key)}>
             <FontAwesomeIcon icon={faPen} />
           </Button>
         </div>
@@ -155,64 +167,82 @@ const HolidaySetting = ({ BackToSetting }) => {
   //API CURD
   //post
   const Post = async () => {
-    if(FormInData.officeLocationId === null ||
-        FormInData.date === "" ||
-        FormInData.holidayName=== null
-        ){
-            message.error("fill all the fields");
-        }
-        else{
-            console.log(FormInData);
-           await dispatch(PostHoliday(FormInData));
-           await dispatch(GetHoliday());
-           await ClosePopUp();
-           await message.success("created successfully");
-        }
-    
+    if (
+      FormInData.officeLocationId === null ||
+      FormInData.date === "" ||
+      FormInData.holidayName === null
+    ) {
+      message.error("fill all the fields");
+    } else {
+      await dispatch(PostHoliday(FormInData));
+      await dispatch(GetHoliday());
+      await ClosePopUp();
+      await message.success("created successfully");
+    }
   };
-  const PencilIconClick = async(id)=>{
-const EditData =await filterHolidayData.filter(data=> data.id === id);
-const currentDate = new Date();
-const formattedDate = currentDate.toISOString().slice(0, 19);
-   await setFormInData(
-        {officeLocationId: EditData[0].officelocationId,
-        holidayName: EditData[0].holidayName,
-        date:await moment(EditData[0].date)._i ,
-        isDeleted: false,
-        createdDate:EditData[0].createdDate,
-        modifiedDate:formattedDate,
-        id:EditData[0].id
-        // modifiedBy:'',
-        // createdBy:''
+  const PencilIconClick = async (id) => {
+    const EditData = await filterHolidayData.filter((data) => data.id === id);
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().slice(0, 19);
+    await setFormInData({
+      officeLocationId: EditData[0].officelocationId,
+      holidayName: EditData[0].holidayName,
+      date: await moment(EditData[0].date)._i,
+      isDeleted: false,
+      createdDate: EditData[0].createdDate,
+      modifiedDate: formattedDate,
+      id: EditData[0].id,
+      // modifiedBy:'',
+      // createdBy:''
     });
     form.setFieldsValue({
-      DatePicker:  moment(moment(EditData[0].date)._i),
+      DatePicker: moment(moment(EditData[0].date)._i),
     });
     await SaveBtnChange();
-   await OpenPopUp();
+    await OpenPopUp();
   };
 
   //put
-  const Put = async() => {
-    if(FormInData.officeLocationId === null ||
-        FormInData.date === "" ||
-        FormInData.holidayName=== null
-        ){
-            message.error("fill all the fields");
-        }
-        else{
-            console.log(FormInData);
-            await dispatch(PutHoliday(FormInData));
-            await dispatch(GetHoliday());
-            await ClosePopUp();
-            await message.success("updated successfully");
-        }
-   
+  const Put = async () => {
+    if (
+      FormInData.officeLocationId === null ||
+      FormInData.date === "" ||
+      FormInData.holidayName === null
+    ) {
+      message.error("fill all the fields");
+    } else {
+      console.log(FormInData);
+      await dispatch(PutHoliday(FormInData));
+      await dispatch(GetHoliday());
+      await ClosePopUp();
+      await message.success("updated successfully");
+    }
   };
   //delete
   const Delete = async (id) => {
-   await dispatch(DeleteHoliday(id));
-   await dispatch(GetHoliday());
+    /*
+    //hard delete
+      await dispatch(DeleteHoliday(id));
+       await dispatch(GetHoliday());
+    */
+    //soft delete
+    const EditData = await filterHolidayData.filter((data) => data.id === id);
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().slice(0, 19);
+    await dispatch(
+      PutHoliday({
+        officeLocationId: EditData[0].officelocationId,
+        holidayName: EditData[0].holidayName,
+        date: await moment(EditData[0].date)._i,
+        isDeleted: true,
+        createdDate: EditData[0].createdDate,
+        modifiedDate: formattedDate,
+        id: EditData[0].id,
+        // modifiedBy:'',
+        // createdBy:''
+      })
+    );
+    await dispatch(GetHoliday());
   };
   return (
     <>
@@ -271,7 +301,8 @@ const formattedDate = currentDate.toISOString().slice(0, 19);
           {/* RollName */}
           <Form.Item
             label="Holiday Name"
-            style={{ marginBottom: 0, marginTop: 10 }}>
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
             <Input
               style={{ float: "right", width: widthSize }}
               placeholder="holiday name"
@@ -281,13 +312,16 @@ const formattedDate = currentDate.toISOString().slice(0, 19);
             />
           </Form.Item>
 
-          <Form.Item  name="DatePicker" label="Date" style={{ marginBottom: 0, marginTop: 10 }} >
+          <Form.Item
+            name="DatePicker"
+            label="Date"
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
             <DatePicker
               style={{ float: "right", width: widthSize }}
               format={dateFormat}
               onChange={DateSelect}
-               value={FormInData.date}
-              
+              value={FormInData.date}
             />
           </Form.Item>
 
