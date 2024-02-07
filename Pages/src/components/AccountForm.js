@@ -1,81 +1,84 @@
-import React, { useState, forwardRef, useImperativeHandle, useEffect } from "react";
-import { Form, Input, message,Spin  } from "antd";
+import React, {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { Form, Input, message, Spin } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLandmark } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch, useSelector } from "react-redux";
-import { getaccount, postaccount, putaccount } from "../redux/slices/accountdetailsSlice";
+import { useSelector } from "react-redux";
+
+
 
 const AccountForm = forwardRef((props, ref) => {
   
-  //Api
-  const dispatch = useDispatch();
-  // const { account } = useSelector(state => state.account);
-  // useEffect(()=>{
-  //   dispatch(getaccount());
-  // },[])
-
   const widthSize = "810px";
-  const { newempid, accountPostProcessBar,receiveAccountData } = props;
   const [form] = Form.useForm();
+  const {
+    FormAccF, //account state
+    UpdateAccF, //account onchange
+    accountPostProcessBar, //process bar
+    PostEmployee,
+    PostRole,
+    PostTeam,
+    PostCureenetAdd,
+    PostPermenantAdd,
+    newEmployee
+  } = props;
 
-  //Account fields
-  const [accountInput, setAccountInput] = useState({
-    employeeId:newempid,
-    bankName: null,
-    branchName: null,
-    bankLocation: null,
-    accountNumber: null,
-    ifsc: null,
-    isdeleted: false,
-  });
+
+  //update data
   const accountInputOnchange = (e) => {
     const { name, value } = e.target;
-    setAccountInput((pro) => ({ ...pro, [name]: value }));
+    UpdateAccF({ [name]: value });
+    if(name === 'accountNumber'){
+      isNaN(value)
+      isNaN(value) === false ? setNumberValidate(false): setNumberValidate(true);
+    }
   };
+
+
 
   //Post account Data
   const [NumberValidate, setNumberValidate] = useState(false);
-  const accountValidateData = async () => {
-   
-    const accountno = accountInput.accountNumber;
+  const accountValidateData =  () => {
+ 
+    const accountno = FormAccF.accountNumber;
     if (
-      accountInput.bankName === null ||
-      accountInput.branchName === null ||
-      accountInput.bankLocation === null ||
-      accountInput.accountNumber === null ||
-      accountInput.ifsc === null
+      FormAccF.bankName === "" ||
+      FormAccF.branchName === "" ||
+      FormAccF.bankLocation === "" ||
+      FormAccF.accountNumber === "" ||
+      FormAccF.ifsc === ""
     ) {
       message.error("Fill all the fields");
     } else if (isNaN(accountno) === true){//true
       setNumberValidate(true);
       message.error("please check the account number");
   }
-  else if(!isNaN(accountno) === false){ //false
-      setNumberValidate(false)
-  } else if (
+   else if (
       (!isNaN(accountno) !=
-        (!accountInput.bankName ||
-          !accountInput.branchName ||
-          !accountInput.bankLocation ||
-          !accountInput.accountNumber ||
-          !accountInput.ifsc)) === true
+        (!FormAccF.bankName ||
+          !FormAccF.branchName ||
+          !FormAccF.bankLocation ||
+          !FormAccF.accountNumber ||
+          !FormAccF.ifsc)) === true
     ) {
       accountPostProcessBar();
-      setNumberValidate(false);
-      await dispatch(postaccount(accountInput));
-      await dispatch(getaccount());
-
+      newEmployee();
     }
-    // receiveAccountData(accountInput);
-    // accountPostProcessBar();
+    //  accountPostProcessBar();
+    //  newEmployee();
   };
 
+  //send fn child to parenet
   useImperativeHandle(ref, () => {
     return {
       accountValidateData: accountValidateData,
     };
   });
 
+ 
   return (
     <section>
       <div className="mt-5 flex justify-center items-center">
@@ -89,7 +92,7 @@ const AccountForm = forwardRef((props, ref) => {
             style={{ float: "right", width: widthSize }}
             placeholder="bank name"
             name="bankName"
-            value={accountInput.bankName}
+            value={FormAccF.bankName}
             onChange={accountInputOnchange}
           />
         </Form.Item>
@@ -102,7 +105,7 @@ const AccountForm = forwardRef((props, ref) => {
             style={{ float: "right", width: widthSize }}
             placeholder="branch name"
             name="branchName"
-            value={accountInput.branchName}
+            value={FormAccF.branchName}
             onChange={accountInputOnchange}
           />
         </Form.Item>
@@ -112,7 +115,7 @@ const AccountForm = forwardRef((props, ref) => {
             style={{ float: "right", width: widthSize }}
             placeholder="bank location"
             name="bankLocation"
-            value={accountInput.bankLocation}
+            value={FormAccF.bankLocation}
             onChange={accountInputOnchange}
           />
         </Form.Item>
@@ -125,7 +128,7 @@ const AccountForm = forwardRef((props, ref) => {
               message: "Please enter a valid number!",
             },
           ]}
-          validateStatus={ NumberValidate ===true ? "error" : ""}
+          validateStatus={NumberValidate === true ? "error" : ""}
           help={form.getFieldError("accountNumber")}
           pattern="[0-9]*"
           label="Account No"
@@ -135,7 +138,7 @@ const AccountForm = forwardRef((props, ref) => {
             style={{ float: "right", width: widthSize }}
             placeholder="account no"
             name="accountNumber"
-            value={accountInput.accountNumber}
+            value={FormAccF.accountNumber}
             onChange={accountInputOnchange}
           />
         </Form.Item>
@@ -146,7 +149,7 @@ const AccountForm = forwardRef((props, ref) => {
             style={{ float: "right", width: widthSize }}
             placeholder="ifsc"
             name="ifsc"
-            value={accountInput.ifsc}
+            value={FormAccF.ifsc}
             onChange={accountInputOnchange}
           />
         </Form.Item>

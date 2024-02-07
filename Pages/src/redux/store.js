@@ -10,6 +10,8 @@ import consoleSlice from './slices/consoleSlice';
 import productSlice from './slices/productSlice';
 import accessoriesSlice from './slices/accessoriesSlice'
 import addressSlice from './slices/addressSlice';
+import holidaySlice from './slices/holidaySlice';
+
 
 export const store = configureStore({
     devTools:true,
@@ -25,6 +27,8 @@ export const store = configureStore({
         products:productSlice,
         accessories:accessoriesSlice,
         address:addressSlice,
+        holiday:holidaySlice
+
     }
 });
 

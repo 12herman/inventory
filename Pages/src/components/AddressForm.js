@@ -1,83 +1,69 @@
-import React, {
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useEffect,
-} from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Form, Input, Checkbox, message } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch, useSelector } from "react-redux";
-import { getAddress, postAddress } from "../redux/slices/addressSlice";
 
 const filedWidth = "760px";
 
 const AddressForm = forwardRef((props, ref) => {
-
-  const dispatch = useDispatch();
-  
-  useEffect(()=>{
-    dispatch(getAddress());
-  },[]);
-
   const [form] = Form.useForm();
-  // Address inputs
-  // type 1 -current address
-  // type 2 - permanet address
-  const { newempid, addressPostProcessBar,receiveCurrentAddData,receivePermenantAddData } = props;
-  const [currentAddFields, setCurrentAddFields] = useState({
-    employeeId: newempid,
-    address1: "",
-    city: "",
-    state: "",
-    country: "",
-    postalCode: "",
-    isdeleted: false,
-    type: 1,
-  });
-  const [addressFields, setAddressFields] = useState({
-    employeeId: newempid,
-    address1: "",
-    city: "",
-    state: "",
-    country: "",
-    postalCode: "",
-    isdeleted: false,
-    type: 2,
-  });
+  const {
+    addressPostProcessBar, //process bar
+    FormCAdd, //cureent add state
+    FormPAdd, //permanent add state
+    CheckBoxF, //check box state
+    UpdateCAdd, //cureent onchange
+    UpdatePAdd, //permanent onchange
+    UpdateCheckBox, //checkbox onchange
+  } = props;
 
+  //onchange
   const inputFiledsChange = (e) => {
     const { name, value, dataset } = e.target;
     const type = dataset.type;
     if (type === "1") {
-      setCurrentAddFields((pre) => ({ ...pre, [name]: value }));
+      UpdateCAdd({ [name]: value });
+      //validation
+      if (name === "postalCode") {
+        isNaN(value) === false
+          ? setPNumberValidate(false)
+          : setPNumberValidate(true);
+      }
     } else if (type === "2") {
-      setAddressFields((pre) => ({ ...pre, [name]: value }));
+      UpdatePAdd({ [name]: value });
+      //validation
+      if (name === "postalCode") {
+        isNaN(value) === false
+          ? setCNumberValidate(false)
+          : setCNumberValidate(true);
+      }
     }
   };
-  const [check, setCheck] = useState(false);
+
   // check box
   const CheckboxChange = (e) => {
     const isChecked = e.target.checked;
     if (isChecked === true) {
-      setCheck(true);
+      UpdateCheckBox(true);
       form.setFieldsValue({
-        Addaddress1: currentAddFields.address1,
-        Addcity: currentAddFields.city,
-        Addstate: currentAddFields.state,
-        Addcountry: currentAddFields.country,
-        AddpostalCode: currentAddFields.postalCode,
+        Addaddress1: FormCAdd.address1,
+        Addcity: FormCAdd.city,
+        Addstate: FormCAdd.state,
+        Addcountry: FormCAdd.country,
+        AddpostalCode: FormCAdd.postalCode,
       });
-      setAddressFields((prev) => ({
-        ...prev,
-        address1: currentAddFields.address1,
-        city: currentAddFields.city,
-        state: currentAddFields.state,
-        country: currentAddFields.country,
-        postalCode: currentAddFields.postalCode,
-      }));
+
+      UpdatePAdd({
+        address1: FormCAdd.address1,
+        city: FormCAdd.city,
+        state: FormCAdd.state,
+        country: FormCAdd.country,
+        postalCode: FormCAdd.postalCode,
+        isdeleted: false,
+        type: 2,
+      });
     } else if (isChecked === false) {
-      setCheck(false);
+      UpdateCheckBox(false);
       form.setFieldsValue({
         Addaddress1: null,
         Addcity: null,
@@ -85,45 +71,49 @@ const AddressForm = forwardRef((props, ref) => {
         Addcountry: null,
         AddpostalCode: null,
       });
-      setAddressFields((prev) => ({
-        ...prev,
+      UpdatePAdd({
         address1: "",
         city: "",
         state: "",
         country: "",
         postalCode: "",
-      }));
+        isdeleted: false,
+        type: 2,
+      });
     }
   };
-
+  const [CNumberValidate, setCNumberValidate] = useState(false);
+  const [PNumberValidate, setPNumberValidate] = useState(false);
   // post address data next btn
-  const addredValidateDate = async () => {
-    
+  const addredValidateDate = () => {
+   
     if (
-      currentAddFields.address1 === "" ||
-      currentAddFields.city === "" ||
-      currentAddFields.state === "" ||
-      currentAddFields.country === "" ||
-      currentAddFields.postalCode === "" ||
-      addressFields.address1 === "" ||
-      addressFields.city === "" ||
-      addressFields.state === "" ||
-      addressFields.country === "" ||
-      addressFields.postalCode === ""
+      FormCAdd.address1 === "" ||
+      FormCAdd.city === "" ||
+      FormCAdd.state === "" ||
+      FormCAdd.country === "" ||
+      FormCAdd.postalCode === "" ||
+      FormPAdd.address1 === "" ||
+      FormPAdd.city === "" ||
+      FormPAdd.state === "" ||
+      FormPAdd.country === "" ||
+      FormPAdd.postalCode === ""
     ) {
       message.error("fill the all the fields");
+    } else if (isNaN(FormPAdd.postalCode) === true) {
+      //true
+      message.error("please check the postal code");
+      setPNumberValidate(true);
+    } else if (isNaN(FormCAdd.postalCode) === true) {
+      //true
+      message.error("please check the postal code");
+      setCNumberValidate(true);
     } else {
-      await dispatch(postAddress(currentAddFields));
-      await dispatch(postAddress(addressFields));
-      await dispatch (getAddress());
-      await addressPostProcessBar();
+      addressPostProcessBar();
     }
-  //   receiveCurrentAddData(currentAddFields);
-  //   receivePermenantAddData(addressFields);
-  //  addressPostProcessBar();
+    
+    //addressPostProcessBar();
   };
-
-
 
   // send fn on child to parent
   useImperativeHandle(ref, () => {
@@ -132,8 +122,6 @@ const AddressForm = forwardRef((props, ref) => {
     };
   });
 
-
-
   return (
     <section>
       <div className="mt-5 flex justify-center items-center">
@@ -141,7 +129,7 @@ const AddressForm = forwardRef((props, ref) => {
       </div>
       {/* cureent Address */}
       <Form form={form} className="mt-10">
-        <h2 className=" px-7 mt-10 text-lg">Current Address :</h2>
+        <h2 className=" px-7 mt-10 text-lg">Permanet Address :</h2>
         <Form.Item
           data-type="1"
           className="px-7"
@@ -154,8 +142,9 @@ const AddressForm = forwardRef((props, ref) => {
             style={{ float: "right", width: filedWidth }}
             placeholder="Address"
             name="address1"
-            value={currentAddFields.address1}
+            value={FormCAdd.address1}
             onChange={inputFiledsChange}
+            defaultValue={FormCAdd.address1}
           />
         </Form.Item>
 
@@ -171,8 +160,9 @@ const AddressForm = forwardRef((props, ref) => {
             style={{ float: "right", width: filedWidth }}
             placeholder="City"
             name="city"
-            value={currentAddFields.city}
+            value={FormCAdd.city}
             onChange={inputFiledsChange}
+            defaultValue={FormCAdd.city}
           />
         </Form.Item>
 
@@ -188,8 +178,9 @@ const AddressForm = forwardRef((props, ref) => {
             style={{ float: "right", width: filedWidth }}
             placeholder="State"
             name="state"
-            value={currentAddFields.state}
+            value={FormCAdd.state}
             onChange={inputFiledsChange}
+            defaultValue={FormCAdd.state}
           />
         </Form.Item>
 
@@ -205,8 +196,9 @@ const AddressForm = forwardRef((props, ref) => {
             style={{ float: "right", width: filedWidth }}
             placeholder="Country"
             name="country"
-            value={currentAddFields.country}
+            value={FormCAdd.country}
             onChange={inputFiledsChange}
+            defaultValue={FormCAdd.country}
           />
         </Form.Item>
 
@@ -216,27 +208,40 @@ const AddressForm = forwardRef((props, ref) => {
           style={{ marginBottom: 0, marginTop: 10 }}
           label="Postal Code"
           name="postalCode"
+          // rules={[
+          //   {
+          //     type: "number",
+          //   },
+          // ]}
+          validateStatus={PNumberValidate === true ? "error" : ""}
+          //help={form.getFieldError("postalCode")}
+          pattern="[0-9]*"
         >
           <Input
             data-type="1"
             style={{ float: "right", width: filedWidth }}
             placeholder="postal Code"
             name="postalCode"
-            value={currentAddFields.postalCode}
+            value={FormCAdd.postalCode}
             onChange={inputFiledsChange}
+            defaultValue={FormCAdd.postalCode}
           />
         </Form.Item>
 
         {/* check-box */}
         <div className="px-7 mt-3 ">
-          <Checkbox className="shadow-2xl" onChange={CheckboxChange} />
+          <Checkbox
+            className="shadow-2xl"
+            onChange={CheckboxChange}
+            checked={CheckBoxF}
+          />
           <span className="px-3 text-red-500">
             cureent address same as permanet address
           </span>
         </div>
 
         {/* permanet Address */}
-        <h2 className="mt-5 px-7 text-lg">Permanet Address :</h2>
+        <h2 className="mt-5 px-7 text-lg">Current Address :</h2>
         <Form.Item
           data-type="2"
           className="px-7"
@@ -249,9 +254,10 @@ const AddressForm = forwardRef((props, ref) => {
             data-type="2"
             placeholder="Address"
             name="address1"
-            value={addressFields.address1}
+            value={FormPAdd.address1}
             onChange={inputFiledsChange}
-            disabled={check}
+            // disabled={CheckBoxF}
+            defaultValue={FormPAdd.address1}
           />
         </Form.Item>
 
@@ -267,9 +273,10 @@ const AddressForm = forwardRef((props, ref) => {
             data-type="2"
             placeholder="City"
             name="city"
-            value={addressFields.city}
+            value={FormPAdd.city}
             onChange={inputFiledsChange}
-            disabled={check}
+            // disabled={CheckBoxF}
+            defaultValue={FormPAdd.city}
           />
         </Form.Item>
 
@@ -285,9 +292,10 @@ const AddressForm = forwardRef((props, ref) => {
             data-type="2"
             placeholder="State"
             name="state"
-            value={addressFields.state}
+            value={FormPAdd.state}
             onChange={inputFiledsChange}
-            disabled={check}
+            // disabled={CheckBoxF}
+            defaultValue={FormPAdd.state}
           />
         </Form.Item>
 
@@ -303,9 +311,10 @@ const AddressForm = forwardRef((props, ref) => {
             data-type="2"
             placeholder="Country"
             name="country"
-            value={addressFields.country}
+            value={FormPAdd.country}
             onChange={inputFiledsChange}
-            disabled={check}
+            // disabled={CheckBoxF}
+            defaultValue={FormPAdd.country}
           />
         </Form.Item>
 
@@ -315,15 +324,24 @@ const AddressForm = forwardRef((props, ref) => {
           style={{ marginBottom: 0, marginTop: 10 }}
           label="Postal Code"
           name="AddpostalCode"
+          // rules={[
+          //   {
+          //     type: "number",
+          //   },
+          // ]}
+          validateStatus={CNumberValidate === true ? "error" : ""}
+          //help={form.getFieldError("postalCode")}
+          pattern="[0-9]*"
         >
           <Input
             style={{ float: "right", width: filedWidth }}
             data-type="2"
             placeholder="postal Code"
             name="postalCode"
-            value={addressFields.postalCode}
+            value={FormPAdd.postalCode}
             onChange={inputFiledsChange}
-            disabled={check}
+            // disabled={CheckBoxF}
+            defaultValue={FormPAdd.postalCode}
           />
         </Form.Item>
       </Form>

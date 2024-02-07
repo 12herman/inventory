@@ -1,0 +1,13 @@
+/* YourButtonStyles.css */
+
+.custom-button.ant-btn:hover {
+    background-color: transparent;  /* Change the background color on hover if needed */
+    color: inherit;  /* Inherit the text color on hover */
+    border-color: transparent;  /* Change the border color on hover if needed */
+    box-shadow: none;  /* Remove the box shadow on hover */
+  }
+  
+  .custom-button.ant-btn:hover .anticon {
+    display: none;  /* Hide the icon on hover */
+  }
+  

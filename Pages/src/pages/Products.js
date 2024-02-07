@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import { Space, Table, Tag,Modal,Form,Input } from 'antd';
+import { Space, Table, Tag,Modal,Form,Input, message } from 'antd';
 import { Button, Col, Row, Statistic,Divider,Select } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash, faPen, faL } from '@fortawesome/free-solid-svg-icons';
@@ -16,6 +16,12 @@ import { getProducts } from '../redux/slices/productSlice';
 const formatter = (value) => <CountUp end={value} />;
 
 const columns = [
+  {
+title:"S.No",
+dataIndex:"sno",
+key:'sno'
+}
+  ,
   {
     title: 'Name',
     dataIndex: 'name',
@@ -88,16 +94,13 @@ const Products = ({officeData}) => {
   // console.log("Consoles:",consoles);
 
   const [system,setSystem] =useState({
-    accessoriesId:null,
-    brandId:null,
-    modelNumber:'',
+    productName:null,//name
+    accessoriesId:null,//product type
+    brandId:null,//brand
+    modelNumber:'',//model
     isdeleted:false,
   });
 
-  const brandDropDown =(data)=>{
-    setSystem(pre=>({...pre,brandId:data}))
-    console.log(data);
-  }
   
 
   const [combinedDatas, setCombinedDatas] = useState([]);
@@ -106,17 +109,15 @@ const Products = ({officeData}) => {
   //Fetching Data from Api to Table
   const consoleData = consoles.length > 0 ? consoles.filter(cnsl => !cnsl.isdeleted) : [];
   // console.log("Consoles Data:", consoleData);
-  const data = consoleData.map((consoleItem) => {
+  const data = consoleData.map((consoleItem,i) => {
     const filteraccessoryItem = accessories.filter((accItem) => accItem.id === consoleItem.accessoryId);
    const filterbrandItem = brand.filter((brandItem) => brandItem.id === consoleItem.brandId);
 
    const accessoryItems = filteraccessoryItem.length > 0 ? filteraccessoryItem[0] : null;
    const brandItems = filterbrandItem.length > 0 ? filterbrandItem[0] : null;
- 
-    // console.log(accessoryItems);
-    // console.log(brandItems);
 
     return {
+      sno:i+1,
       key: consoleItem.consolesId,
       name: accessoryItems ? accessoryItems.name : '',
       brand: brandItems ? brandItems.name : '',
@@ -125,51 +126,53 @@ const Products = ({officeData}) => {
     };
   });       
   
-  // console.log("Data", data);
-
-  const updateCombinedData =  (newProduct) => {
-    setCombinedDatas((prevData) => [...prevData, newProduct]);
-  };
-
-  //Add Product Button
-
+ 
+//Add Product Button
 const addProduct = async () => {
-  const newProduct ={
-  accessoriesId: system.accessoriesId,
-  brandId: system.brandId ,
-  modelNumber: system.modelNumber,
+  if(system.productName=== null || 
+    system.accessoriesId === null ||
+    system.brandId === null ||
+    system.modelNumber === null 
+  ){
+    message.error("fill all the fields")
   }
-  try{
-    await dispatch(postconsoles(newProduct));
-    await dispatch(getconsoles());
-    // setCombinedDatas(system);
-    // console.log(system);
-    setModalOpen(false);
-    clearFields();
-  }catch(error){
-    console.error("Error adding product:",error)
+  else{
+    const newProduct ={
+      accessoriesId: system.accessoriesId,
+      brandId: system.brandId ,
+      modelNumber: system.modelNumber,
+      productName:system.productName
+      }
+      try{
+        await dispatch(postconsoles(newProduct));
+        await dispatch(getconsoles());
+        setModalOpen(false);
+        clearFields();
+      }catch(error){
+        console.error("Error adding product:",error)
+      }
   }
 };
 
+const FilterFalseConsole = consoles.filter(data => data.isdeleted === false);
+
 const updateTableData = () => {
-  const updatedData = consoles.map((consoleItem) => {
-    const filterAccessoryItem = accessories.find((accItem) => accItem.id === consoleItem.accessoryId);
-    const filterBrandItem = brand.find((brandItem) => brandItem.id === consoleItem.brandId);
-
-    const accessoryName = filterAccessoryItem ? filterAccessoryItem.name : '';
-    const brandName = filterBrandItem ? filterBrandItem.name : '';
-
+  const updatedData = FilterFalseConsole.map((consoleItem,i) => {
+    //const filterAccessoryItem = accessories.find((accItem) => accItem.id === consoleItem.accessoryId);
+    // const filterBrandItem = brand.find((brandItem) => brandItem.id === consoleItem.brandId);
+    // const accessoryName = filterAccessoryItem ? filterAccessoryItem.name : '';
+    // const brandName = filterBrandItem ? filterBrandItem.name : '';
     return {
+      sno:i+1,
       key: consoleItem.consolesId,
-      name: accessoryName,
-      brand: brandName,
+      name: consoleItem.accessoryName,
+      brand: consoleItem.brandName,
       address: consoleItem.modelNo !== undefined ? consoleItem.modelNo : '',
       tags: ['Active'],
     };
   });
-  
-  setCombinedDatas(updatedData);
-  // console.log(updatedData);
+   setCombinedDatas(updatedData);
+  setProCounts(updatedData.length);
 };
 
 
@@ -217,67 +220,59 @@ useEffect(() => {
     // console.log(employee.length);
 },[dispatch]);
 
-function DataLoading(){
-  var numberOfOffice = officeData.filter((off) => off.officename);
-  var officeNames = numberOfOffice.map((off) => {
-    return off.officename;
-  });
-  if (officeNames.length ===1){
-    var filterOneOffice =proData.filter((off) => off.officeLocationId.officename ===officeNames[0]);
-    setProCounts(filterOneOffice.length);
+// function DataLoading(){
+//   var numberOfOffice = officeData.filter((off) => off.officename);
+//   console.log(numberOfOffice);
+//   var officeNames = numberOfOffice.map((off) => {
+//     return off.officename;
+//   });
+//   if (officeNames.length ===1){
+//     var filterOneOffice =proData.filter((off) => off.officeLocationId.officename ===officeNames[0]);
+//     setProCounts(filterOneOffice.length);
     
-  }else{
-    setProCounts(proData.length);
-  }
-};
+//   }else{
+//     setProCounts(proData.length);
+//   }
+// };
 
 useEffect(()=>{
 setEmpData(employee);
 setProData(products);
-DataLoading();
+//DataLoading();
 },[employee,products,officeData]);
 
-useEffect(() => {
-  // console.log("Accessories Data:",accessories);
-  const combinedData = accessories.map((item) => ({
-    name:item.name
-  }));
-  // console.log("Combined Data:",combinedData);
-},[accessories])
 
- //console.log(empData);
-
+ //drop down
 const productFilter = accessories.filter(acc => acc.isdeleted === false);
 const productOption = productFilter.map((pr,i)=>({
+  key:i+1,
   label:pr.name ,
   value:pr.id
 }));
-
-
-const productNameDropDown = (data,value)=>{
-  setSystem(pre => ({...pre,accessoriesId:data}));
-  console.log(data);
-}
-
-// console.log(system);
-// console.log(productOption);
-
 const brandFilter =brand.filter(brnd => brnd.isdeleted ===false);
-// console.log(brandFilter);
 const brandOption = brandFilter.map((br,i) => ({
+  key:i+1,
   label:br.name,
   value:br.id
 }));
+const productNameDropDown = (data,value)=>{
+  setSystem(pre => ({...pre,accessoriesId:data}));
+  console.log(data);
+};
+const brandDropDown =(data)=>{
+  setSystem(pre=>({...pre,brandId:data}))
+  console.log(data);
+};
 
-// const brandNameDropDown =(data,value) => {
-//   setBrandName(brd => ({...brd,brandName:data}));
-// }
 
  const handleModelNumberChange = (e) => {
   setSystem(pre=>({...pre,modelNumber:e.target.value}))
     // console.log(e.target.valuesdfdsf);
   };
-
+  const ProductNameOnChange = (e) => {
+    setSystem(pre=>({...pre,productName:e.target.value}))
+      // console.log(e.target.valuesdfdsf);
+    };
 
   return (
     <div>
@@ -304,16 +299,32 @@ const brandOption = brandFilter.map((br,i) => ({
       <Modal
          title="Add Product"
          open={modalOpen}
-         onCancel={handleCancel}
-         onOk={addProduct}
+        onCancel={handleCancel}
+         
+         footer={[
+          <Button danger={true} onClick={handleCancel}>Cancel</Button>,
+          <Button onClick={addProduct}>ok</Button>
+         ]}
          
       >
       <Form>
 
-          <Form.Item label="Product Name" style={{ marginBottom: 0, marginTop: 10 }}>         
+      <Form.Item label="Product Name" style={{ marginBottom: 0, marginTop: 10 }}>
+            <Input
+              style={{ float: 'right', width: '380px' }}
+              placeholder="product name"
+              name="productName"
+              value={system.productName}
+              onChange={ProductNameOnChange}
+            />
+           
+            
+          </Form.Item>
+
+          <Form.Item label="Product Type" style={{ marginBottom: 0, marginTop: 10 }}>         
             <Select 
             style={{ float: 'right', width: '380px' }}
-            placeholder="Product name"
+            placeholder="product type"
               options={productOption}
               value={system.accessoriesId}
               onChange={productNameDropDown}
@@ -321,10 +332,10 @@ const brandOption = brandFilter.map((br,i) => ({
           </Form.Item>
 
           {/* Additional form fields for brand name and model number */}
-          <Form.Item label="Brand Name" style={{ marginBottom: 0, marginTop: 10 }}>
+          <Form.Item label="Brand" style={{ marginBottom: 0, marginTop: 10 }}>
             <Select
                style={{ float: 'right', width: '380px' }}
-               placeholder="Brand Name"
+               placeholder="Brand"
                options={brandOption} 
                value={system.brandId}
                onChange={brandDropDown}

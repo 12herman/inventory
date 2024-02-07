@@ -3,8 +3,7 @@ import Axios from 'axios';
 import {ApiLink} from '../../apilinks/api'
 
 export const getProducts = createAsyncThunk('get/getProducts',async()=>{
-    return Axios.get(ApiLink.products)
-                .then(res => {return res.data}); 
+    return Axios.get(ApiLink.products).then(res => {return res.data}); 
 });
 
 // export const createProducts = createAsyncThunk('products/createProducts', async (newProductData) => {
@@ -35,17 +34,17 @@ const productSlice = createSlice({
         //Get Method
         .addCase(getProducts.pending,(state)=>{
             state.loading = true;
-            console.log('getProducts is pending');
+            //console.log('getProducts is pending');
         })
         .addCase(getProducts.fulfilled,(state,action)=>{
             state.loading = false;
             state.products = action.payload;
-            console.log('getProducts fulfilled. Updated products:', state.products);
+            //console.log('getProducts fulfilled. Updated products:', state.products);
         })
         .addCase(getProducts.rejected,(state,action)=>{
             state.loading = false;
-            //state.error = action.error.message || 'An error occured';
-            //console.log('Error Fetching Data:',action.error);
+            state.error = action.error.message || 'An error occured';
+            console.log('Error Fetching Data:',action.error);
         })
         //Post Method
     //     .addCase(createProducts.pending, (state) => {

@@ -52,6 +52,7 @@ import TeamForm from "../components/TeamForm";
 import AddressForm from "../components/AddressForm";
 import AccountForm from "../components/AccountForm";
 import FinishForm from "../components/FinishForm";
+
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
@@ -262,7 +263,8 @@ const Users = ({ officeData }) => {
   const handleCancel = () => {
     Modal.confirm({
       icon: null,
-      content: "Your data will be destroyed. Are you sure to exit this process?",
+      content:
+        "Your data will be destroyed. Are you sure to exit this process?",
       onCancel: () => {},
       onOk: () => setModelOpen(false),
       okButtonProps: { type: "default", danger: true }, // Prevent the default Modal onCancel behavior
@@ -276,7 +278,7 @@ const Users = ({ officeData }) => {
   // post methods
   // 1.information
   const informationPostBtn = async () => {
- 
+  
     //check all empty fields
     if (
       !EmployeeInput.firstName.trim() ||
@@ -315,19 +317,21 @@ const Users = ({ officeData }) => {
     }
     // employee && role details post method
     else {
-      // post employee details
-      const employeeDatas = await dispatch(postEmployees(EmployeeInput));
-      // post role details
-      if (employeeDatas && employeeDatas.payload.id) {
-        console.log({ employeeId: employeeDatas.payload.id, ...RoleValue });
-        await dispatch(
-          postRoleDetail({ employeeId: employeeDatas.payload.id, ...RoleValue })
-        );
-        setNewempId(employeeDatas.payload.id);
-      }
-      infoPostProcessBar();
+      // // post employee details
+      // const employeeDatas = await dispatch(postEmployees(EmployeeInput));
+      // // post role details
+      // if (employeeDatas && employeeDatas.payload.id) {
+      //   console.log({ employeeId: employeeDatas.payload.id, ...RoleValue });
+      //   await dispatch(
+      //     postRoleDetail({ employeeId: employeeDatas.payload.id, ...RoleValue })
+      //   );
+      //   setNewempId(employeeDatas.payload.id);
+      
+      
+      //infoPostProcessBar();
     }
     // infoPostProcessBar();
+    // console.log(EmployeeInput);
     // setNewempId(3);
   };
 
@@ -504,6 +508,7 @@ const Users = ({ officeData }) => {
         "isDeleted",
         "Role",
       ]);
+      console.log("Hi");
     }
     setProcessBar({
       info: "process",
@@ -544,7 +549,21 @@ const Users = ({ officeData }) => {
     setProcessBar((pre) => ({ ...pre, account: "finish" }));
     setProcessBar((pre) => ({ ...pre, done: "finish" }));
   };
-
+  // fist back
+  const inforReturn = () => {
+    setProcessBar((pre) => ({ ...pre, info: "process" }));
+    setProcessBar((pre) => ({ ...pre, team: "wait" }));
+  };
+  //team back
+  const teamReturn = () => {
+    setProcessBar((pre) => ({ ...pre, address: "wait" }));
+    setProcessBar((pre) => ({ ...pre, team: "process" }));
+  };
+  //account back
+  const accountReturn = () => {
+    setProcessBar((pre) => ({ ...pre, address: "process" }));
+    setProcessBar((pre) => ({ ...pre, account: "wait" }));
+  };
   // child to parent function
   const teamFormRef = useRef();
   const postTeam = () => {
@@ -552,7 +571,6 @@ const Users = ({ officeData }) => {
       teamFormRef.current.teamValidateData();
     }
   };
-
   const addressRef = useRef();
   const postAdd = () => {
     if (addressRef.current) {
@@ -568,25 +586,27 @@ const Users = ({ officeData }) => {
 
   // post datas
   //team
-  const [postteamData,setPostTeamData] = useState(null);
-  const receiveTeamData =(data)=>{
+  const [postteamData, setPostTeamData] = useState(null);
+  const receiveTeamData = (data) => {
     setPostTeamData(data);
   };
   //address
-  const [postCureenetAddData,setPostCurrentAddData] = useState(null);
-  const [postPermenantAddData,setPermenantAddData]= useState(null);
-  const receiveCurrentAddData =(data)=>{
+  const [postCureenetAddData, setPostCurrentAddData] = useState(null);
+  const [postPermenantAddData, setPermenantAddData] = useState(null);
+  const receiveCurrentAddData = (data) => {
     setPostCurrentAddData(data);
   };
-  const receivePermenantAddData = (data)=>{
+  const receivePermenantAddData = (data) => {
     setPermenantAddData(data);
   };
   //account
-  const[postAccount,setPostAccount]=useState(null);
-  const receiveAccountData = (data)=>{
+  const [postAccount, setPostAccount] = useState(null);
+  const receiveAccountData = (data) => {
     setPostAccount(data);
   };
-  
+
+  // const [TeamPreData, setTeamPreData] = useState(null);
+  // const teamPreData = () => {};
   return (
     <div>
       <Row gutter={[16, 16]} align="middle">
@@ -702,48 +722,61 @@ const Users = ({ officeData }) => {
         width={1000}
         footer={[
           //info back
-          // backbtn.infoback === true
-          //   ? <Button onClick={InfoBack}>Back</Button>
-          //   : "",
-          //saveBtn === false ? <Button key="submit" onClick={informationPostBtn}>Next</Button> : <Button key="1" onClick={ModelEditBtn} >Save</Button>,
-          //next btns
+          // close && finish btn
           processbar.info === "process" ? ( //condition
-            <Button key="submit" onClick={informationPostBtn}>
+            <Button onClick={handleCancel} danger={true} key="submit1">
+              close
+            </Button>
+          ) : processbar.team === "process" ? (
+            <Button onClick={inforReturn} key="submit2">
+              info back
+            </Button>
+          ) : processbar.address === "process" ? (
+            <Button onClick={teamReturn} key="submit3">
+              team back
+            </Button>
+          ) : processbar.account === "process" ? (
+            <Button onClick={accountReturn} key="submit4">
+              address back
+            </Button>
+          ) : processbar.account === "finish" ? (
+            <Button
+              disabled
+              className="custom-button"
+              type="text"
+              key="submit5"
+            >
+              {" "}
+            </Button>
+          ) : (
+            <Button
+              disabled
+              className="custom-button"
+              type="text"
+              key="submit6"
+            >
+              {" "}
+            </Button>
+          ),
+          processbar.info === "process" ? ( //condition
+            <Button key="submit7" type="submit" onClick={informationPostBtn}>
               Next
             </Button>
           ) : processbar.team === "process" ? ( //condition
-            <Button key="submit" onClick={postTeam}>
+            <Button key="submit8" type="submit" onClick={postTeam}>
               Next
             </Button>
           ) : processbar.address === "process" ? ( //condition
-            <Button key="submit" onClick={postAdd}>
+            <Button key="submit9" type="submit" onClick={postAdd}>
               Next
             </Button>
           ) : processbar.account === "process" ? ( //condition
-            <Button key="submit" onClick={postAcc}>
+            <Button key="submit10" type="submit" onClick={postAcc}>
               Next
             </Button>
           ) : (
             ""
           ),
-
-          /*
-                  processbar.info === 'process'//condition
-            ? <Button key="submit" onClick={informationPostBtn}>Next</Button>
-            : processbar.team === 'process'//condition
-              ? <Button key="submit" onClick={postTeam}>Next</Button>
-              : processbar.address === 'process'//condition
-                ? <Button key="submit" onClick={postAdd}>Next</Button>:'',
-                 */
-          // close && finish btn
-          processbar.done === "finish" //condition
-            ? ""
-            : "",
-          /*
-          processbar.done === 'finish'//condition
-            ? <Button onClick={()=>ModelClose()} style={{ borderColor: '#00b96b', color: '#00b96b' }}>Finish</Button>
-            : <Button type='text' key="2" danger="red" style={{ border: "0.5px solid red" }} onClick={() => ModelClose()}>Close</Button>
-            */
         ]}
         maskClosable={false}
       >
@@ -985,7 +1018,21 @@ const Users = ({ officeData }) => {
                   onChange={EmployeeInputsOnchange}
                 />
               </Form.Item>
-
+              {/* contactPersonName */}
+              <Form.Item
+                name="contactPersonName"
+                className="px-7"
+                label="Contact Person Name"
+                style={{ marginBottom: 0, marginTop: 10 }}
+              >
+                <Input
+                  style={{ float: "right", width: filedWidth }}
+                  placeholder="contact person name"
+                  name="contactPersonName"
+                  value={EmployeeInput.contactPersonName}
+                  onChange={EmployeeInputsOnchange}
+                />
+              </Form.Item>
               {/* Relationship */}
               <Form.Item
                 name="relationship"
@@ -1084,22 +1131,6 @@ const Users = ({ officeData }) => {
                 />
               </Form.Item>
 
-              {/* contactPersonName */}
-              <Form.Item
-                name="contactPersonName"
-                className="px-7"
-                label="Contact Person Name"
-                style={{ marginBottom: 0, marginTop: 10 }}
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="contact person name"
-                  name="contactPersonName"
-                  value={EmployeeInput.contactPersonName}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
-
               {/* maritalStatus */}
               <Form.Item
                 name="maritalStatus"
@@ -1180,6 +1211,8 @@ const Users = ({ officeData }) => {
           </section>
         ) : processbar.team === "process" ? (
           <TeamForm
+            key="team"
+            EmployeeInput={EmployeeInput}
             newempid={newempid}
             teamPostProcessBar={teamPostProcessBar}
             ref={teamFormRef}
@@ -1187,6 +1220,7 @@ const Users = ({ officeData }) => {
           />
         ) : processbar.address === "process" ? (
           <AddressForm
+            key="address"
             newempid={newempid}
             addressPostProcessBar={addressPostProcessBar}
             receiveCurrentAddData={receiveCurrentAddData}
@@ -1195,20 +1229,25 @@ const Users = ({ officeData }) => {
           />
         ) : processbar.account === "process" ? (
           <AccountForm
+            key="account"
             newempid={newempid}
             accountPostProcessBar={accountPostProcessBar}
-            receiveAccountData={receiveAccountData}
+            PostEmployee={EmployeeInput} //emp data
+            PostRole={RoleValue} //role data
+            PostTeam={postteamData} //team data
+            PostCureenetAdd={postCureenetAddData} //cureent data
+            PostPermenantAdd={postPermenantAddData} //permenanat data
             ref={accFormRef}
           />
         ) : processbar.done === "finish" ? (
           <FinishForm
-            EmployeeInput={EmployeeInput}//emp data
-            RoleValue={RoleValue}//role data
-            postteamData={postteamData}//team data
-            postCureenetAddData={postCureenetAddData}//cureent data
-            postPermenantAddData={postPermenantAddData}//permenanat data
-            postAccount={postAccount}//account
-            newempid={newempid}
+            key="finish"
+            EmployeeInput={EmployeeInput} //emp data
+            RoleValue={RoleValue} //role data
+            postteamData={postteamData} //team data
+            postCureenetAddData={postCureenetAddData} //cureent data
+            postPermenantAddData={postPermenantAddData} //permenanat data
+            postAccount={postAccount} //account
             modelclose={ModelClose}
           />
         ) : (

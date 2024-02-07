@@ -7,9 +7,10 @@ import RoleSettings from './settingsPages/RoleSettings';
 import AccountDetailSettings from './settingsPages/AccountDetailsSettings';
 import DepartmentSettings from './settingsPages/DepartmentSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright} from '@fortawesome/free-solid-svg-icons';
+import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright,faChampagneGlasses} from '@fortawesome/free-solid-svg-icons';
 import BrandSettings  from './settingsPages/BrandSettings';
 import AccessoriesSettings from './settingsPages/AccessoriesSettings';
+import HolidaySetting from './settingsPages/HolidaySettings';
 
 
 const Settings = () => {
@@ -65,6 +66,13 @@ const Settings = () => {
       settingname: "Accessories",
       componets: <AccessoriesSettings />,
       icon: faKeyboard,
+      props: { BackToSetting : () => setsettingsBack(true) }
+    },
+    {
+      key: 7,
+      settingname: "Holiday",
+      componets: <HolidaySetting/>,
+      icon: faChampagneGlasses,
       props: { BackToSetting : () => setsettingsBack(true) }
     },
   ];

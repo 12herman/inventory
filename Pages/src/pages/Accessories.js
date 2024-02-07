@@ -17,6 +17,7 @@ import { createOffice, getOffice } from '../redux/slices/officeSlice';
 
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
+import Employee from './employee';
 // import { getEmployees } from '../redux/slices/employeeSlice';
 
 const { Header, Sider, Content } = Layout;
@@ -102,12 +103,19 @@ const Accessories = () => {
       Content: <Dashboard />,
       Components: 'Dashboard'
     },
+    // {
+    //   key: '2',
+    //   icon: <FontAwesomeIcon icon={faUser} />,
+    //   label: 'Users',
+    //   Content: <Users />,
+    //   Components: 'Users'
+    // },
     {
       key: '2',
       icon: <FontAwesomeIcon icon={faUser} />,
-      label: 'Users',
-      Content: <Users />,
-      Components: 'Users'
+      label: 'User',
+      Content: <Employee />,
+      Components: 'Employee'
     },
     {
       key: '3',
@@ -137,6 +145,7 @@ const Accessories = () => {
       Content: <Settings />,
       Components: 'Settings'
     },
+    
   ];
 
 
