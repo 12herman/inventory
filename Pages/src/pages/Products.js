@@ -17,7 +17,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { getEmployees } from "../redux/slices/employeeSlice";
 import { getaccessories } from "../redux/slices/accessoriesSlice";
 import { getbrand } from "../redux/slices/brandSlice";
-import { getProducts } from "../redux/slices/productSlice";
 import {
   getProductsDetail,
   putProductsDetail,
@@ -144,7 +143,6 @@ const Products = ({ officeData }) => {
 
   const { productsDetail } = useSelector((state) => state.productsDetail) || [];
 
-  const { products } = useSelector((state) => state.products);
 
   const [proData, setProData] = useState([]);
 
@@ -380,7 +378,6 @@ const Products = ({ officeData }) => {
     dispatch(getaccessories());
     dispatch(getProductsDetail());
     dispatch(getbrand());
-    dispatch(getProducts());
     // console.log(employee.length);
   }, [dispatch]);
 

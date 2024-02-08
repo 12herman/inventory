@@ -7,7 +7,6 @@ import departmentSlice from './slices/departmentSlice';
 import roleDetailsSlice from './slices/roleDetailsSlice';
 import brandSlice from './slices/brandSlice';
 import consoleSlice from './slices/consoleSlice';
-import productSlice from './slices/productSlice';
 import accessoriesSlice from './slices/accessoriesSlice'
 import addressSlice from './slices/addressSlice';
 import holidaySlice from './slices/holidaySlice';
@@ -26,7 +25,6 @@ export const store = configureStore({
         roledetail:roleDetailsSlice,
         brand:brandSlice,
         consoles:consoleSlice,
-        products:productSlice,
         accessories:accessoriesSlice,
         address:addressSlice,
         holiday:holidaySlice,

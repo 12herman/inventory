@@ -11,9 +11,9 @@ import {
   message,
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash, faPen, faRotate } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { Getemployeeleave, Postemployeeleave } from "../../redux/slices/employeeLeaveSlice";
+import { Deleteemployeeleave, Getemployeeleave, Postemployeeleave, Putemployeeleave } from "../../redux/slices/employeeLeaveSlice";
 import { getEmployees } from "../../redux/slices/employeeSlice";
 const headingValue = "Leave";
 const filedWidth = "370px";
@@ -153,30 +153,43 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
   //btns
   //add+
   const AddBtn = () => {
+    setRestBtn(false);
+    form.setFieldsValue({
+      Employee: null,
+    });
     clearEmployeeLeaveIn();
     ModalOpen();
     saveBtnOff();
   };
   //pencil btn
+  const currentDate = new Date();
+  const formattedDate = currentDate.toISOString().slice(0, 19);
   const PencelBtn = (id) => {
+    setRestBtn(true);
     const EditData = employeeleave.filter((data) => data.id === id);
     EditData.map((x) => {
       form.setFieldsValue({
         Employee: x.employeeName,
       });
       setEmployeeLeaveIn({
+        id:x.id,
         employeeId: x.employeeId,
         sickLeave: x.sickLeave,
         casualLeave: x.casualLeave,
         total: x.total,
         leaveAvailed: x.leaveAvailed,
         isDeleted: false,
+        createdDate:x.createdDate,
+        createdBy:x.createdBy,
+        modifiedDate:formattedDate,
+        modifiedBy:x.modifiedBy
       });
     });
     saveBtnOn();
     ModalOpen();
   };
-
+ 
+  
   //api
   const dispatch = useDispatch();
   const { employeeleave } = useSelector((state) => state.employeeleave);
@@ -188,7 +201,7 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
 
   //table data
   const EmpLeaveData = employeeleave
-    .filter((data) => data.employeeData.isDeleted === false)
+    .filter((data) => employee.some(emp=> emp.isDeleted === false && data.employeeData && data.employeeData.isDeleted === false))
     .map((data, i) => ({
       SerialNo: i + 1,
       key: data.id,
@@ -204,7 +217,7 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
     .filter(
       (data) =>
         !employeeleave.some(
-          (leave) => leave.employeeId === data.id && data.isDeleted === false
+          (leave) => leave.employeeId === data.id && data.isDeleted !== undefined &&  data.isDeleted === false
         )
     )
     .map((data, i) => ({
@@ -212,8 +225,8 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
       value: data.id,
       label: data.firstName + " " + data.lastName,
     }));
-
-  const PostMethod = () => {
+//post method
+  const PostMethod = async() => {
     if(EmployeeLeaveIn.casualLeave === null ||
         EmployeeLeaveIn.employeeId === null ||
         EmployeeLeaveIn.leaveAvailed===null ||
@@ -229,14 +242,55 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
                  message.error("check the field it's not a number");
         }
         else{
-          dispatch(Postemployeeleave(EmployeeLeaveIn));
-          dispatch(Getemployeeleave());
-            console.log(EmployeeLeaveIn);
+          await dispatch(Postemployeeleave(EmployeeLeaveIn));
+          await dispatch(Getemployeeleave());
+          await ModalClose();
         }
-    
   };
-  const PutMethod = () => {};
-  const Delete = (id) => {};
+//put method
+  const PutMethod = async() => {
+    if(EmployeeLeaveIn.casualLeave === null ||
+      EmployeeLeaveIn.employeeId === null ||
+      EmployeeLeaveIn.leaveAvailed===null ||
+      EmployeeLeaveIn.sickLeave=== null ||
+      EmployeeLeaveIn.total=== null)
+      {
+          message.error("fill the all field")
+      }
+      else if(isNaN(EmployeeLeaveIn.casualLeave) ||
+               isNaN(EmployeeLeaveIn.leaveAvailed)||
+               isNaN(EmployeeLeaveIn.sickLeave) ||
+               isNaN(EmployeeLeaveIn.total)  ){
+               message.error("check the field it's not a number");
+      }
+      else{
+        await dispatch(Putemployeeleave(EmployeeLeaveIn));
+        await dispatch(Getemployeeleave());
+        await ModalClose();
+      }
+  };
+  //delete method
+  const Delete = async(id) => {
+    await dispatch(Deleteemployeeleave(id));
+    await dispatch(Getemployeeleave());
+  };
+
+  //reset btn
+  const [RestBtn,setRestBtn]=useState(false);
+  const RestBtnLogo =()=>{
+    setRestBtn(true);
+    form.setFieldsValue({
+      Employee: "All",
+    });
+    ModalOpen();
+  };
+
+const ResetAll= ()=>{
+  const Ids = employee.filter(data => EmpLeaveData.some(leaveEmp => leaveEmp.key === data.id));
+
+ console.log(Ids);
+};
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -255,6 +309,17 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
         <span>Add Holiday</span>{" "}
         <FontAwesomeIcon icon={faPlus} className="icon" />{" "}
       </Button>
+
+      <Button
+        onClick={() => RestBtnLogo()}
+        type="primary"
+        className="mx-2 bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
+      >
+        {" "}
+        <span>Reset</span>{" "}
+        <FontAwesomeIcon icon={faRotate} className="icon" />{" "}
+      </Button>
+
       <Table
         style={{ marginTop: 10 }}
         bordered
@@ -269,12 +334,15 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
         open={modalOpen}
         onCancel={ModalClose}
         footer={[
-          saveBtn === false ? (
+         RestBtn === true ? <Button key="3" onClick={ResetAll}>
+              Reset
+            </Button> :
+         saveBtn === false ? (
             <Button key="1" onClick={PostMethod}>
               Add
             </Button>
-          ) : (
-            <Button key="1" onClick={PutMethod}>
+          ) :    (
+            <Button key="3" onClick={PutMethod}>
               Save
             </Button>
           ),
@@ -308,6 +376,7 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
               style={{ float: "right", width: filedWidth }}
               onChange={DropDown}
               options={employeeOption}
+              disabled={RestBtn === false ? false : true}
             />
           </Form.Item>
 
