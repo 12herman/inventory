@@ -11,6 +11,7 @@ import productSlice from './slices/productSlice';
 import accessoriesSlice from './slices/accessoriesSlice'
 import addressSlice from './slices/addressSlice';
 import holidaySlice from './slices/holidaySlice';
+import employeeLeaveSlice from './slices/employeeLeaveSlice';
 
 
 export const store = configureStore({
@@ -27,7 +28,8 @@ export const store = configureStore({
         products:productSlice,
         accessories:accessoriesSlice,
         address:addressSlice,
-        holiday:holidaySlice
+        holiday:holidaySlice,
+        employeeleave:employeeLeaveSlice,
 
     }
 });

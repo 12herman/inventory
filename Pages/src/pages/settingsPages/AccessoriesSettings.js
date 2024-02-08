@@ -42,7 +42,7 @@ const AccessoriesSettings = ({BackToSetting})=>{
                 </div>
             )
         }
-    ]
+    ];
 
     const dispatch =useDispatch();
     const{accessories} = useSelector(state => state.accessories);

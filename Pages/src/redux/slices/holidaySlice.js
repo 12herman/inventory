@@ -2,7 +2,7 @@ import {createSlice,createAsyncThunk} from '@reduxjs/toolkit';
 import Axios from 'axios';
 import {ApiLink} from '../../apilinks/api';
 import { faL } from '@fortawesome/free-solid-svg-icons';
-import accessoriesSlice from './accessoriesSlice';
+
 
 const ApiName = 'holiday';
 const ApiH= ApiLink.holiday;

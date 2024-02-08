@@ -211,7 +211,6 @@ const HolidaySetting = ({ BackToSetting }) => {
     ) {
       message.error("fill all the fields");
     } else {
-      console.log(FormInData);
       await dispatch(PutHoliday(FormInData));
       await dispatch(GetHoliday());
       await ClosePopUp();
