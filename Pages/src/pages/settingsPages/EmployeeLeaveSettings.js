@@ -65,11 +65,11 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
             }}
             onConfirm={() => Delete(record.key)}
           >
-            <Button>
+            <Button disabled={SelectTableData}>
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </Popconfirm>
-          <Button onClick={() => PencelBtn(record.key)}>
+          <Button disabled={SelectTableData} onClick={() => PencelBtn(record.key)}>
             <FontAwesomeIcon icon={faPen} />
           </Button>
         </div>
@@ -153,7 +153,6 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
   //btns
   //add+
   const AddBtn = () => {
-    setRestBtn(false);
     form.setFieldsValue({
       Employee: null,
     });
@@ -165,7 +164,6 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 19);
   const PencelBtn = (id) => {
-    setRestBtn(true);
     const EditData = employeeleave.filter((data) => data.id === id);
     EditData.map((x) => {
       form.setFieldsValue({
@@ -201,7 +199,7 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
 
   //table data
   const EmpLeaveData = employeeleave
-    .filter((data) => employee.some(emp=> emp.isDeleted === false && data.employeeData && data.employeeData.isDeleted === false))
+  .filter((data) => employee.some(emp=> emp.isDeleted === false && data.isdeleted === false) )
     .map((data, i) => ({
       SerialNo: i + 1,
       key: data.id,
@@ -211,7 +209,6 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
       total: data.total,
       leaveAvailed: data.leaveAvailed,
     }));
-
   // drop down
   const employeeOption = employee
     .filter(
@@ -285,11 +282,66 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
     ModalOpen();
   };
 
-const ResetAll= ()=>{
-  const Ids = employee.filter(data => EmpLeaveData.some(leaveEmp => leaveEmp.key === data.id));
 
- console.log(Ids);
-};
+
+  //enable && disable btn
+ const [SelectTableData,setSelectTableData]= useState(false);
+ const DisableBtn=()=> setSelectTableData(true);
+ const EnableBtn=()=> setSelectTableData(false);
+//multi select
+const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const onSelectChange = (newSelectedRowKeys) => {
+    //console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+  useEffect(()=>{
+    if(selectedRowKeys.length ===0){
+      EnableBtn();
+    }else{
+      DisableBtn()
+    }
+  },[selectedRowKeys]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: 'odd',
+        text: 'Select Odd Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        key: 'even',
+        text: 'Select Even Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+    
+  };
+ 
+  
 
   return (
     <>
@@ -301,6 +353,7 @@ const ResetAll= ()=>{
         </Button>
       </div>
       <Button
+      disabled={SelectTableData}
         onClick={() => AddBtn()}
         type="primary"
         className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
@@ -310,17 +363,10 @@ const ResetAll= ()=>{
         <FontAwesomeIcon icon={faPlus} className="icon" />{" "}
       </Button>
 
-      <Button
-        onClick={() => RestBtnLogo()}
-        type="primary"
-        className="mx-2 bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
-      >
-        {" "}
-        <span>Reset</span>{" "}
-        <FontAwesomeIcon icon={faRotate} className="icon" />{" "}
-      </Button>
+      
 
       <Table
+        rowSelection={rowSelection}
         style={{ marginTop: 10 }}
         bordered
         columns={columns}
@@ -334,9 +380,7 @@ const ResetAll= ()=>{
         open={modalOpen}
         onCancel={ModalClose}
         footer={[
-         RestBtn === true ? <Button key="3" onClick={ResetAll}>
-              Reset
-            </Button> :
+         
          saveBtn === false ? (
             <Button key="1" onClick={PostMethod}>
               Add
@@ -376,7 +420,7 @@ const ResetAll= ()=>{
               style={{ float: "right", width: filedWidth }}
               onChange={DropDown}
               options={employeeOption}
-              disabled={RestBtn === false ? false : true}
+              // disabled={RestBtn === false ? false : true}
             />
           </Form.Item>
 
