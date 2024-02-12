@@ -10,7 +10,7 @@ import { postaccount } from "../redux/slices/accountdetailsSlice";
 import { postleaderemployee } from "../redux/slices/leaderEmployeeSlice";
 
 
-const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData,modelclose,newempid,loadings})=>{
+const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData,modelclose,newempid,loadings,EditPencilState})=>{
 
   // const dispatch = useDispatch();
   // const [loading, setLoading] = useState(true);
@@ -50,11 +50,11 @@ const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData
           ?  <Spin indicator={<LoadingOutlined style={{ fontSize: 24}} spin/> }/> 
           : <Result
             status="success"
-            title="Employee is created successfully."
+            title={EditPencilState === false ? "Employee is created successfully.": "Employee Updated successfully."}  
             subTitle={
               <span>
                 <p className="text-center">
-                  New employee is created successfully.
+                {EditPencilState === false ? "New employee is created successfully.": "Employee Updated successfully."}  
                 </p>
                 <p className="text-center">Employee Id: {newempid}</p>
               </span>

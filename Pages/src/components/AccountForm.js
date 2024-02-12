@@ -23,7 +23,9 @@ const AccountForm = forwardRef((props, ref) => {
     PostTeam,
     PostCureenetAdd,
     PostPermenantAdd,
-    newEmployee
+    newEmployee,
+    EditPencilState,
+    PutEmployee
   } = props;
 
 
@@ -62,10 +64,21 @@ const AccountForm = forwardRef((props, ref) => {
           !FormAccF.branchName ||
           !FormAccF.bankLocation ||
           !FormAccF.accountNumber ||
-          !FormAccF.ifsc)) === true
+          !FormAccF.ifsc )) === true && EditPencilState ===false
     ) {
       accountPostProcessBar();
       newEmployee();
+    }
+    else if (
+      (!isNaN(accountno) !=
+        (!FormAccF.bankName ||
+          !FormAccF.branchName ||
+          !FormAccF.bankLocation ||
+          !FormAccF.accountNumber ||
+          !FormAccF.ifsc)) === true && EditPencilState===true
+    ) {
+       accountPostProcessBar();
+      PutEmployee();
     }
     //  accountPostProcessBar();
     //  newEmployee();

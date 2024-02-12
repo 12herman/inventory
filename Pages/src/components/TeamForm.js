@@ -76,7 +76,9 @@ const TeamForm = forwardRef((props, ref) => {
   const teamValidateData =  () => {
   
     if (TeamFData.hrManagerId === null
-      || TeamFData.leaderId ===null) {
+      || TeamFData.leaderId ===null 
+      ||TeamFData.hrManagerId === ""
+      || TeamFData.leaderId ==="" ) {
       message.error("Fill all the fields");
     } else {
        teamPostProcessBar();
