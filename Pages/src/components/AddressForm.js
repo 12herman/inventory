@@ -88,16 +88,16 @@ const AddressForm = forwardRef((props, ref) => {
   const addredValidateDate = () => {
    
     if (
-      FormCAdd.address1 === "" ||
-      FormCAdd.city === "" ||
-      FormCAdd.state === "" ||
-      FormCAdd.country === "" ||
-      FormCAdd.postalCode === "" ||
-      FormPAdd.address1 === "" ||
-      FormPAdd.city === "" ||
-      FormPAdd.state === "" ||
-      FormPAdd.country === "" ||
-      FormPAdd.postalCode === ""
+      FormCAdd.address1 === "" || FormCAdd.address1 === null ||
+      FormCAdd.city === "" || FormCAdd.city === null ||
+      FormCAdd.state === "" || FormCAdd.state === null ||
+      FormCAdd.country === "" || FormCAdd.country === null ||
+      FormCAdd.postalCode === "" || FormCAdd.postalCode === null ||
+      FormPAdd.address1 === "" ||  FormPAdd.address1 === null ||
+      FormPAdd.city === "" || FormPAdd.city === null ||
+      FormPAdd.state === "" || FormPAdd.state === null ||
+      FormPAdd.country === "" || FormPAdd.country === null ||
+      FormPAdd.postalCode === "" ||  FormPAdd.postalCode === null
     ) {
       message.error("fill the all the fields");
     } else if (isNaN(FormPAdd.postalCode) === true) {
@@ -111,7 +111,6 @@ const AddressForm = forwardRef((props, ref) => {
     } else {
       addressPostProcessBar();
     }
-    
     //addressPostProcessBar();
   };
 

@@ -56,7 +56,6 @@ const employeeSlice = createSlice({
         .addCase(putEmployees.fulfilled, (state, action) => {
             state.loading = false;
             state.employee = state.employee.map((item) => item.id === action.payload.id ? action.payload : item);
-            console.log(state.employee);
         })
         .addCase(putEmployees.rejected, (state) => {
             state.loading = false;

@@ -47,20 +47,29 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { getDepartment } from "../redux/slices/departmentSlice";
-import { postRoleDetail } from "../redux/slices/roleDetailsSlice";
+import {
+  getRoleDetail,
+  postRoleDetail,
+  putRoleDetail,
+} from "../redux/slices/roleDetailsSlice";
 import TeamForm from "../components/TeamForm";
 import AddressForm from "../components/AddressForm";
 import AccountForm from "../components/AccountForm";
 import FinishForm from "../components/FinishForm";
-import { postleaderemployee } from "../redux/slices/leaderEmployeeSlice";
-import { postAddress } from "../redux/slices/addressSlice";
-import { postaccount } from "../redux/slices/accountdetailsSlice";
-
+import {
+  getleaderemployee,
+  postleaderemployee,
+  putleaderemployee,
+} from "../redux/slices/leaderEmployeeSlice";
+import { getAddress, postAddress, putAddress } from "../redux/slices/addressSlice";
+import { getaccount, postaccount, putaccount } from "../redux/slices/accountdetailsSlice";
+import moment, { months } from "moment";
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
 const { Option } = Select;
-
+const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().slice(0, 19);
 const Employee = ({ officeData }) => {
   //Emil validation
   function validateEmail(email) {
@@ -167,23 +176,17 @@ const Employee = ({ officeData }) => {
   const { role } = useSelector((state) => state.role);
   const { office } = useSelector((state) => state.office);
   const { department } = useSelector((state) => state.department);
+  const { leaderemployee } = useSelector((state) => state.leaderemployee);
+  const { roledetail } = useSelector((state) => state.roledetail);
+  const { address } = useSelector((state) => state.address);
+  const {account} = useSelector(state => state.account)
 
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
   const [empCounts, setEmpCounts] = useState();
   const [tableData, setTableData] = useState([]);
 
-  useEffect(() => {
-    dispatch(getEmployees());
-    dispatch(getrole());
-    dispatch(getDepartment());
-  }, []);
-
-  useEffect(() => {
-    setRoledetailData(role);
-    setEmpData(employee);
-    DataLoading();
-  }, [employee, officeData, role]);
+ 
 
   function DataLoading() {
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
@@ -266,8 +269,9 @@ const Employee = ({ officeData }) => {
   const handleCancel = () => {
     Modal.confirm({
       icon: null,
-      content:
-        "Your data will be destroyed. Are you sure to exit this process?",
+      content: <div >
+        Are you sure to exit this process?
+      </div>,
       onCancel: () => {},
       onOk: () => setModelOpen(false),
       okButtonProps: { type: "default", danger: true }, // Prevent the default Modal onCancel behavior
@@ -281,14 +285,13 @@ const Employee = ({ officeData }) => {
   // post methods
   // 1.information
   const informationPostBtn = async () => {
-    
     //check all empty fields
     if (
       !EmployeeInput.firstName.trim() ||
       !EmployeeInput.lastName.trim() ||
       !String(EmployeeInput.gender).trim() || // Convert to string
       !EmployeeInput.personalEmail.trim() ||
-      !EmployeeInput.officeEmail.trim() ||
+      //!EmployeeInput.officeEmail.trim() ||
       !EmployeeInput.mobileNumber.trim() ||
       !EmployeeInput.dateOfBirth.trim() ||
       !EmployeeInput.dateOfJoin.trim() ||
@@ -306,10 +309,12 @@ const Employee = ({ officeData }) => {
     else if (validateEmail(EmployeeInput.personalEmail) === false) {
       message.error("Personal email is not a valid email");
     }
+
     // check the office email
-    else if (validateEmail(EmployeeInput.officeEmail) === false) {
-      message.error("Office email is not a valid email");
-    }
+    // else if (validateEmail(EmployeeInput.officeEmail) === false) {
+    //   message.error("Office email is not a valid email");
+    // }
+
     // check the mobile number
     else if (validateMobileNumber(EmployeeInput.mobileNumber) === false) {
       message.error("please check the mobile number");
@@ -320,22 +325,179 @@ const Employee = ({ officeData }) => {
     }
     // employee && role details post method
     else {
-      infoPostProcessBar();
+       
+       if(validateEmail(EmployeeInput.officeEmail) === false || EmployeeInput.officeEmail ===""){
+        setEmployeeInput((pre)=> ({ ...pre,officeEmail:null}));
+       };
+       infoPostProcessBar();
     }
     //infoPostProcessBar();
     // setNewempId(3);
   };
 
+  
   // Table Delete Icon
   const DeleteIcon = (data) => {
     console.log(data.key);
   };
 
   // Table Edit Icon
-  const EditPencilIcon = (data) => {
-    saveBtnOn();
-    ModelOpen();
-    console.log(data.key);
+  const [EditPencilData, setEditPencilData] = useState([]);
+  const [EditPencilState, setEditPencilState] = useState(false);
+  
+  const EditPencilIcon = async (data) => {
+    await saveBtnOn();
+   await ModelOpen();
+   await setAddressCheck(false);
+   await setEditPencilState(true);
+    //employee
+    const EmpFilter = await employee.filter((emp) => emp.id === data.key);
+    const EData = (await EmpFilter) && EmpFilter[0] ? EmpFilter[0] : [];
+    //role
+    const RoleDetailsFilter = await roledetail.filter(
+      (roleDetails) => roleDetails.employeeId === data.key
+    );
+    const RoleDetailsData =
+      await RoleDetailsFilter.length === 0
+        ? null
+        : RoleDetailsFilter[0];
+    //team
+    const TeamFilter = await leaderemployee.filter(
+      (leader) => leader.employeeId === data.key
+    );
+    const TeamData = (await TeamFilter.length) === 0 ? null : TeamFilter[0];
+    //address
+    const AddressFilter = await address.filter(
+      (add) => add.employeeId === data.key
+    );
+    const AddressData =await AddressFilter.length === 0 ? null : AddressFilter;
+    const PermanetFilter = await AddressData ===null ? null:await AddressData.filter((per) => per.type === 2);
+    const PermanetData =await PermanetFilter === null ? null : PermanetFilter[0];
+    const CurrentFilter = await AddressData ===null ? null: await AddressData.filter((per) => per.type === 1);
+    const CurrentData =await CurrentFilter ===null ? null : CurrentFilter[0];
+    //account
+    const AccountFilter = await account.filter(acc => acc.employeeId === data.key);
+    const AccountData = await AccountFilter.length === 0 ? null : AccountFilter[0];
+    
+    //set method
+    //employee details && team
+    await setEditPencilData(EData);
+    await setNewempId(EData.id);
+    await setEmployeeInput({
+      id: EData.id,
+      firstName: EData.firstName,
+      lastName: EData.lastName,
+      gender: EData.gender,
+      personalEmail: EData.personalEmail,
+      officeEmail: EData.officeEmail,
+      mobileNumber: EData.mobileNumber,
+      dateOfBirth: EData.dateOfBirth,
+      dateOfJoin: EData.dateOfJoin,
+      bloodGroup: EData.bloodGroup,
+      alternateContactNo: EData.alternateContactNo,
+      contactPersonName: EData.contactPersonName,
+      relationship: EData.relationship,
+      maritalStatus: EData.maritalStatus,
+      officeLocationId: EData.officeLocationId.id,
+      departmentId: EData.departmentId.id,
+      isDeleted: false,
+      createdDate: EData.createdDate,
+      createdBy: EData.createdBy,
+      modifiedDate:formattedDate,
+      modifiedBy: EData.modifiedBy
+    });
+    await form.setFieldsValue({
+      firstName: EData.firstName,
+      lastName: EData.lastName,
+      gender: EData.gender ? EData.gender : null,
+      personalEmail: EData.personalEmail,
+      officeEmail: EData.officeEmail,
+      mobileNumber: EData.mobileNumber,
+      dateOfBirth: moment(moment(EData.dateOfBirth)._i),
+      dateOfJoin: moment(moment(EData.dateOfJoin)._i),
+      bloodGroup: EData.bloodGroup,
+      alternateContactNo: EData.alternateContactNo,
+      contactPersonName: EData.contactPersonName,
+      relationship: EData.relationship,
+      maritalStatus: EData.maritalStatus,
+      officeLocationId: EData.officeLocationId.id,
+      departmentId: EData.departmentId.id,
+      isDeleted: false,
+      Role:RoleDetailsData===null?null: RoleDetailsData.roleId,
+    });
+
+    //role details
+    setRoleValue({
+      id: RoleDetailsData === null ? null : RoleDetailsData.id,
+      employeeId:RoleDetailsData === null ? null : RoleDetailsData.employeeId,
+      roleId:RoleDetailsData === null ? null : RoleDetailsData.roleId,
+      isdeleted: false,
+      createdDate:RoleDetailsData === null ? null : RoleDetailsData.createdDate,
+      createdBy:RoleDetailsData === null ? null : RoleDetailsData.createdBy,
+      modifiedDate:formattedDate,
+      modifiedBy:RoleDetailsData === null ? null : RoleDetailsData.modifiedBy
+    });
+
+    //team
+    await setTeamFData({
+      id:TeamData === null ? null : TeamData.id,
+      employeeId:TeamData === null ? null : TeamData.employeeId ,
+      leaderId: TeamData === null ? null : TeamData.leaderId,
+      hrManagerId: TeamData === null ? null : TeamData.hrManagerId,
+      isdeleted: false,
+      createdDate:TeamData === null ? null : TeamData.createdDate,
+      createdBy:TeamData === null ? null : TeamData.createdBy,
+      modifiedDate:formattedDate,
+      modifiedBy:TeamData === null ? null : TeamData.modifiedBy
+    });
+
+    //address
+    await setPermanetFAdd({
+      id: PermanetData === null ? null : PermanetData.id,
+      employeeId:PermanetData === null ? null : PermanetData.employeeId,
+      address1: PermanetData === null ? null : PermanetData.address1,
+      city: PermanetData === null ? null : PermanetData.city,
+      state: PermanetData === null ? null : PermanetData.state,
+      country: PermanetData === null ? null : PermanetData.country,
+      postalCode: PermanetData === null ? null : PermanetData.postalCode,
+      isdeleted: false,
+      type: 2,
+      createdDate:PermanetData === null ? null : PermanetData.createdDate,
+      createdBy:PermanetData === null ? null : PermanetData.createdBy,
+      modifiedDate:formattedDate,
+      modifiedBy:PermanetData === null ? null : PermanetData.modifiedBy
+    });
+    await setCurrentFAdd({
+      id: CurrentData === null ? null : CurrentData.id,
+      employeeId:CurrentData === null ? null : CurrentData.employeeId,
+      address1: CurrentData === null ? null : CurrentData.address1,
+      city: CurrentData === null ? null : CurrentData.city,
+      state: CurrentData === null ? null : CurrentData.state,
+      country: CurrentData === null ? null : CurrentData.country,
+      postalCode: CurrentData === null ? null : CurrentData.postalCode,
+      isdeleted: false,
+      type: 1,
+      createdDate:CurrentData === null ? null : CurrentData.createdDate,
+      createdBy:CurrentData === null ? null : CurrentData.createdBy,
+      modifiedDate:formattedDate,
+      modifiedBy:CurrentData === null ? null : CurrentData.modifiedBy
+    });
+
+    //account
+    await setAccF({
+    id : AccountData === null ? null : AccountData.accountId,
+    employeeId:AccountData === null ? null : AccountData.employeeId,  
+    bankName: AccountData === null ? null : AccountData.bankName,
+    branchName: AccountData === null ? null : AccountData.branchName,
+    accountNumber: AccountData === null ? null : AccountData.accountNumber,
+    bankLocation: AccountData === null ? null : AccountData.bankLocation,
+    ifsc: AccountData === null ? null : AccountData.ifsc,
+    isdeleted: false,
+    createdDate:AccountData === null ? null : AccountData.createdDate,
+    createdBy:AccountData === null ? null : AccountData.createdBy,
+    modifiedDate:formattedDate,
+    modifiedBy:AccountData === null ? null : AccountData.modifiedBy
+    });
   };
 
   // Employee Inputs
@@ -473,12 +635,14 @@ const Employee = ({ officeData }) => {
   // Employee Add|+| Btn
   const [form] = Form.useForm();
   const AddEmployeeBtn = () => {
+    setNewempId('');
+    setEditPencilState(false);//post method
     ClearEmployeeInputs(); //clear employee
     roleClear(); //clear role
     TeamFDataClear(); //clear team
     clearAddress(); //clear address
     setAddressCheck(false);
-    ClearAccount();//clear account
+    ClearAccount(); //clear account
     if (form) {
       form.resetFields([
         "firstName",
@@ -574,8 +738,6 @@ const Employee = ({ officeData }) => {
       accFormRef.current.accountValidateData();
     }
   };
-
-  
 
   //employee api
   const FalseEmp = employee.filter((emp) => emp.isDeleted === false);
@@ -679,25 +841,85 @@ const Employee = ({ officeData }) => {
   };
 
   const [loadings, setLoading] = useState(true);
-  const newEmployee=  async ()=>{
+
+  const newEmployee = async () => {
     const employeeDatas = await dispatch(postEmployees(EmployeeInput));
     if (employeeDatas && employeeDatas.payload.id) {
       setNewempId(employeeDatas.payload.id);
-      console.log({ employeeId: employeeDatas.payload.id});
+      console.log({ employeeId: employeeDatas.payload.id });
       //role creation
-      await dispatch(postRoleDetail({employeeId: employeeDatas.payload.id,...RoleValue}));
+      await dispatch(
+        postRoleDetail({ employeeId: employeeDatas.payload.id, ...RoleValue })
+      );
       //leaderemployee creation
-      await dispatch(postleaderemployee({employeeId:employeeDatas.payload.id,...TeamFData}));
+      await dispatch(
+        postleaderemployee({
+          employeeId: employeeDatas.payload.id,
+          ...TeamFData,
+        })
+      );
       // address creation
-      await dispatch(postAddress({employeeId:employeeDatas.payload.id,...CureentFAdd}));
-      await dispatch(postAddress({employeeId:employeeDatas.payload.id,...PermanetFAdd}));
+      await dispatch(
+        postAddress({ employeeId: employeeDatas.payload.id, ...CureentFAdd })
+      );
+      await dispatch(
+        postAddress({ employeeId: employeeDatas.payload.id, ...PermanetFAdd })
+      );
       //account creation
-      await dispatch(postaccount({employeeId:employeeDatas.payload.id,...AccF}));
+      await dispatch(
+        postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
+      );
       //await dispatch()
       await setLoading(false);
-      };
+    }
   };
 
+  //put employee
+  const PutEmployee =async ()=>{
+    await dispatch(putEmployees(EmployeeInput)); //employee
+    await dispatch(putRoleDetail(RoleValue)); //role
+    await dispatch(putleaderemployee(TeamFData));//leader employee
+    await dispatch(putAddress(CureentFAdd));
+    await dispatch(putAddress(PermanetFAdd));
+    await dispatch(putaccount(AccF));
+    await setLoading(false);
+  };
+
+  //initial reneder
+  useEffect(() => {
+    dispatch(getEmployees());
+    dispatch(getrole());
+    dispatch(getDepartment());
+    dispatch(getleaderemployee());
+    dispatch(getRoleDetail());
+    dispatch(getAddress());
+    dispatch(getaccount());
+  }, []);
+
+
+  //table loading 
+  useEffect(() => {
+    setRoledetailData(role);
+    setEmpData(employee);
+    DataLoading();
+  }, [employee, officeData, role]);
+
+
+  //form edit initial loading screen
+  const InitialFormEdit = ()=>{
+    setProcessBar({
+      info: "process",
+      team: "wait",
+      address: "wait",
+      account: "wait",
+      done: "wait",
+    })
+  };
+  useEffect(()=>{
+    InitialFormEdit();
+  },[modelOpen]);
+
+  console.log(EmployeeInput);
   return (
     <div>
       <Row gutter={[16, 16]} align="middle">
@@ -742,7 +964,7 @@ const Employee = ({ officeData }) => {
 
       <Modal
         title={[
-          <h2 className="text-center pt-2">{`Add New ${headingValue}`}</h2>,
+          <h2 className="text-center pt-2">{EditPencilState === false ? `Add New ${headingValue}` :`Edit Employee Details`}</h2>,
           <Steps
             className="mt-3 px-[100px]"
             size="small"
@@ -971,7 +1193,7 @@ const Employee = ({ officeData }) => {
                 rules={[{ type: "email" }]}
                 className="px-7"
                 name="officeEmail"
-                label="Office Email"
+                label="Office Email (optional)"
                 style={{ marginBottom: 0, marginTop: 10 }}
               >
                 <Input
@@ -1019,7 +1241,7 @@ const Employee = ({ officeData }) => {
                   onChange={DateOfBirthValue}
                 />
               </Form.Item>
-                 {/* maritalStatus */}
+              {/* maritalStatus */}
               <Form.Item
                 name="maritalStatus"
                 className="px-7"
@@ -1138,7 +1360,7 @@ const Employee = ({ officeData }) => {
                   onChange={EmployeeInputsOnchange}
                 />
               </Form.Item>
-                 {/* contactPersonName */}
+              {/* contactPersonName */}
               <Form.Item
                 name="contactPersonName"
                 className="px-7"
@@ -1251,10 +1473,6 @@ const Employee = ({ officeData }) => {
                 />
               </Form.Item>
 
-             
-
-             
-
               {/* officeLocationId */}
               <Form.Item
                 name="officeLocationId"
@@ -1316,6 +1534,7 @@ const Employee = ({ officeData }) => {
             EmployeeInput={EmployeeInput} //input employee name
             teamPostProcessBar={teamPostProcessBar} // process bar
             ref={teamFormRef}
+            EditData={EditPencilData} //edit data
           />
         ) : processbar.address === "process" ? (
           <AddressForm
@@ -1328,15 +1547,19 @@ const Employee = ({ officeData }) => {
             UpdateCheckBox={AddCheckBox} // update check box
             addressPostProcessBar={addressPostProcessBar} // process bar
             ref={addressRef}
+            EditData={EditPencilData} //edit data
           />
         ) : processbar.account === "process" ? (
           <AccountForm
             key="account"
-            FormAccF={AccF}//state
-            UpdateAccF={UpdateAccountF}//update account 
-            accountPostProcessBar={accountPostProcessBar}//process bar
+            FormAccF={AccF} //state
+            UpdateAccF={UpdateAccountF} //update account
+            accountPostProcessBar={accountPostProcessBar} //process bar
             newEmployee={newEmployee}
             ref={accFormRef}
+            EditData={EditPencilData} //edit data
+            EditPencilState={EditPencilState} // true put method
+            PutEmployee={PutEmployee}
           />
         ) : processbar.done === "finish" ? (
           <FinishForm
@@ -1346,9 +1569,11 @@ const Employee = ({ officeData }) => {
             CAddData={CureentFAdd} //cureent add data
             PAddData={PermanetFAdd} //permenanat add data
             AccountData={AccF} //account data
-            newempid={newempid}//emp id
-            loadings={loadings}//loading
+            newempid={newempid} //emp id
+            loadings={loadings} //loading
             modelclose={ModelClose}
+            EditData={EditPencilData} //edit data
+            EditPencilState={EditPencilState} // true put method
           />
         ) : (
           ""
