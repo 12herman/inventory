@@ -13,5 +13,6 @@ export const ApiLink = {
     holiday:"https://localhost:7129/api/Holiday" ,
     employeeleave:"https://localhost:7129/api/EmployeeHoliday",
     productsDetail:"https://localhost:7129/api/ProductsDetail",
+    productstoragelocation:"https://localhost:7129/api/ProductStorageLocation",
   };
   
