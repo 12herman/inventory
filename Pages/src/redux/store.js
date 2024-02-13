@@ -12,7 +12,7 @@ import addressSlice from './slices/addressSlice';
 import holidaySlice from './slices/holidaySlice';
 import employeeLeaveSlice from './slices/employeeLeaveSlice';
 import productsDetailSlice from './slices/productsDetailSlice';
-import leaderEmployeeSlice from './slices/leaderEmployeeSlice';
+import productStorageLocationSlice from './slices/productStorageLocationSlice';
 
 
 export const store = configureStore({
@@ -31,7 +31,7 @@ export const store = configureStore({
         holiday:holidaySlice,
         employeeleave:employeeLeaveSlice,
         productsDetail:productsDetailSlice,
-        leaderemployee:leaderEmployeeSlice
+        productstoragelocation:productStorageLocationSlice,
     }
 });
 
