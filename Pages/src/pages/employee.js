@@ -39,6 +39,7 @@ import {
   faCircleCheck,
   faPeopleGroup,
   faL,
+  faInfo,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   LoadingOutlined,
@@ -64,6 +65,7 @@ import {
 import { getAddress, postAddress, putAddress } from "../redux/slices/addressSlice";
 import { getaccount, postaccount, putaccount } from "../redux/slices/accountdetailsSlice";
 import moment, { months } from "moment";
+import dayjs from 'dayjs';
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
@@ -71,6 +73,7 @@ const { Option } = Select;
 const currentDate = new Date();
     const formattedDate = currentDate.toISOString().slice(0, 19);
 const Employee = ({ officeData }) => {
+  const [form] = Form.useForm();
   //Emil validation
   function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -121,21 +124,67 @@ const Employee = ({ officeData }) => {
       key: "position",
       dataIndex: "position",
       render: (_, { position }) => (
+        //console.log(position)
         <>
-          {position.map((tag) => {
-            let color = tag.length > 7 ? "geekblue" : "green";
-            if (tag === "loser") {
-              color = "volcano";
-            } else if (tag === "Not Assigned") {
+      {Array.isArray( position) ? (
+        position.map( ( tag) => {
+          let color;
+
+          switch (tag) {
+            case "IT":
+              color = "green";
+              break;
+              case "employee":
+              color = "blue";
+              break;
+            case "Not Assigned":
               color = "red";
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </>
+              break;
+              case "hr":
+              color = "green";
+              break;
+              case "ceo":
+              color = "purple";
+              break;
+              case "Leader":
+              color = "orange";
+              break;
+              case "BIM":
+              color = "yellow";
+              break;
+            default:
+              color = "blue"; // Default color for other tags
+              break;
+          }
+
+          return (
+            <Tag color={color} key={tag}>
+              {tag}
+            </Tag>
+          );
+        })
+      ) : (
+        <Tag color="red">Not Assigned</Tag>
+      )}
+    </>
+
+        // <>
+        //   { 
+        //     position.map(( tag) => {
+        //     let color = tag.length > 7 ? "geekblue" : "green";
+        //     if (tag === "loser") {
+        //       color = "volcano";
+        //     } else if (tag === "Not Assigned") {
+        //       color = "red";
+        //     }
+        //     return (
+        //       <Tag color={color} key={tag}>
+        //         {tag.toUpperCase()}
+        //       </Tag>
+        //     );
+        //   })
+        //   }
+        // </>
       ),
     },
     {
@@ -186,7 +235,7 @@ const Employee = ({ officeData }) => {
   const [empCounts, setEmpCounts] = useState();
   const [tableData, setTableData] = useState([]);
 
- 
+ console.log(roledetailData);
 
   function DataLoading() {
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
@@ -285,6 +334,7 @@ const Employee = ({ officeData }) => {
   // post methods
   // 1.information
   const informationPostBtn = async () => {
+  
     //check all empty fields
     if (
       !EmployeeInput.firstName.trim() ||
@@ -415,6 +465,8 @@ const Employee = ({ officeData }) => {
       mobileNumber: EData.mobileNumber,
       dateOfBirth: moment(moment(EData.dateOfBirth)._i),
       dateOfJoin: moment(moment(EData.dateOfJoin)._i),
+      // dateOfBirth: dayjs(EData.dateOfBirth,dateFormat)._i,
+      // dateOfJoin: dayjs(EData.dateOfJoin,dateFormat)._i,
       bloodGroup: EData.bloodGroup,
       alternateContactNo: EData.alternateContactNo,
       contactPersonName: EData.contactPersonName,
@@ -425,7 +477,7 @@ const Employee = ({ officeData }) => {
       isDeleted: false,
       Role:RoleDetailsData===null?null: RoleDetailsData.roleId,
     });
-
+    console.log();
     //role details
     setRoleValue({
       id: RoleDetailsData === null ? null : RoleDetailsData.id,
@@ -501,7 +553,7 @@ const Employee = ({ officeData }) => {
   };
 
   // Employee Inputs
-  const filedWidth = "730px";
+  const filedWidth = "100%";
   const [EmployeeInput, setEmployeeInput] = useState({
     firstName: "",
     lastName: "",
@@ -633,7 +685,6 @@ const Employee = ({ officeData }) => {
   ];
 
   // Employee Add|+| Btn
-  const [form] = Form.useForm();
   const AddEmployeeBtn = () => {
     setNewempId('');
     setEditPencilState(false);//post method
@@ -826,6 +877,19 @@ const Employee = ({ officeData }) => {
     ifsc: null,
     isdeleted: false,
   });
+
+
+  //employee leave (employee holiday)
+  const [EmployeeLeave,setEmployeeLeave] = useState({
+    employeeId:null,
+    sickLeave:null,
+    casualLeave:null,
+    total:null,
+    isDeleted:false,
+    createdBy:null,
+  });
+
+
   const UpdateAccountF = (NewData) => {
     setAccF((PreData) => ({ ...PreData, ...NewData }));
   };
@@ -843,7 +907,9 @@ const Employee = ({ officeData }) => {
   const [loadings, setLoading] = useState(true);
 
   const newEmployee = async () => {
+    try{
     const employeeDatas = await dispatch(postEmployees(EmployeeInput));
+
     if (employeeDatas && employeeDatas.payload.id) {
       setNewempId(employeeDatas.payload.id);
       console.log({ employeeId: employeeDatas.payload.id });
@@ -869,8 +935,16 @@ const Employee = ({ officeData }) => {
       await dispatch(
         postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
       );
-      //await dispatch()
+      await dispatch(getRoleDetail());
+      await dispatch(getleaderemployee());
+      await dispatch(getAddress());
+      await dispatch(getaccount());
       await setLoading(false);
+      await dispatch(getEmployees());
+    }
+    }
+    catch(error){
+      console.error("Error creating new employee:", error);
     }
   };
 
@@ -879,10 +953,11 @@ const Employee = ({ officeData }) => {
     await dispatch(putEmployees(EmployeeInput)); //employee
     await dispatch(putRoleDetail(RoleValue)); //role
     await dispatch(putleaderemployee(TeamFData));//leader employee
-    await dispatch(putAddress(CureentFAdd));
-    await dispatch(putAddress(PermanetFAdd));
-    await dispatch(putaccount(AccF));
+    await dispatch(putAddress(CureentFAdd));//address1
+    await dispatch(putAddress(PermanetFAdd));//address2
+    await dispatch(putaccount(AccF));//account
     await setLoading(false);
+    await dispatch(getEmployees());
   };
 
   //initial reneder
@@ -894,7 +969,7 @@ const Employee = ({ officeData }) => {
     dispatch(getRoleDetail());
     dispatch(getAddress());
     dispatch(getaccount());
-  }, []);
+  }, [dispatch]);
 
 
   //table loading 
@@ -919,7 +994,7 @@ const Employee = ({ officeData }) => {
     InitialFormEdit();
   },[modelOpen]);
 
-  console.log(EmployeeInput);
+  
   return (
     <div>
       <Row gutter={[16, 16]} align="middle">
@@ -1071,11 +1146,6 @@ const Employee = ({ officeData }) => {
               {" "}
             </Button>
           ),
-          // backbtn.infoback === true
-          //   ? <Button onClick={InfoBack}>Back</Button>
-          //   : "",
-          //saveBtn === false ? <Button key="submit" onClick={informationPostBtn}>Next</Button> : <Button key="1" onClick={ModelEditBtn} >Save</Button>,
-          //next btns
           processbar.info === "process" ? ( //condition
             <Button key="submit7" type="submit" onClick={informationPostBtn}>
               Next
@@ -1101,14 +1171,19 @@ const Employee = ({ officeData }) => {
         {/* (i)Employee-Details-section */}
         {processbar.info === "process" ? (
           <section>
+          <div className="mt-4 flex justify-center items-center">
+        <FontAwesomeIcon className="text-2xl " icon={faInfoCircle} />
+      </div>
             {/* <h1 className='font-bold mt-2 text-center'>Employee Details</h1> */}
-            <Form form={form}>
+            <Form form={form}  layout="vertical" className="mt-5">
+            <Row>
+            <Col span={6}>
               {/* firstName */}
               <Form.Item
                 name="firstName"
                 label="First Name"
-                style={{ marginBottom: 0, marginTop: 10 }}
-                className="px-7"
+    
+                className="px-3"
               >
                 <Input
                   style={{ float: "right", width: filedWidth }}
@@ -1123,8 +1198,7 @@ const Employee = ({ officeData }) => {
               <Form.Item
                 name="lastName"
                 label="Last Name"
-                style={{ marginBottom: 0, marginTop: 10 }}
-                className="px-7"
+                className="px-3"
               >
                 <Input
                   style={{ float: "right", width: filedWidth }}
@@ -1142,8 +1216,8 @@ const Employee = ({ officeData }) => {
                   { message: "Please select your gender!", type: "string" },
                 ]}
                 label="Gender"
-                style={{ marginBottom: 0, marginTop: 10 }}
-                className="px-7"
+    
+                className="px-3"
               >
                 <Select
                   optionFilterProp="children"
@@ -1174,10 +1248,10 @@ const Employee = ({ officeData }) => {
               {/* personalEmail */}
               <Form.Item
                 rules={[{ type: "email" }]}
-                className="px-7"
+                className="px-3"
                 label="Personal Email"
                 name="personalEmail"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Input
                   style={{ float: "right", width: filedWidth }}
@@ -1191,10 +1265,10 @@ const Employee = ({ officeData }) => {
               {/* officeEmail */}
               <Form.Item
                 rules={[{ type: "email" }]}
-                className="px-7"
+                className="px-3"
                 name="officeEmail"
                 label="Office Email (optional)"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Input
                   style={{ float: "right", width: filedWidth }}
@@ -1204,18 +1278,21 @@ const Employee = ({ officeData }) => {
                   onChange={EmployeeInputsOnchange}
                 />
               </Form.Item>
-
-              {/* mobileNumber */}
-              <Form.Item
-                className="px-7"
-                style={{ marginBottom: 0, marginTop: 10 }}
+</Col>
+              
+        
+        <Col span={6}>
+        {/* mobileNumber */}
+        <Form.Item
+                className="px-3"
+    
                 label="Mobile Number"
                 name="mobileNumber"
                 rules={[
                   { message: "Please enter your mobile number" },
                   {
                     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    message: "Please enter a valid 10-digit mobile number",
+                    message: "Enter 10-digit number",
                   },
                 ]}
               >
@@ -1227,13 +1304,12 @@ const Employee = ({ officeData }) => {
                   onChange={EmployeeInputsOnchange}
                 />
               </Form.Item>
-
               {/* dateOfBirth*/}
               <Form.Item
                 name="dateOfBirth"
-                className="px-7"
+                className="px-3"
                 label="Date Of Birth"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <DatePicker
                   style={{ float: "right", width: filedWidth }}
@@ -1244,9 +1320,9 @@ const Employee = ({ officeData }) => {
               {/* maritalStatus */}
               <Form.Item
                 name="maritalStatus"
-                className="px-7"
+                className="px-3"
                 label="Marital Status"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Select
                   optionFilterProp="children"
@@ -1269,9 +1345,9 @@ const Employee = ({ officeData }) => {
               {/* dateOfJoin*/}
               <Form.Item
                 name="dateOfJoin"
-                className="px-7"
+                className="px-3"
                 label="Date Of Join"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <DatePicker
                   style={{ float: "right", width: filedWidth }}
@@ -1283,9 +1359,9 @@ const Employee = ({ officeData }) => {
               {/* bloodGroup */}
               <Form.Item
                 name="bloodGroup"
-                className="px-7"
+                className="px-3"
                 label="Blood Group"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Select
                   //mode="multiple"
@@ -1338,17 +1414,21 @@ const Employee = ({ officeData }) => {
                 />
               </Form.Item>
 
-              {/* alternateContactNo */}
-              <Form.Item
-                className="px-7"
-                style={{ marginBottom: 0, marginTop: 10 }}
+             
+              </Col>
+              <Col span={6}>
+
+               {/* alternateContactNo */}
+               <Form.Item
+                className="px-3"
+    
                 label="Alternate Contact No"
                 name="alternateContactNo"
                 rules={[
                   { message: "Please enter your mobile number" },
                   {
                     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    message: "Please enter a valid 10-digit mobile number",
+                    message: "Enter 10-digit number",
                   },
                 ]}
               >
@@ -1363,9 +1443,9 @@ const Employee = ({ officeData }) => {
               {/* contactPersonName */}
               <Form.Item
                 name="contactPersonName"
-                className="px-7"
+                className="px-3"
                 label="Contact Person Name"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Input
                   style={{ float: "right", width: filedWidth }}
@@ -1378,9 +1458,9 @@ const Employee = ({ officeData }) => {
               {/* Relationship */}
               <Form.Item
                 name="relationship"
-                className="px-7"
+                className="px-3"
                 label="Relationship"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Select
                   optionFilterProp="children"
@@ -1476,9 +1556,9 @@ const Employee = ({ officeData }) => {
               {/* officeLocationId */}
               <Form.Item
                 name="officeLocationId"
-                className="px-7"
+                className="px-3"
                 label="Office Location"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Select
                   optionFilterProp="children"
@@ -1493,9 +1573,9 @@ const Employee = ({ officeData }) => {
               {/* departmentId */}
               <Form.Item
                 name="departmentId"
-                className="px-7"
+                className="px-3"
                 label="Department"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Select
                   optionFilterProp="children"
@@ -1507,12 +1587,15 @@ const Employee = ({ officeData }) => {
                 />
               </Form.Item>
 
-              {/* Roll Detail */}
-              <Form.Item
+             
+              </Col>
+               <Col span={6}>
+                {/* Roll Detail */}
+               <Form.Item
                 name="Role"
-                className="px-7"
+                className="px-3"
                 label="Role"
-                style={{ marginBottom: 0, marginTop: 10 }}
+    
               >
                 <Select
                   optionFilterProp="children"
@@ -1523,6 +1606,8 @@ const Employee = ({ officeData }) => {
                   value={RoleValue.roleId}
                 />
               </Form.Item>
+               </Col>
+              </Row>
             </Form>
           </section>
         ) : processbar.team === "process" ? (
