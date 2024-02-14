@@ -176,7 +176,7 @@ const Employee = ({ officeData }) => {
   const { role } = useSelector((state) => state.role);
   const { office } = useSelector((state) => state.office);
   const { department } = useSelector((state) => state.department);
-  // const { leaderemployee } = useSelector((state) => state.leaderemployee);
+  const { leaderemployee } = useSelector((state) => state.leaderemployee);
   const { roledetail } = useSelector((state) => state.roledetail);
   const { address } = useSelector((state) => state.address);
   const {account} = useSelector(state => state.account)
@@ -361,12 +361,12 @@ const Employee = ({ officeData }) => {
       await RoleDetailsFilter.length === 0
         ? null
         : RoleDetailsFilter[0];
-    // //team
-    // const TeamFilter = await leaderemployee.filter(
-    //   (leader) => leader.employeeId === data.key
-    // );
-    // const TeamData = (await TeamFilter.length) === 0 ? null : TeamFilter[0];
-    //address
+    //team
+    const TeamFilter = await leaderemployee.filter(
+      (leader) => leader.employeeId === data.key
+    );
+    const TeamData = (await TeamFilter.length) === 0 ? null : TeamFilter[0];
+    // address
     const AddressFilter = await address.filter(
       (add) => add.employeeId === data.key
     );
@@ -438,18 +438,18 @@ const Employee = ({ officeData }) => {
       modifiedBy:RoleDetailsData === null ? null : RoleDetailsData.modifiedBy
     });
 
-    // //team
-    // await setTeamFData({
-    //   id:TeamData === null ? null : TeamData.id,
-    //   employeeId:TeamData === null ? null : TeamData.employeeId ,
-    //   leaderId: TeamData === null ? null : TeamData.leaderId,
-    //   hrManagerId: TeamData === null ? null : TeamData.hrManagerId,
-    //   isdeleted: false,
-    //   createdDate:TeamData === null ? null : TeamData.createdDate,
-    //   createdBy:TeamData === null ? null : TeamData.createdBy,
-    //   modifiedDate:formattedDate,
-    //   modifiedBy:TeamData === null ? null : TeamData.modifiedBy
-    // });
+    //team
+    await setTeamFData({
+      id:TeamData === null ? null : TeamData.id,
+      employeeId:TeamData === null ? null : TeamData.employeeId ,
+      leaderId: TeamData === null ? null : TeamData.leaderId,
+      hrManagerId: TeamData === null ? null : TeamData.hrManagerId,
+      isdeleted: false,
+      createdDate:TeamData === null ? null : TeamData.createdDate,
+      createdBy:TeamData === null ? null : TeamData.createdBy,
+      modifiedDate:formattedDate,
+      modifiedBy:TeamData === null ? null : TeamData.modifiedBy
+    });
 
     //address
     await setPermanetFAdd({
