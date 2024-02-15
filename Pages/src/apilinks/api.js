@@ -14,5 +14,7 @@ export const ApiLink = {
     employeeleave:"https://localhost:7129/api/EmployeeHoliday",
     productsDetail:"https://localhost:7129/api/ProductsDetail",
     productstoragelocation:"https://localhost:7129/api/ProductStorageLocation",
+    login:"https://localhost:7129/api/Login",
+    loginauth:"https://localhost:7129/api/Login/login"
   };
   

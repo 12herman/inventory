@@ -1,5 +1,5 @@
 import React, { useState, useEffect,} from "react";
-import { Result, Button,Spin } from "antd";
+import { Result, Button,Spin,Form,Tag } from "antd";
 import { LoadingOutlined } from '@ant-design/icons';
 import { useDispatch } from "react-redux";
 import '../css/finishform.css'
@@ -10,7 +10,7 @@ import { postaccount } from "../redux/slices/accountdetailsSlice";
 import { postleaderemployee } from "../redux/slices/leaderEmployeeSlice";
 
 
-const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData,modelclose,newempid,loadings,EditPencilState})=>{
+const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData,modelclose,newempid,loadings,EditPencilState,DisplayLogin})=>{
 
   // const dispatch = useDispatch();
   // const [loading, setLoading] = useState(true);
@@ -44,8 +44,7 @@ const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData
 //   }, []);
 
   return (
-    <div className="h-[70.022vh] flex justify-center items-center">
-
+    <div className=" flex justify-center items-center h-[59.9vh]">
     {loadings === true 
           ?  <Spin indicator={<LoadingOutlined style={{ fontSize: 24}} spin/> }/> 
           : <Result
@@ -56,7 +55,11 @@ const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData
                 <p className="text-center">
                 {EditPencilState === false ? "New employee is created successfully.": "Employee Updated successfully."}  
                 </p>
-                <p className="text-center">Employee Id: {newempid}</p>
+                {EditPencilState === false ? <>
+                   Username: <span className="text-green-600">{DisplayLogin.userName}</span> <br/>
+                   Password: <span className="text-blue-500">{DisplayLogin.password}</span>
+                </> : ""}
+                <p className="text-center">Employee Id:<span className="text-black">{newempid}</span> </p>
               </span>
             }
             extra={[
@@ -64,8 +67,8 @@ const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData
                 Finish
               </Button>,
             ]}
-          />}
-         
+          /> }
+        
          
         </div>
   );

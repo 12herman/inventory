@@ -93,16 +93,16 @@ const AccountForm = forwardRef((props, ref) => {
 
  
   return (
-    <section>
-      <div className="mt-5 flex justify-center items-center">
+    <section className="h-[60vh]">
+      {/* <div className=" mt-2 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faLandmark} />
-      </div>
+      </div> */}
 
-      <Form form={form} className="h-[60.9vh] mt-5 px-5">
+      <Form layout="vertical" form={form} className=" mt-5 px-5">
         {/* bankname */}
         <Form.Item label="Bank Name" style={{ marginBottom: 0, marginTop: 10 }}>
           <Input
-            style={{ float: "right", width: widthSize }}
+            // style={{ float: "right", width: widthSize }}
             placeholder="bank name"
             name="bankName"
             value={FormAccF.bankName}
@@ -115,7 +115,7 @@ const AccountForm = forwardRef((props, ref) => {
           style={{ marginBottom: 0, marginTop: 10 }}
         >
           <Input
-            style={{ float: "right", width: widthSize }}
+            // style={{ float: "right", width: widthSize }}
             placeholder="branch name"
             name="branchName"
             value={FormAccF.branchName}
@@ -125,7 +125,7 @@ const AccountForm = forwardRef((props, ref) => {
         {/* BankLocation */}
         <Form.Item label="Location" style={{ marginBottom: 0, marginTop: 10 }}>
           <Input
-            style={{ float: "right", width: widthSize }}
+            // style={{ float: "right", width: widthSize }}
             placeholder="bank location"
             name="bankLocation"
             value={FormAccF.bankLocation}
@@ -148,7 +148,7 @@ const AccountForm = forwardRef((props, ref) => {
           style={{ marginBottom: 0, marginTop: 10 }}
         >
           <Input
-            style={{ float: "right", width: widthSize }}
+            // style={{ float: "right", width: widthSize }}
             placeholder="account no"
             name="accountNumber"
             value={FormAccF.accountNumber}
@@ -159,7 +159,7 @@ const AccountForm = forwardRef((props, ref) => {
         {/* Ifsc */}
         <Form.Item label="IFSC" style={{ marginBottom: 10, marginTop: 10 }}>
           <Input
-            style={{ float: "right", width: widthSize }}
+            // style={{ float: "right", width: widthSize }}
             placeholder="ifsc"
             name="ifsc"
             value={FormAccF.ifsc}

@@ -1,9 +1,10 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { Form, Select, Switch, message } from "antd";
+import { Form, Select, Switch, message,Row,Col,Tag } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 
-const filedWidth = "760px";
+
+const filedWidth = "100%";
 const TeamForm = forwardRef((props, ref) => {
   //props data
   const {
@@ -94,21 +95,27 @@ const TeamForm = forwardRef((props, ref) => {
   });
 
   return (
-    <section>
-      <div className="mt-5 flex justify-center items-center">
+    <section className="h-[59.9vh]">
+      <div className="mt-2 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faPeopleGroup} />
       </div>
-      <Form className="h-[60.9vh] mt-5">
-        <Form.Item
+
+      <Form className=" mt-5 " layout="vertical">
+        <span className="flex mb-2 justify-center items-center">
+        <h2 className="px-7 text-2xl"><Tag color="blue">{EmployeeName}</Tag></h2>
+        {/* <Form.Item
           style={{ marginBottom: 0, marginTop: 10 }}
-          className="px-7"
+           className="px-7"
           label="Employee Name"
         >
-          <h2 className={`px-5 w-[${filedWidth}]`}>{EmployeeName}</h2>
-        </Form.Item>
+          <h2 >{EmployeeName}</h2>
+        </Form.Item> */}
+        </span>
         {/* <Form.Item style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="All employee List">
           <Switch className={`mx-5 w-[${filedWidth}]`} size="small" checked={EnableEmp} style={{ background: `${EnableEmp === false ? "rgba(0, 0, 0, 0.45)" : "#4096ff"}` }} trackBgDisabled onClick={enableAllemp} onChange={enableAllemp} />
         </Form.Item> */}
+        <Row>
+        <Col span={12}>
         <Form.Item
           name="leader"
           style={{ marginBottom: 0, marginTop: 10 }}
@@ -120,12 +127,15 @@ const TeamForm = forwardRef((props, ref) => {
             onChange={leaderIdOnchange}
             showSearch
             placeholder="select Leader"
-            style={{ float: "right", width: filedWidth }}
+            // style={{ float: "right", width: filedWidth }}
             options={EnableEmp === false ? leaderOption : empOptions}
             value={TeamFData.leaderId}
             defaultValue={leadername}
           />
         </Form.Item>
+        </Col>
+
+        <Col span={12}>
         <Form.Item
           name="hr"
           style={{ marginBottom: 0, marginTop: 15 }}
@@ -137,11 +147,13 @@ const TeamForm = forwardRef((props, ref) => {
             onChange={hridOnchange}
             showSearch
             placeholder="select HR"
-            style={{ float: "right", width: filedWidth }}
+            // style={{ float: "right", width: filedWidth }}
             options={EnableEmp === false ? hrOption : empOptions}
             defaultValue={hrname}
           />
         </Form.Item>
+        </Col>
+        </Row>
       </Form>
     </section>
   );

@@ -22,6 +22,7 @@ import {
 import CountUp from "react-countup";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteEmployee,
   getEmployees,
   postEmployees,
   putEmployees,
@@ -62,28 +63,89 @@ import {
   postleaderemployee,
   putleaderemployee,
 } from "../redux/slices/leaderEmployeeSlice";
-import { getAddress, postAddress, putAddress } from "../redux/slices/addressSlice";
-import { getaccount, postaccount, putaccount } from "../redux/slices/accountdetailsSlice";
+import {
+  getAddress,
+  postAddress,
+  putAddress,
+} from "../redux/slices/addressSlice";
+import {
+  getaccount,
+  postaccount,
+  putaccount,
+} from "../redux/slices/accountdetailsSlice";
 import moment, { months } from "moment";
-import dayjs from 'dayjs';
+import '../css/employee.css'
+import dayjs from "dayjs";
+import bcrpt from "bcryptjs";
+// import bcrpt from "bcrypt";
+import {encrypt,decrypt} from "n-krypta"
+import { GetLogin, PostLogin } from "../redux/slices/loginSlice";
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
 const { Option } = Select;
 const currentDate = new Date();
-    const formattedDate = currentDate.toISOString().slice(0, 19);
+const formattedDate = currentDate.toISOString().slice(0, 19);
 const Employee = ({ officeData }) => {
   const [form] = Form.useForm();
   //Emil validation
   function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  }
+  };
   //Mobile number validation
   function validateMobileNumber(mobileNumber) {
     const mobileNumberRegex = /^\d{10}$/;
     return mobileNumberRegex.test(mobileNumber);
-  }
+  };
+ //password readom genorator human readable
+ function generateRandomPassword() {
+  const charset ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+  // const charset ="0123456789";
+  let password = "";
+  for (let i = 0; i < 4; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset.charAt(randomIndex);
+  }; 
+  // const HashedPassword = bcrpt.hashSync(password, 10); 
+  const HashedPassword = bcrpt.hashSync(password, 10); 
+  console.log(password);
+  console.log(HashedPassword);
+  return {password,HashedPassword}
+}
+const [DisplayLogin,setDisplayLogin] = useState({
+  userName:null,
+  password:null, 
+});
+async function generateRandomUsername (firstName, lastName,id)
+        {
+          const randomNumbers =await Math.floor(100 + Math.random() * 900);
+          const username = await `${firstName}${randomNumbers}`;
+          const {password,HashedPassword} = generateRandomPassword();
+      
+          const userNameFl = await login.filter(user => user.userName === username);
+          const sameName = await userNameFl && userNameFl[0] ? userNameFl[0].userName : '';
+      
+          if(sameName === username){
+              generateRandomUsername(firstName, lastName,id);
+              console.log("2ed loop");  
+          }
+          else{
+            setDisplayLogin({userName:username,password:password});
+            // await window.localStorage.setItem(
+            //   "login",
+            //   JSON.stringify({ password, HashedPassword })
+            // );
+            return ({
+              employeeId:id,
+              userName: username,
+              password:HashedPassword,
+              isDeleted:false,
+            });
+          }
+        };
+        // Vasan71680
+        // 8825
 
   const [searchText, setSearchText] = useState("");
   const columns = [
@@ -126,50 +188,50 @@ const Employee = ({ officeData }) => {
       render: (_, { position }) => (
         //console.log(position)
         <>
-      {Array.isArray( position) ? (
-        position.map( ( tag) => {
-          let color;
+          {Array.isArray(position) ? (
+            position.map((tag) => {
+              let color;
 
-          switch (tag) {
-            case "IT":
-              color = "green";
-              break;
-              case "employee":
-              color = "blue";
-              break;
-            case "Not Assigned":
-              color = "red";
-              break;
-              case "hr":
-              color = "green";
-              break;
-              case "ceo":
-              color = "purple";
-              break;
-              case "Leader":
-              color = "orange";
-              break;
-              case "BIM":
-              color = "yellow";
-              break;
-            default:
-              color = "blue"; // Default color for other tags
-              break;
-          }
+              switch (tag) {
+                case "IT":
+                  color = "green";
+                  break;
+                case "employee":
+                  color = "blue";
+                  break;
+                case "Not Assigned":
+                  color = "red";
+                  break;
+                case "hr":
+                  color = "green";
+                  break;
+                case "ceo":
+                  color = "purple";
+                  break;
+                case "Leader":
+                  color = "orange";
+                  break;
+                case "BIM":
+                  color = "yellow";
+                  break;
+                default:
+                  color = "blue"; // Default color for other tags
+                  break;
+              }
 
-          return (
-            <Tag color={color} key={tag}>
-              {tag}
-            </Tag>
-          );
-        })
-      ) : (
-        <Tag color="red">Not Assigned</Tag>
-      )}
-    </>
+              return (
+                <Tag color={color} key={tag}>
+                  {tag}
+                </Tag>
+              );
+            })
+          ) : (
+            <Tag color="red">Not Assigned</Tag>
+          )}
+        </>
 
         // <>
-        //   { 
+        //   {
         //     position.map(( tag) => {
         //     let color = tag.length > 7 ? "geekblue" : "green";
         //     if (tag === "loser") {
@@ -228,14 +290,14 @@ const Employee = ({ officeData }) => {
   const { leaderemployee } = useSelector((state) => state.leaderemployee);
   const { roledetail } = useSelector((state) => state.roledetail);
   const { address } = useSelector((state) => state.address);
-  const {account} = useSelector(state => state.account)
-
+  const { account } = useSelector((state) => state.account);
+  const {login} = useSelector((state)=> state.login);
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
   const [empCounts, setEmpCounts] = useState();
   const [tableData, setTableData] = useState([]);
 
- console.log(roledetailData);
+
 
   function DataLoading() {
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
@@ -244,9 +306,10 @@ const Employee = ({ officeData }) => {
     });
     if (officeNames.length === 1) {
       var filterOneOffice = empData.filter(
-        (off) => off.officeLocationId.officename === officeNames[0]
+        (off) => off.officeLocationId.officename === officeNames[0] 
       );
-      setEmpCounts(filterOneOffice.length);
+      const counts = filterOneOffice.filter(data => data.isDeleted === false).length
+      setEmpCounts(counts);
       setTableData(filterOneOffice);
     } else {
       setEmpCounts(empData.length);
@@ -318,9 +381,7 @@ const Employee = ({ officeData }) => {
   const handleCancel = () => {
     Modal.confirm({
       icon: null,
-      content: <div >
-        Are you sure to exit this process?
-      </div>,
+      content: <div>Are you sure to exit this process?</div>,
       onCancel: () => {},
       onOk: () => setModelOpen(false),
       okButtonProps: { type: "default", danger: true }, // Prevent the default Modal onCancel behavior
@@ -334,7 +395,6 @@ const Employee = ({ officeData }) => {
   // post methods
   // 1.information
   const informationPostBtn = async () => {
-  
     //check all empty fields
     if (
       !EmployeeInput.firstName.trim() ||
@@ -375,31 +435,34 @@ const Employee = ({ officeData }) => {
     }
     // employee && role details post method
     else {
-       
-       if(validateEmail(EmployeeInput.officeEmail) === false || EmployeeInput.officeEmail ===""){
-        setEmployeeInput((pre)=> ({ ...pre,officeEmail:null}));
-       };
-       infoPostProcessBar();
+      if (
+        validateEmail(EmployeeInput.officeEmail) === false ||
+        EmployeeInput.officeEmail === ""
+      ) {
+        setEmployeeInput((pre) => ({ ...pre, officeEmail: null }));
+      }
+      infoPostProcessBar();
     }
     //infoPostProcessBar();
     // setNewempId(3);
   };
 
-  
   // Table Delete Icon
-  const DeleteIcon = (data) => {
+  const DeleteIcon = async(data) => {
     console.log(data.key);
+    await dispatch(deleteEmployee(data.key));
+    await setFullComponentLoading(!FullComponentLoading);
   };
 
   // Table Edit Icon
   const [EditPencilData, setEditPencilData] = useState([]);
   const [EditPencilState, setEditPencilState] = useState(false);
-  
+
   const EditPencilIcon = async (data) => {
     await saveBtnOn();
-   await ModelOpen();
-   await setAddressCheck(false);
-   await setEditPencilState(true);
+    await ModelOpen();
+    await setAddressCheck(false);
+    await setEditPencilState(true);
     //employee
     const EmpFilter = await employee.filter((emp) => emp.id === data.key);
     const EData = (await EmpFilter) && EmpFilter[0] ? EmpFilter[0] : [];
@@ -408,9 +471,7 @@ const Employee = ({ officeData }) => {
       (roleDetails) => roleDetails.employeeId === data.key
     );
     const RoleDetailsData =
-      await RoleDetailsFilter.length === 0
-        ? null
-        : RoleDetailsFilter[0];
+      (await RoleDetailsFilter.length) === 0 ? null : RoleDetailsFilter[0];
     //team
     const TeamFilter = await leaderemployee.filter(
       (leader) => leader.employeeId === data.key
@@ -420,15 +481,27 @@ const Employee = ({ officeData }) => {
     const AddressFilter = await address.filter(
       (add) => add.employeeId === data.key
     );
-    const AddressData =await AddressFilter.length === 0 ? null : AddressFilter;
-    const PermanetFilter = await AddressData ===null ? null:await AddressData.filter((per) => per.type === 2);
-    const PermanetData =await PermanetFilter === null ? null : PermanetFilter[0];
-    const CurrentFilter = await AddressData ===null ? null: await AddressData.filter((per) => per.type === 1);
-    const CurrentData =await CurrentFilter ===null ? null : CurrentFilter[0];
+    const AddressData =
+      (await AddressFilter.length) === 0 ? null : AddressFilter;
+    const PermanetFilter =
+      (await AddressData) === null
+        ? null
+        : await AddressData.filter((per) => per.type === 2);
+    const PermanetData =
+      (await PermanetFilter) === null ? null : PermanetFilter[0];
+    const CurrentFilter =
+      (await AddressData) === null
+        ? null
+        : await AddressData.filter((per) => per.type === 1);
+    const CurrentData =
+      (await CurrentFilter) === null ? null : CurrentFilter[0];
     //account
-    const AccountFilter = await account.filter(acc => acc.employeeId === data.key);
-    const AccountData = await AccountFilter.length === 0 ? null : AccountFilter[0];
-    
+    const AccountFilter = await account.filter(
+      (acc) => acc.employeeId === data.key
+    );
+    const AccountData =
+      (await AccountFilter.length) === 0 ? null : AccountFilter[0];
+
     //set method
     //employee details && team
     await setEditPencilData(EData);
@@ -453,8 +526,8 @@ const Employee = ({ officeData }) => {
       isDeleted: false,
       createdDate: EData.createdDate,
       createdBy: EData.createdBy,
-      modifiedDate:formattedDate,
-      modifiedBy: EData.modifiedBy
+      modifiedDate: formattedDate,
+      modifiedBy: EData.modifiedBy,
     });
     await form.setFieldsValue({
       firstName: EData.firstName,
@@ -475,38 +548,39 @@ const Employee = ({ officeData }) => {
       officeLocationId: EData.officeLocationId.id,
       departmentId: EData.departmentId.id,
       isDeleted: false,
-      Role:RoleDetailsData===null?null: RoleDetailsData.roleId,
+      Role: RoleDetailsData === null ? null : RoleDetailsData.roleId,
     });
     console.log();
     //role details
     setRoleValue({
       id: RoleDetailsData === null ? null : RoleDetailsData.id,
-      employeeId:RoleDetailsData === null ? null : RoleDetailsData.employeeId,
-      roleId:RoleDetailsData === null ? null : RoleDetailsData.roleId,
+      employeeId: RoleDetailsData === null ? null : RoleDetailsData.employeeId,
+      roleId: RoleDetailsData === null ? null : RoleDetailsData.roleId,
       isdeleted: false,
-      createdDate:RoleDetailsData === null ? null : RoleDetailsData.createdDate,
-      createdBy:RoleDetailsData === null ? null : RoleDetailsData.createdBy,
-      modifiedDate:formattedDate,
-      modifiedBy:RoleDetailsData === null ? null : RoleDetailsData.modifiedBy
+      createdDate:
+        RoleDetailsData === null ? null : RoleDetailsData.createdDate,
+      createdBy: RoleDetailsData === null ? null : RoleDetailsData.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: RoleDetailsData === null ? null : RoleDetailsData.modifiedBy,
     });
 
     //team
     await setTeamFData({
-      id:TeamData === null ? null : TeamData.id,
-      employeeId:TeamData === null ? null : TeamData.employeeId ,
+      id: TeamData === null ? null : TeamData.id,
+      employeeId: TeamData === null ? null : TeamData.employeeId,
       leaderId: TeamData === null ? null : TeamData.leaderId,
       hrManagerId: TeamData === null ? null : TeamData.hrManagerId,
       isdeleted: false,
-      createdDate:TeamData === null ? null : TeamData.createdDate,
-      createdBy:TeamData === null ? null : TeamData.createdBy,
-      modifiedDate:formattedDate,
-      modifiedBy:TeamData === null ? null : TeamData.modifiedBy
+      createdDate: TeamData === null ? null : TeamData.createdDate,
+      createdBy: TeamData === null ? null : TeamData.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: TeamData === null ? null : TeamData.modifiedBy,
     });
 
     //address
     await setPermanetFAdd({
       id: PermanetData === null ? null : PermanetData.id,
-      employeeId:PermanetData === null ? null : PermanetData.employeeId,
+      employeeId: PermanetData === null ? null : PermanetData.employeeId,
       address1: PermanetData === null ? null : PermanetData.address1,
       city: PermanetData === null ? null : PermanetData.city,
       state: PermanetData === null ? null : PermanetData.state,
@@ -514,14 +588,14 @@ const Employee = ({ officeData }) => {
       postalCode: PermanetData === null ? null : PermanetData.postalCode,
       isdeleted: false,
       type: 2,
-      createdDate:PermanetData === null ? null : PermanetData.createdDate,
-      createdBy:PermanetData === null ? null : PermanetData.createdBy,
-      modifiedDate:formattedDate,
-      modifiedBy:PermanetData === null ? null : PermanetData.modifiedBy
+      createdDate: PermanetData === null ? null : PermanetData.createdDate,
+      createdBy: PermanetData === null ? null : PermanetData.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: PermanetData === null ? null : PermanetData.modifiedBy,
     });
     await setCurrentFAdd({
       id: CurrentData === null ? null : CurrentData.id,
-      employeeId:CurrentData === null ? null : CurrentData.employeeId,
+      employeeId: CurrentData === null ? null : CurrentData.employeeId,
       address1: CurrentData === null ? null : CurrentData.address1,
       city: CurrentData === null ? null : CurrentData.city,
       state: CurrentData === null ? null : CurrentData.state,
@@ -529,26 +603,26 @@ const Employee = ({ officeData }) => {
       postalCode: CurrentData === null ? null : CurrentData.postalCode,
       isdeleted: false,
       type: 1,
-      createdDate:CurrentData === null ? null : CurrentData.createdDate,
-      createdBy:CurrentData === null ? null : CurrentData.createdBy,
-      modifiedDate:formattedDate,
-      modifiedBy:CurrentData === null ? null : CurrentData.modifiedBy
+      createdDate: CurrentData === null ? null : CurrentData.createdDate,
+      createdBy: CurrentData === null ? null : CurrentData.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: CurrentData === null ? null : CurrentData.modifiedBy,
     });
 
     //account
     await setAccF({
-    id : AccountData === null ? null : AccountData.accountId,
-    employeeId:AccountData === null ? null : AccountData.employeeId,  
-    bankName: AccountData === null ? null : AccountData.bankName,
-    branchName: AccountData === null ? null : AccountData.branchName,
-    accountNumber: AccountData === null ? null : AccountData.accountNumber,
-    bankLocation: AccountData === null ? null : AccountData.bankLocation,
-    ifsc: AccountData === null ? null : AccountData.ifsc,
-    isdeleted: false,
-    createdDate:AccountData === null ? null : AccountData.createdDate,
-    createdBy:AccountData === null ? null : AccountData.createdBy,
-    modifiedDate:formattedDate,
-    modifiedBy:AccountData === null ? null : AccountData.modifiedBy
+      id: AccountData === null ? null : AccountData.accountId,
+      employeeId: AccountData === null ? null : AccountData.employeeId,
+      bankName: AccountData === null ? null : AccountData.bankName,
+      branchName: AccountData === null ? null : AccountData.branchName,
+      accountNumber: AccountData === null ? null : AccountData.accountNumber,
+      bankLocation: AccountData === null ? null : AccountData.bankLocation,
+      ifsc: AccountData === null ? null : AccountData.ifsc,
+      isdeleted: false,
+      createdDate: AccountData === null ? null : AccountData.createdDate,
+      createdBy: AccountData === null ? null : AccountData.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: AccountData === null ? null : AccountData.modifiedBy,
     });
   };
 
@@ -686,8 +760,8 @@ const Employee = ({ officeData }) => {
 
   // Employee Add|+| Btn
   const AddEmployeeBtn = () => {
-    setNewempId('');
-    setEditPencilState(false);//post method
+    setNewempId("");
+    setEditPencilState(false); //post method
     ClearEmployeeInputs(); //clear employee
     roleClear(); //clear role
     TeamFDataClear(); //clear team
@@ -878,17 +952,15 @@ const Employee = ({ officeData }) => {
     isdeleted: false,
   });
 
-
   //employee leave (employee holiday)
-  const [EmployeeLeave,setEmployeeLeave] = useState({
-    employeeId:null,
-    sickLeave:null,
-    casualLeave:null,
-    total:null,
-    isDeleted:false,
-    createdBy:null,
+  const [EmployeeLeave, setEmployeeLeave] = useState({
+    employeeId: null,
+    sickLeave: null,
+    casualLeave: null,
+    total: null,
+    isDeleted: false,
+    createdBy: null,
   });
-
 
   const UpdateAccountF = (NewData) => {
     setAccF((PreData) => ({ ...PreData, ...NewData }));
@@ -904,60 +976,76 @@ const Employee = ({ officeData }) => {
     });
   };
 
+  const [LoginData,setLoginData] = useState({
+    userName:'',
+    password:'',
+    isDeleted:false,
+    // createdDate:'',
+    // createdBy:'',
+    // modifiedDate:'',
+    // modifiedBy:''
+  });
   const [loadings, setLoading] = useState(true);
 
   const newEmployee = async () => {
-    try{
-    const employeeDatas = await dispatch(postEmployees(EmployeeInput));
+    try {
+      const employeeDatas = await dispatch(postEmployees(EmployeeInput));
+      
+      if (employeeDatas && employeeDatas.payload.id) {
+        setNewempId(employeeDatas.payload.id);
+        
+       const LoginDatas = await generateRandomUsername(EmployeeInput.firstName,EmployeeInput.lastName,employeeDatas.payload.id);
 
-    if (employeeDatas && employeeDatas.payload.id) {
-      setNewempId(employeeDatas.payload.id);
-      console.log({ employeeId: employeeDatas.payload.id });
-      //role creation
-      await dispatch(
-        postRoleDetail({ employeeId: employeeDatas.payload.id, ...RoleValue })
-      );
-      //leaderemployee creation
-      await dispatch(
-        postleaderemployee({
-          employeeId: employeeDatas.payload.id,
-          ...TeamFData,
-        })
-      );
-      // address creation
-      await dispatch(
-        postAddress({ employeeId: employeeDatas.payload.id, ...CureentFAdd })
-      );
-      await dispatch(
-        postAddress({ employeeId: employeeDatas.payload.id, ...PermanetFAdd })
-      );
-      //account creation
-      await dispatch(
-        postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
-      );
-      await dispatch(getRoleDetail());
-      await dispatch(getleaderemployee());
-      await dispatch(getAddress());
-      await dispatch(getaccount());
-      await setLoading(false);
-      await dispatch(getEmployees());
-    }
-    }
-    catch(error){
+        // console.log({ employeeId: employeeDatas.payload.id });
+        //role creation
+        await dispatch(
+          postRoleDetail({ employeeId: employeeDatas.payload.id, ...RoleValue })
+        );
+        //leaderemployee creation
+        await dispatch(
+          postleaderemployee({
+            employeeId: employeeDatas.payload.id,
+            ...TeamFData,
+          })
+        );
+        // address creation
+        await dispatch(
+          postAddress({ employeeId: employeeDatas.payload.id, ...CureentFAdd })
+        );
+        await dispatch(
+          postAddress({ employeeId: employeeDatas.payload.id, ...PermanetFAdd })
+        );
+        //account creation
+        await dispatch(
+          postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
+        );
+        
+        await dispatch(PostLogin(LoginDatas));
+
+        await dispatch(getRoleDetail());
+        await dispatch(getleaderemployee());
+        await dispatch(getAddress());
+        await dispatch(getaccount());
+        await setLoading(false);
+        await dispatch(getEmployees());
+        await setFullComponentLoading(!FullComponentLoading);
+      }
+    } catch (error) {
       console.error("Error creating new employee:", error);
     }
   };
 
   //put employee
-  const PutEmployee =async ()=>{
+  const [FullComponentLoading,setFullComponentLoading]= useState(false);
+  const PutEmployee = async () => {
     await dispatch(putEmployees(EmployeeInput)); //employee
     await dispatch(putRoleDetail(RoleValue)); //role
-    await dispatch(putleaderemployee(TeamFData));//leader employee
-    await dispatch(putAddress(CureentFAdd));//address1
-    await dispatch(putAddress(PermanetFAdd));//address2
-    await dispatch(putaccount(AccF));//account
+    await dispatch(putleaderemployee(TeamFData)); //leader employee
+    await dispatch(putAddress(CureentFAdd)); //address1
+    await dispatch(putAddress(PermanetFAdd)); //address2
+    await dispatch(putaccount(AccF)); //account
     await setLoading(false);
-    await dispatch(getEmployees());
+    setFullComponentLoading(!FullComponentLoading)
   };
 
   //initial reneder
@@ -969,32 +1057,31 @@ const Employee = ({ officeData }) => {
     dispatch(getRoleDetail());
     dispatch(getAddress());
     dispatch(getaccount());
-  }, [dispatch]);
+    dispatch(GetLogin());
+    // console.log("loading all");
+  }, [dispatch,loadings,FullComponentLoading]);
 
-
-  //table loading 
+  //table loading
   useEffect(() => {
     setRoledetailData(role);
     setEmpData(employee);
     DataLoading();
-  }, [employee, officeData, role]);
-
+  }, [employee, officeData, role,FullComponentLoading]);
 
   //form edit initial loading screen
-  const InitialFormEdit = ()=>{
+  const InitialFormEdit = () => {
     setProcessBar({
       info: "process",
       team: "wait",
       address: "wait",
       account: "wait",
       done: "wait",
-    })
+    });
   };
-  useEffect(()=>{
+  useEffect(() => {
     InitialFormEdit();
-  },[modelOpen]);
+  }, [modelOpen]);
 
-  
   return (
     <div>
       <Row gutter={[16, 16]} align="middle">
@@ -1039,7 +1126,11 @@ const Employee = ({ officeData }) => {
 
       <Modal
         title={[
-          <h2 className="text-center pt-2">{EditPencilState === false ? `Add New ${headingValue}` :`Edit Employee Details`}</h2>,
+          <h2 className="text-center pt-2">
+            {EditPencilState === false
+              ? `Add New ${headingValue}`
+              : `Edit Employee Details`}
+          </h2>,
           <Steps
             className="mt-3 px-[100px]"
             size="small"
@@ -1170,443 +1261,414 @@ const Employee = ({ officeData }) => {
       >
         {/* (i)Employee-Details-section */}
         {processbar.info === "process" ? (
-          <section>
-          <div className="mt-4 flex justify-center items-center">
+          <section className="mt-3 h-[59.9vh]">
+            {/* <div className="mt-4 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faInfoCircle} />
-      </div>
+      </div> */}
             {/* <h1 className='font-bold mt-2 text-center'>Employee Details</h1> */}
-            <Form form={form}  layout="vertical" className="mt-5">
-            <Row>
-            <Col span={6}>
-              {/* firstName */}
-              <Form.Item
-                name="firstName"
-                label="First Name"
-    
-                className="px-3"
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="first name"
-                  name="firstName"
-                  value={EmployeeInput.firstName}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
+            <Form form={form} layout="vertical " >
+              <Row>
+                <Col span={6}>
+                  {/* firstName */}
+                  <Form.Item
+                    name="firstName"
+                    label="First Name"
+                    className="px-3"
+                  >
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="first name"
+                      name="firstName"
+                      value={EmployeeInput.firstName}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
 
-              {/* lastName */}
-              <Form.Item
-                name="lastName"
-                label="Last Name"
-                className="px-3"
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="last name"
-                  name="lastName"
-                  value={EmployeeInput.lastName}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
+                  {/* lastName */}
+                  <Form.Item name="lastName" label="Last Name" className="px-3">
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="last name"
+                      name="lastName"
+                      value={EmployeeInput.lastName}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
 
-              {/* gender */}
-              <Form.Item
-                name="gender"
-                rules={[
-                  { message: "Please select your gender!", type: "string" },
-                ]}
-                label="Gender"
-    
-                className="px-3"
-              >
-                <Select
-                  optionFilterProp="children"
-                  placeholder="select gender"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={GengerDropDown}
-                  options={[
-                    {
-                      key: 1,
-                      value: "Male",
-                      label: "Male",
-                    },
-                    {
-                      key: 2,
-                      value: "Female",
-                      label: "Female",
-                    },
-                    {
-                      key: 3,
-                      value: "Other",
-                      label: "Other",
-                    },
-                  ]}
-                  value={EmployeeInput.gender}
-                />
-              </Form.Item>
+                  {/* gender */}
+                  <Form.Item
+                    name="gender"
+                    rules={[
+                      { message: "Please select your gender!", type: "string" },
+                    ]}
+                    label="Gender"
+                    className="px-3"
+                  >
+                    <Select
+                      optionFilterProp="children"
+                      placeholder="select gender"
+                      style={{ width: filedWidth }}
+                      onChange={GengerDropDown}
+                      options={[
+                        {
+                          key: 1,
+                          value: "Male",
+                          label: "Male",
+                        },
+                        {
+                          key: 2,
+                          value: "Female",
+                          label: "Female",
+                        },
+                        {
+                          key: 3,
+                          value: "Other",
+                          label: "Other",
+                        },
+                      ]}
+                      value={EmployeeInput.gender}
+                    />
+                  </Form.Item>
 
-              {/* personalEmail */}
-              <Form.Item
-                rules={[{ type: "email" }]}
-                className="px-3"
-                label="Personal Email"
-                name="personalEmail"
-    
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="personal email"
-                  name="personalEmail"
-                  value={EmployeeInput.personalEmail}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
+                  {/* personalEmail */}
+                  <Form.Item
+                    rules={[{ type: "email" }]}
+                    className="px-3"
+                    label="Personal Email"
+                    name="personalEmail"
+                  >
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="personal email"
+                      name="personalEmail"
+                      value={EmployeeInput.personalEmail}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
 
-              {/* officeEmail */}
-              <Form.Item
-                rules={[{ type: "email" }]}
-                className="px-3"
-                name="officeEmail"
-                label="Office Email (optional)"
-    
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="office email"
-                  name="officeEmail"
-                  value={EmployeeInput.officeEmail}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
-</Col>
-              
-        
-        <Col span={6}>
-        {/* mobileNumber */}
-        <Form.Item
-                className="px-3"
-    
-                label="Mobile Number"
-                name="mobileNumber"
-                rules={[
-                  { message: "Please enter your mobile number" },
-                  {
-                    pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    message: "Enter 10-digit number",
-                  },
-                ]}
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="Mobile Number"
-                  name="mobileNumber"
-                  value={EmployeeInput.mobileNumber}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
-              {/* dateOfBirth*/}
-              <Form.Item
-                name="dateOfBirth"
-                className="px-3"
-                label="Date Of Birth"
-    
-              >
-                <DatePicker
-                  style={{ float: "right", width: filedWidth }}
-                  format={dateFormat}
-                  onChange={DateOfBirthValue}
-                />
-              </Form.Item>
-              {/* maritalStatus */}
-              <Form.Item
-                name="maritalStatus"
-                className="px-3"
-                label="Marital Status"
-    
-              >
-                <Select
-                  optionFilterProp="children"
-                  placeholder="select marital status"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={MarriedDropDown}
-                  options={[
-                    {
-                      value: "Married",
-                      label: "Married",
-                    },
-                    {
-                      value: "Unmarried",
-                      label: "Unmarried",
-                    },
-                  ]}
-                  value={EmployeeInput.maritalStatus}
-                />
-              </Form.Item>
-              {/* dateOfJoin*/}
-              <Form.Item
-                name="dateOfJoin"
-                className="px-3"
-                label="Date Of Join"
-    
-              >
-                <DatePicker
-                  style={{ float: "right", width: filedWidth }}
-                  format={dateFormat}
-                  onChange={DateOfJoinValue}
-                />
-              </Form.Item>
+                  {/* officeEmail */}
+                  <Form.Item
+                    rules={[{ type: "email" }]}
+                    className="px-3"
+                    name="officeEmail"
+                    label="Office Email (optional)"
+                  >
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="office email"
+                      name="officeEmail"
+                      value={EmployeeInput.officeEmail}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
+                </Col>
 
-              {/* bloodGroup */}
-              <Form.Item
-                name="bloodGroup"
-                className="px-3"
-                label="Blood Group"
-    
-              >
-                <Select
-                  //mode="multiple"
-                  //size={size}
-                  placeholder="select blood group"
-                  onChange={BloodGroupValue}
-                  style={{ float: "right", width: filedWidth }}
-                  options={[
-                    {
-                      key: 1,
-                      value: "A+",
-                      label: "A+",
-                    },
-                    {
-                      key: 2,
-                      value: "A-",
-                      label: "A-",
-                    },
-                    {
-                      key: 3,
-                      value: "B+",
-                      label: "B+",
-                    },
-                    {
-                      key: 4,
-                      value: "B-",
-                      label: "B-",
-                    },
-                    {
-                      key: 5,
-                      value: "O+",
-                      label: "O+",
-                    },
-                    {
-                      key: 6,
-                      value: "O-",
-                      label: "O-",
-                    },
-                    {
-                      key: 7,
-                      value: "AB+",
-                      label: "AB+",
-                    },
-                    {
-                      key: 8,
-                      value: "AB-",
-                      label: "AB-",
-                    },
-                  ]}
-                />
-              </Form.Item>
+                <Col span={6}>
+                  {/* mobileNumber */}
+                  <Form.Item
+                    className="px-3"
+                    label="Mobile Number"
+                    name="mobileNumber"
+                    rules={[
+                      { message: "Please enter your mobile number" },
+                      {
+                        pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
+                        message: "Enter 10-digit number",
+                      },
+                    ]}
+                  >
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="Mobile Number"
+                      name="mobileNumber"
+                      value={EmployeeInput.mobileNumber}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
+                  {/* dateOfBirth*/}
+                  <Form.Item
+                    name="dateOfBirth"
+                    className="px-3"
+                    label="Date Of Birth"
+                  >
+                    <DatePicker
+                      style={{ width: filedWidth }}
+                      format={dateFormat}
+                      onChange={DateOfBirthValue}
+                    />
+                  </Form.Item>
+                  {/* maritalStatus */}
+                  <Form.Item
+                    name="maritalStatus"
+                    className="px-3"
+                    label="Marital Status"
+                  >
+                    <Select
+                      optionFilterProp="children"
+                      placeholder="select marital status"
+                      style={{ width: filedWidth }}
+                      onChange={MarriedDropDown}
+                      options={[
+                        {
+                          value: "Married",
+                          label: "Married",
+                        },
+                        {
+                          value: "Unmarried",
+                          label: "Unmarried",
+                        },
+                      ]}
+                      value={EmployeeInput.maritalStatus}
+                    />
+                  </Form.Item>
+                  {/* dateOfJoin*/}
+                  <Form.Item
+                    name="dateOfJoin"
+                    className="px-3"
+                    label="Date Of Join"
+                  >
+                    <DatePicker
+                      style={{ width: filedWidth }}
+                      format={dateFormat}
+                      onChange={DateOfJoinValue}
+                    />
+                  </Form.Item>
 
-             
-              </Col>
-              <Col span={6}>
+                  {/* bloodGroup */}
+                  <Form.Item
+                    name="bloodGroup"
+                    className="px-3"
+                    label="Blood Group"
+                  >
+                    <Select
+                      //mode="multiple"
+                      //size={size}
+                      placeholder="select blood group"
+                      onChange={BloodGroupValue}
+                      style={{ width: filedWidth }}
+                      options={[
+                        {
+                          key: 1,
+                          value: "A+",
+                          label: "A+",
+                        },
+                        {
+                          key: 2,
+                          value: "A-",
+                          label: "A-",
+                        },
+                        {
+                          key: 3,
+                          value: "B+",
+                          label: "B+",
+                        },
+                        {
+                          key: 4,
+                          value: "B-",
+                          label: "B-",
+                        },
+                        {
+                          key: 5,
+                          value: "O+",
+                          label: "O+",
+                        },
+                        {
+                          key: 6,
+                          value: "O-",
+                          label: "O-",
+                        },
+                        {
+                          key: 7,
+                          value: "AB+",
+                          label: "AB+",
+                        },
+                        {
+                          key: 8,
+                          value: "AB-",
+                          label: "AB-",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  {/* alternateContactNo */}
+                  <Form.Item
+                    className="px-3"
+                    label="Alternate Contact No"
+                    name="alternateContactNo"
+                    rules={[
+                      { message: "Please enter your mobile number" },
+                      {
+                        pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
+                        message: "Enter 10-digit number",
+                      },
+                    ]}
+                  >
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="alternate contact no"
+                      name="alternateContactNo"
+                      value={EmployeeInput.alternateContactNo}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
+                  {/* contactPersonName */}
+                  <Form.Item
+                    name="contactPersonName"
+                    className="px-3"
+                    label="Contact Person Name"
+                  >
+                    <Input
+                      style={{ width: filedWidth }}
+                      placeholder="contact person name"
+                      name="contactPersonName"
+                      value={EmployeeInput.contactPersonName}
+                      onChange={EmployeeInputsOnchange}
+                    />
+                  </Form.Item>
+                  {/* Relationship */}
+                  <Form.Item
+                    name="relationship"
+                    className="px-3"
+                    label="Relationship"
+                  >
+                    <Select
+                      optionFilterProp="children"
+                      placeholder="select relationship"
+                      style={{ width: filedWidth }}
+                      onChange={relationShipValue}
+                      options={[
+                        {
+                          key: 1,
+                          value: "Father",
+                          label: "Father",
+                        },
+                        {
+                          key: 2,
+                          value: "Mother",
+                          label: "Mother",
+                        },
+                        {
+                          key: 3,
+                          value: "Son",
+                          label: "Son",
+                        },
+                        {
+                          key: 4,
+                          value: "Daughter",
+                          label: "Daughter",
+                        },
+                        {
+                          key: 5,
+                          value: "Husband",
+                          label: "Husband",
+                        },
+                        {
+                          key: 6,
+                          value: "Wife",
+                          label: "Wife",
+                        },
+                        {
+                          key: 7,
+                          value: "Brother",
+                          label: "Brother",
+                        },
+                        {
+                          key: 8,
+                          value: "Sister",
+                          label: "Sister",
+                        },
+                        {
+                          key: 9,
+                          value: "Grandfather",
+                          label: "Grandfather",
+                        },
+                        {
+                          key: 10,
+                          value: "Grandmother",
+                          label: "Grandmother",
+                        },
+                        {
+                          key: 11,
+                          value: "Grandson",
+                          label: "Grandson",
+                        },
+                        {
+                          key: 12,
+                          value: "Uncle",
+                          label: "Uncle",
+                        },
+                        {
+                          key: 13,
+                          value: "Aunt",
+                          label: "Aunt",
+                        },
+                        {
+                          key: 14,
+                          value: "Nephew",
+                          label: "Nephew",
+                        },
+                        {
+                          key: 15,
+                          value: "Niece",
+                          label: "Niece",
+                        },
+                        {
+                          key: 16,
+                          value: "Cousins",
+                          label: "Cousins",
+                        },
+                      ]}
+                      value={EmployeeInput.relationship}
+                    />
+                  </Form.Item>
 
-               {/* alternateContactNo */}
-               <Form.Item
-                className="px-3"
-    
-                label="Alternate Contact No"
-                name="alternateContactNo"
-                rules={[
-                  { message: "Please enter your mobile number" },
-                  {
-                    pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    message: "Enter 10-digit number",
-                  },
-                ]}
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="alternate contact no"
-                  name="alternateContactNo"
-                  value={EmployeeInput.alternateContactNo}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
-              {/* contactPersonName */}
-              <Form.Item
-                name="contactPersonName"
-                className="px-3"
-                label="Contact Person Name"
-    
-              >
-                <Input
-                  style={{ float: "right", width: filedWidth }}
-                  placeholder="contact person name"
-                  name="contactPersonName"
-                  value={EmployeeInput.contactPersonName}
-                  onChange={EmployeeInputsOnchange}
-                />
-              </Form.Item>
-              {/* Relationship */}
-              <Form.Item
-                name="relationship"
-                className="px-3"
-                label="Relationship"
-    
-              >
-                <Select
-                  optionFilterProp="children"
-                  placeholder="select relationship"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={relationShipValue}
-                  options={[
-                    {
-                      key: 1,
-                      value: "Father",
-                      label: "Father",
-                    },
-                    {
-                      key: 2,
-                      value: "Mother",
-                      label: "Mother",
-                    },
-                    {
-                      key: 3,
-                      value: "Son",
-                      label: "Son",
-                    },
-                    {
-                      key: 4,
-                      value: "Daughter",
-                      label: "Daughter",
-                    },
-                    {
-                      key: 5,
-                      value: "Husband",
-                      label: "Husband",
-                    },
-                    {
-                      key: 6,
-                      value: "Wife",
-                      label: "Wife",
-                    },
-                    {
-                      key: 7,
-                      value: "Brother",
-                      label: "Brother",
-                    },
-                    {
-                      key: 8,
-                      value: "Sister",
-                      label: "Sister",
-                    },
-                    {
-                      key: 9,
-                      value: "Grandfather",
-                      label: "Grandfather",
-                    },
-                    {
-                      key: 10,
-                      value: "Grandmother",
-                      label: "Grandmother",
-                    },
-                    {
-                      key: 11,
-                      value: "Grandson",
-                      label: "Grandson",
-                    },
-                    {
-                      key: 12,
-                      value: "Uncle",
-                      label: "Uncle",
-                    },
-                    {
-                      key: 13,
-                      value: "Aunt",
-                      label: "Aunt",
-                    },
-                    {
-                      key: 14,
-                      value: "Nephew",
-                      label: "Nephew",
-                    },
-                    {
-                      key: 15,
-                      value: "Niece",
-                      label: "Niece",
-                    },
-                    {
-                      key: 16,
-                      value: "Cousins",
-                      label: "Cousins",
-                    },
-                  ]}
-                  value={EmployeeInput.relationship}
-                />
-              </Form.Item>
+                  {/* officeLocationId */}
+                  <Form.Item
+                    name="officeLocationId"
+                    className="px-3"
+                    label="Office Location"
+                  >
+                    <Select
+                      optionFilterProp="children"
+                      placeholder="select office location"
+                      style={{ width: filedWidth }}
+                      onChange={officeLocationDropDown}
+                      options={officeOption}
+                      value={EmployeeInput.officeLocationId}
+                    />
+                  </Form.Item>
 
-              {/* officeLocationId */}
-              <Form.Item
-                name="officeLocationId"
-                className="px-3"
-                label="Office Location"
-    
-              >
-                <Select
-                  optionFilterProp="children"
-                  placeholder="select office location"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={officeLocationDropDown}
-                  options={officeOption}
-                  value={EmployeeInput.officeLocationId}
-                />
-              </Form.Item>
-
-              {/* departmentId */}
-              <Form.Item
-                name="departmentId"
-                className="px-3"
-                label="Department"
-    
-              >
-                <Select
-                  optionFilterProp="children"
-                  placeholder="select department"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={departmentDropDown}
-                  options={departmentOption}
-                  value={EmployeeInput.departmentId}
-                />
-              </Form.Item>
-
-             
-              </Col>
-               <Col span={6}>
-                {/* Roll Detail */}
-               <Form.Item
-                name="Role"
-                className="px-3"
-                label="Role"
-    
-              >
-                <Select
-                  optionFilterProp="children"
-                  placeholder="select role"
-                  style={{ float: "right", width: filedWidth }}
-                  onChange={roleDropDown}
-                  options={optionRoles}
-                  value={RoleValue.roleId}
-                />
-              </Form.Item>
-               </Col>
+                  {/* departmentId */}
+                  <Form.Item
+                    name="departmentId"
+                    className="px-3"
+                    label="Department"
+                  >
+                    <Select
+                      optionFilterProp="children"
+                      placeholder="select department"
+                      style={{ width: filedWidth }}
+                      onChange={departmentDropDown}
+                      options={departmentOption}
+                      value={EmployeeInput.departmentId}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  {/* Roll Detail */}
+                  <Form.Item name="Role" className="px-3" label="Role">
+                    <Select
+                      optionFilterProp="children"
+                      placeholder="select role"
+                      style={{ width: filedWidth }}
+                      onChange={roleDropDown}
+                      options={optionRoles}
+                      value={RoleValue.roleId}
+                    />
+                  </Form.Item>
+                </Col>
               </Row>
             </Form>
           </section>
@@ -1659,6 +1721,7 @@ const Employee = ({ officeData }) => {
             modelclose={ModelClose}
             EditData={EditPencilData} //edit data
             EditPencilState={EditPencilState} // true put method
+            DisplayLogin={DisplayLogin}//one time login data
           />
         ) : (
           ""

@@ -18,6 +18,7 @@ import { createOffice, getOffice } from '../redux/slices/officeSlice';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import Employee from './employee';
+import LoginPage from "../Loginpage"
 // import { getEmployees } from '../redux/slices/employeeSlice';
 
 const { Header, Sider, Content } = Layout;
@@ -144,6 +145,13 @@ const Accessories = () => {
       label: 'Settings',
       Content: <Settings />,
       Components: 'Settings'
+    },
+    {
+      key: '7',
+      icon: <FontAwesomeIcon icon={faSliders} />,
+      label: 'Login',
+      Content: <LoginPage />,
+      Components: 'Login'
     },
     
   ];
