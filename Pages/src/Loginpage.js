@@ -11,20 +11,11 @@ const Loginpage = () => {
   const dispatch = useDispatch();
   const { login } = useSelector((state) => state.login);
 
-// const onFinish =(value)=>{
-//   const CheckUsername  = login.filter(data => data.userName === value.userName);
-//   const storedHashedPassword = CheckUsername && CheckUsername.length >=0 ? CheckUsername[0].password : "";
-//   const isPasswordValid = bcrpt.compareSync(value.password, storedHashedPassword);
-//   isPasswordValid ? console.log("Correct password"): console.log("");
-// };
 
+//decrption method
 const onFinish = (value) => {
   const CheckUsername = login.filter((data) => data.userName === value.userName);
   const storedHashedPassword = CheckUsername && CheckUsername.length > 0 ? CheckUsername[0].password : "";
-
-  // Hash the entered password for comparison
-  // const enteredHashedPassword = bcrpt.hashSync(value.password, 10);
-  // const isPasswordValid = bcrpt.compareSync(enteredHashedPassword, storedHashedPassword);
   const isPasswordValid = bcrpt.compareSync(value.password, storedHashedPassword);
 
   if (isPasswordValid === true) {
@@ -34,69 +25,14 @@ const onFinish = (value) => {
   }
 };
 
-
-
-// Her374
-// ALF=
+//error not enter the value
 const onFinishFailed =()=>{
-
+  
 };
 
 useEffect(()=>{
   dispatch(GetLogin());
 },[]);
-  // //login values
-  // const onFinish = (values) => {
-  //   const userName = values.userName;
-  //   const HashedPassword = bcrpt.hashSync(values.password, 10);
-
-  //   window.localStorage.setItem(
-  //     "login",
-  //     JSON.stringify({ userName, HashedPassword })
-  //   );
-  // };
-
-  // //login not correct values
-  // const onFinishFailed = (errorInfo) => {
-  //   console.log("Failed:", errorInfo);
-  //   generateRandomUsername("Herman","Joseph");
-  // };
-  // useEffect(() => {
-  //   dispatch(GetLogin());
-  // }, []);
-  
-  // //password readom genorator human readable
-  // function generateRandomPassword() {
-  //   const charset ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-  //   let password = "";
-  //   for (let i = 0; i < 8; i++) {
-  //     const randomIndex = Math.floor(Math.random() * charset.length);
-  //     password += charset.charAt(randomIndex);
-  //   };
-  //   const HashedPassword = bcrpt.hashSync(password, 10); 
-  //   return {password,HashedPassword}
-  // }
-  // // check same value
-  // async function generateRandomUsername (firstName, lastName)
-  // {
-  //   const randomNumbers = Math.floor(10000 + Math.random() * 90000);
-  //   const username = await `${firstName}${randomNumbers}`;
-  //   const {password,HashedPassword} = generateRandomPassword();
-
-  //   const userNameFl = await login.filter(user => user.userName === username);
-  //   const sameName = await userNameFl && userNameFl[0] ? userNameFl[0].userName : '';
-
-  //   if(sameName === username){
-  //       generateRandomUsername(firstName, lastName);
-  //       console.log("2ed loop");  
-  //   }
-  //   else{
-  //       console.log(sameName);
-  //       console.log(username);
-  //       console.log(password);
-  //       console.log(HashedPassword);
-  //   }
-  // };
 
   return (
     <Form

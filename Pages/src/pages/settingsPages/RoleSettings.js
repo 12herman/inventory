@@ -207,7 +207,7 @@ const RoleSettings = ({ BackToSetting }) => {
 
 
                 </Form>
-            </Modal >
+            </Modal>
         </>
     )
 }

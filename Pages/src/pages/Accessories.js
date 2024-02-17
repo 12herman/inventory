@@ -153,7 +153,6 @@ const Accessories = () => {
       Content: <LoginPage />,
       Components: 'Login'
     },
-    
   ];
 
 

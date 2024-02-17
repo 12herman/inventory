@@ -7,11 +7,12 @@ import RoleSettings from './settingsPages/RoleSettings';
 import AccountDetailSettings from './settingsPages/AccountDetailsSettings';
 import DepartmentSettings from './settingsPages/DepartmentSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright,faChampagneGlasses, faCalendarDays} from '@fortawesome/free-solid-svg-icons';
+import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright,faChampagneGlasses, faCalendarDays, faTable} from '@fortawesome/free-solid-svg-icons';
 import BrandSettings  from './settingsPages/BrandSettings';
 import AccessoriesSettings from './settingsPages/AccessoriesSettings';
 import HolidaySetting from './settingsPages/HolidaySettings';
 import EmployeeLeaveSettings from './settingsPages/EmployeeLeaveSettings';
+import LeaveTable from './settingsPages/LeaveTable';
 
 
 const Settings = () => {
@@ -81,6 +82,13 @@ const Settings = () => {
       settingname: "Employee Leave",
       componets: <EmployeeLeaveSettings/>,
       icon: faChampagneGlasses,
+      props: { BackToSetting : () => setsettingsBack(true) }
+    },
+    {
+      key: 9,
+      settingname: "Leave Table",
+      componets: <LeaveTable/>,
+      icon: faTable,
       props: { BackToSetting : () => setsettingsBack(true) }
     },
   ];

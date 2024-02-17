@@ -15,6 +15,7 @@ import productsDetailSlice from './slices/productsDetailSlice';
 import productStorageLocationSlice from './slices/productStorageLocationSlice';
 import leaderEmployeeSlice from './slices/leaderEmployeeSlice';
 import loginSlice from './slices/loginSlice';
+import leaveTableSlice from './slices/leaveTableSlice';
 
 export const store = configureStore({
     devTools:true,
@@ -34,7 +35,8 @@ export const store = configureStore({
         productsDetail:productsDetailSlice,
         productstoragelocation:productStorageLocationSlice,
         leaderemployee:leaderEmployeeSlice,
-        login:loginSlice
+        login:loginSlice,
+        leavetable:leaveTableSlice
     }
 });
 

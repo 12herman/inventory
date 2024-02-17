@@ -5,7 +5,7 @@ export const ApiLink = {
     account:"https://localhost:7129/api/AccountDetails",
     department:"https://localhost:7129/api/Department",
     roledetail:"https://localhost:7129/api/RoleDetail",
-    // leaderemployee:"https://localhost:7129/api/LeaderAndEmployee",
+    leaderemployee:"https://localhost:7129/api/LeaderAndEmployee",
     accessories:"https://localhost:7129/api/Accessory",
     brand:"https://localhost:7129/api/Brand",
     consoles:"https://localhost:7129/api/Console",
@@ -15,6 +15,7 @@ export const ApiLink = {
     productsDetail:"https://localhost:7129/api/ProductsDetail",
     productstoragelocation:"https://localhost:7129/api/ProductStorageLocation",
     login:"https://localhost:7129/api/Login",
-    loginauth:"https://localhost:7129/api/Login/login"
+    loginauth:"https://localhost:7129/api/Login/login",
+    leavetable:"https://localhost:7129/api/LeaveTable",
   };
   

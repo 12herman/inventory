@@ -80,6 +80,8 @@ import bcrpt from "bcryptjs";
 // import bcrpt from "bcrypt";
 import {encrypt,decrypt} from "n-krypta"
 import { GetLogin, PostLogin } from "../redux/slices/loginSlice";
+import { Getleavetable } from "../redux/slices/leaveTableSlice";
+import { Postemployeeleave } from "../redux/slices/employeeLeaveSlice";
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
@@ -292,6 +294,7 @@ async function generateRandomUsername (firstName, lastName,id)
   const { address } = useSelector((state) => state.address);
   const { account } = useSelector((state) => state.account);
   const {login} = useSelector((state)=> state.login);
+  const {leavetable } = useSelector(state =>state.leavetable);
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
   const [empCounts, setEmpCounts] = useState();
@@ -985,8 +988,20 @@ async function generateRandomUsername (firstName, lastName,id)
     // modifiedDate:'',
     // modifiedBy:''
   });
+  
   const [loadings, setLoading] = useState(true);
+  const LeaveRef = (id)=>{
+   return leavetable.map(data=> ({
+    employeeId:id,
+    sickLeave:data.sickLeave,
+    casualLeave:data.casualLeave,
+    total:data.total,
+    leaveAvailed:data.leaveAvailed,
+    isDeleted:false
+    }));
+  };
 
+  
   const newEmployee = async () => {
     try {
       const employeeDatas = await dispatch(postEmployees(EmployeeInput));
@@ -995,7 +1010,7 @@ async function generateRandomUsername (firstName, lastName,id)
         setNewempId(employeeDatas.payload.id);
         
        const LoginDatas = await generateRandomUsername(EmployeeInput.firstName,EmployeeInput.lastName,employeeDatas.payload.id);
-
+       const LeaveData =await LeaveRef(employeeDatas.payload.id);
         // console.log({ employeeId: employeeDatas.payload.id });
         //role creation
         await dispatch(
@@ -1019,9 +1034,9 @@ async function generateRandomUsername (firstName, lastName,id)
         await dispatch(
           postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
         );
-        
+         
         await dispatch(PostLogin(LoginDatas));
-
+        await dispatch(Postemployeeleave(...LeaveData));
         await dispatch(getRoleDetail());
         await dispatch(getleaderemployee());
         await dispatch(getAddress());
@@ -1058,6 +1073,7 @@ async function generateRandomUsername (firstName, lastName,id)
     dispatch(getAddress());
     dispatch(getaccount());
     dispatch(GetLogin());
+    dispatch(Getleavetable());
     // console.log("loading all");
   }, [dispatch,loadings,FullComponentLoading]);
 
