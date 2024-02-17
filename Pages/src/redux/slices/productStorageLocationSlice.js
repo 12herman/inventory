@@ -8,7 +8,7 @@ export const getProductStorageLocation = createAsyncThunk('get/getproductstorage
 });
 
 export const postProductStorageLocation = createAsyncThunk('productstoragelocation/postproductstoragelocation', async (newProductData) => {
-    console.log(newProductData);
+    // console.log(newProductData);
     return Axios.post(ApiLink.productstoragelocation, newProductData)
         .then(res => { return res.data });
         
