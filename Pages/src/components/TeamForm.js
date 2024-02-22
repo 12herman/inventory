@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { Form, Select, Switch, message,Row,Col,Tag } from "antd";
+import { Form, Select, Switch, message,Row,Col,Tag, Button } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 
@@ -95,7 +95,7 @@ const TeamForm = forwardRef((props, ref) => {
   });
 
   return (
-    <section className="h-[59.9vh]">
+    <section className="h-[59.9vh] relative">
       <div className="mt-2 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faPeopleGroup} />
       </div>
@@ -154,7 +154,9 @@ const TeamForm = forwardRef((props, ref) => {
         </Form.Item>
         </Col>
         </Row>
+        
       </Form>
+      
     </section>
   );
 });

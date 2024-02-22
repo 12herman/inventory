@@ -3,8 +3,16 @@ import { Button, Checkbox, Form, Input } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { CheckAuthentication, GetLogin } from "./redux/slices/loginSlice";
 import bcrpt from "bcryptjs";
+import ForgetPages from "./components/ForgetPage";
+// import nodemailer from 'nodemailer';
 // import { decrypt,compare, encrypt } from "n-krypta";
-
+// var transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: 'josephherman810@gmail.com',
+//     pass: 'hava saes oxpa iphm'
+//   }
+// });
 
 
 const Loginpage = () => {
@@ -20,6 +28,7 @@ const onFinish = (value) => {
 
   if (isPasswordValid === true) {
     console.log("Correct password");
+
   } else {  
     console.log("Incorrect password");
   }
@@ -29,13 +38,18 @@ const onFinish = (value) => {
 const onFinishFailed =()=>{
   
 };
-
+//Elcin525
+//q0Xg
+//hava saes oxpa iphm
 useEffect(()=>{
   dispatch(GetLogin());
 },[]);
 
+const [ForgetPage,setForgetPage] = useState(false);
+
   return (
-    <Form
+   <>
+    {ForgetPage === false ?  <Form
       name="basic"
       labelCol={{
         span: 8,
@@ -89,6 +103,15 @@ useEffect(()=>{
     >
       <Checkbox>Remember me</Checkbox>
     </Form.Item> */}
+     <Form.Item
+        wrapperCol={{
+          offset: 8,
+          span: 16,
+        }}
+      >
+    
+    <Button onClick={()=>setForgetPage(true)} type="text" className="text-[12px] text-blue-500">Forget Password</Button>
+      </Form.Item>
 
       <Form.Item
         wrapperCol={{
@@ -96,11 +119,16 @@ useEffect(()=>{
           span: 16,
         }}
       >
+    
         <Button className="bg-blue-500" type="primary" htmlType="submit">
           Submit
         </Button>
       </Form.Item>
     </Form>
+    :
+     <ForgetPages key={2}/>
+    }
+   </>
   );
 };
 export default Loginpage;

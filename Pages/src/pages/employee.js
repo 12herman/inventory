@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  ConfigProvider,
   Steps,
   Popconfirm,
   Form,
   Modal,
-  Space,
   Table,
   Tag,
   Button,
@@ -14,7 +12,6 @@ import {
   Statistic,
   Divider,
   Input,
-  Checkbox,
   Select,
   DatePicker,
   message,
@@ -29,7 +26,6 @@ import {
 } from "../redux/slices/employeeSlice";
 import { getrole } from "../redux/slices/roleSlice";
 import "../css/user.css";
-import { CountriesAPI } from "../apilinks/countrycode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrash,
@@ -39,15 +35,8 @@ import {
   faLandmark,
   faCircleCheck,
   faPeopleGroup,
-  faL,
-  faInfo,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  LoadingOutlined,
-  SmileOutlined,
-  SolutionOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { LoadingOutlined } from "@ant-design/icons";
 import { getDepartment } from "../redux/slices/departmentSlice";
 import {
   getRoleDetail,
@@ -73,81 +62,116 @@ import {
   postaccount,
   putaccount,
 } from "../redux/slices/accountdetailsSlice";
-import moment, { months } from "moment";
-import '../css/employee.css'
-import dayjs from "dayjs";
+import moment from "moment";
+import "../css/employee.css";
 import bcrpt from "bcryptjs";
-// import bcrpt from "bcrypt";
-import {encrypt,decrypt} from "n-krypta"
 import { GetLogin, PostLogin } from "../redux/slices/loginSlice";
 import { Getleavetable } from "../redux/slices/leaveTableSlice";
 import { Postemployeeleave } from "../redux/slices/employeeLeaveSlice";
+
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
-const { Option } = Select;
 const currentDate = new Date();
 const formattedDate = currentDate.toISOString().slice(0, 19);
+
 const Employee = ({ officeData }) => {
   const [form] = Form.useForm();
-  //Emil validation
+
+  const [DisplayLogin, setDisplayLogin] = useState({
+    userName: null,
+    password: null,
+  });
+
+  //password readom genorator human readable
+  function generateRandomPassword() {
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$&";
+    let password = "";
+    for (let i = 0; i < 4; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset.charAt(randomIndex);
+    }
+    const HashedPassword = bcrpt.hashSync(password, 10);
+    console.log(password);
+    console.log(HashedPassword);
+    return { password, HashedPassword };
+  }
+
+  //radom username genorator
+  async function generateRandomUsername(firstName, lastName, id) {
+    const randomNumbers = await Math.floor(100 + Math.random() * 900);
+    const username = await `${firstName}${randomNumbers}`;
+    const { password, HashedPassword } = generateRandomPassword();
+
+    const userNameFl = await login.filter((user) => user.userName === username);
+    const sameName =
+      (await userNameFl) && userNameFl[0] ? userNameFl[0].userName : "";
+
+    if (sameName === username) {
+      generateRandomUsername(firstName, lastName, id);
+      console.log("2ed loop");
+    } else {
+      setDisplayLogin({ userName: username, password: password });
+      return {
+        employeeId: id,
+        userName: username,
+        password: HashedPassword,
+        isDeleted: false,
+      };
+    }
+  }
+
+  //validate email
   function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-  //Mobile number validation
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailPattern.test(email)) {
+      setValidate((pre) => ({ ...pre, officeEmail: false }));
+    } else {
+      setValidate((pre) => ({ ...pre, officeEmail: true }));
+    }
+  }
+  function pvalidateEmail(email) {
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailPattern.test(email)) {
+      setValidate((pre) => ({ ...pre, personalEmail: false }));
+    } else {
+      setValidate((pre) => ({ ...pre, personalEmail: true }));
+    }
+  }
+
+  //validate mobile no
   function validateMobileNumber(mobileNumber) {
     const mobileNumberRegex = /^\d{10}$/;
-    return mobileNumberRegex.test(mobileNumber);
-  };
- //password readom genorator human readable
- function generateRandomPassword() {
-  const charset ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-  // const charset ="0123456789";
-  let password = "";
-  for (let i = 0; i < 4; i++) {
-    const randomIndex = Math.floor(Math.random() * charset.length);
-    password += charset.charAt(randomIndex);
-  }; 
-  // const HashedPassword = bcrpt.hashSync(password, 10); 
-  const HashedPassword = bcrpt.hashSync(password, 10); 
-  console.log(password);
-  console.log(HashedPassword);
-  return {password,HashedPassword}
-}
-const [DisplayLogin,setDisplayLogin] = useState({
-  userName:null,
-  password:null, 
-});
-async function generateRandomUsername (firstName, lastName,id)
-        {
-          const randomNumbers =await Math.floor(100 + Math.random() * 900);
-          const username = await `${firstName}${randomNumbers}`;
-          const {password,HashedPassword} = generateRandomPassword();
-      
-          const userNameFl = await login.filter(user => user.userName === username);
-          const sameName = await userNameFl && userNameFl[0] ? userNameFl[0].userName : '';
-      
-          if(sameName === username){
-              generateRandomUsername(firstName, lastName,id);
-              console.log("2ed loop");  
-          }
-          else{
-            setDisplayLogin({userName:username,password:password});
-            // await window.localStorage.setItem(
-            //   "login",
-            //   JSON.stringify({ password, HashedPassword })
-            // );
-            return ({
-              employeeId:id,
-              userName: username,
-              password:HashedPassword,
-              isDeleted:false,
-            });
-          }
-        };
-        // Vasan71680
-        // 8825
+    if (mobileNumberRegex.test(mobileNumber)) {
+      setValidate((pre) => ({ ...pre, mobileNumber: false }));
+    } else {
+      setValidate((pre) => ({ ...pre, mobileNumber: true }));
+    }
+  }
+  function avalidateMobileNumber(mobileNumber) {
+    const mobileNumberRegex = /^\d{10}$/;
+    if (mobileNumberRegex.test(mobileNumber)) {
+      setValidate((pre) => ({ ...pre, alternateContactNo: false }));
+    } else {
+      setValidate((pre) => ({ ...pre, alternateContactNo: true }));
+    }
+  }
+
+  //age calculater
+  function calculateAge(birthdate) {
+    const birthDateObj = new Date(birthdate);
+    const currentDate = new Date();
+    let age = currentDate.getFullYear() - birthDateObj.getFullYear();
+    if (
+      currentDate.getMonth() < birthDateObj.getMonth() ||
+      (currentDate.getMonth() === birthDateObj.getMonth() &&
+        currentDate.getDate() < birthDateObj.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  }
 
   const [searchText, setSearchText] = useState("");
   const columns = [
@@ -164,20 +188,13 @@ async function generateRandomUsername (firstName, lastName,id)
       onFilter: (value, record) => {
         return (
           String(record.name).toLowerCase().includes(value.toLowerCase()) ||
-          // String(record.lastname)
-          // .toLowerCase().includes(value.toLowerCase()) ||
           String(record.age).toLowerCase().includes(value.toLowerCase()) ||
           String(record.sno).toLowerCase().includes(value.toLowerCase()) ||
           String(record.position).toLowerCase().includes(value.toLowerCase())
         );
       },
     },
-    // {
-    //   title: 'Last Name',
-    //   dataIndex: 'lastname',
-    //   key: 'id',
-    //   render: (text) => <a>{text}</a>,
-    // },
+
     {
       title: "Age",
       dataIndex: "age",
@@ -217,7 +234,7 @@ async function generateRandomUsername (firstName, lastName,id)
                   color = "yellow";
                   break;
                 default:
-                  color = "blue"; // Default color for other tags
+                  color = "blue";
                   break;
               }
 
@@ -231,24 +248,6 @@ async function generateRandomUsername (firstName, lastName,id)
             <Tag color="red">Not Assigned</Tag>
           )}
         </>
-
-        // <>
-        //   {
-        //     position.map(( tag) => {
-        //     let color = tag.length > 7 ? "geekblue" : "green";
-        //     if (tag === "loser") {
-        //       color = "volcano";
-        //     } else if (tag === "Not Assigned") {
-        //       color = "red";
-        //     }
-        //     return (
-        //       <Tag color={color} key={tag}>
-        //         {tag.toUpperCase()}
-        //       </Tag>
-        //     );
-        //   })
-        //   }
-        // </>
       ),
     },
     {
@@ -293,15 +292,14 @@ async function generateRandomUsername (firstName, lastName,id)
   const { roledetail } = useSelector((state) => state.roledetail);
   const { address } = useSelector((state) => state.address);
   const { account } = useSelector((state) => state.account);
-  const {login} = useSelector((state)=> state.login);
-  const {leavetable } = useSelector(state =>state.leavetable);
+  const { login } = useSelector((state) => state.login);
+  const { leavetable } = useSelector((state) => state.leavetable);
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
   const [empCounts, setEmpCounts] = useState();
   const [tableData, setTableData] = useState([]);
 
-
-
+  //reset table data initial state
   function DataLoading() {
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
     var officeNames = numberOfOffice.map((off) => {
@@ -309,9 +307,11 @@ async function generateRandomUsername (firstName, lastName,id)
     });
     if (officeNames.length === 1) {
       var filterOneOffice = empData.filter(
-        (off) => off.officeLocationId.officename === officeNames[0] 
+        (off) => off.officeLocationId.officename === officeNames[0]
       );
-      const counts = filterOneOffice.filter(data => data.isDeleted === false).length
+      const counts = filterOneOffice.filter(
+        (data) => data.isDeleted === false
+      ).length;
       setEmpCounts(counts);
       setTableData(filterOneOffice);
     } else {
@@ -319,24 +319,9 @@ async function generateRandomUsername (firstName, lastName,id)
       setTableData(empData);
     }
   }
-
-  function calculateAge(birthdate) {
-    const birthDateObj = new Date(birthdate);
-    const currentDate = new Date();
-    let age = currentDate.getFullYear() - birthDateObj.getFullYear();
-    if (
-      currentDate.getMonth() < birthDateObj.getMonth() ||
-      (currentDate.getMonth() === birthDateObj.getMonth() &&
-        currentDate.getDate() < birthDateObj.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  }
-
+  //check role
   function roleCheck(roleid) {
     var roleDataCheck = roledetailData.filter((role) => role.id === roleid);
-
     if (roleDataCheck.length > 0) {
       return roleDataCheck[0].rollName;
     } else {
@@ -344,10 +329,12 @@ async function generateRandomUsername (firstName, lastName,id)
     }
   }
 
+  //filter office
   const filterEmployeeDatas =
     tableData && tableData.length > 0
       ? tableData.filter((el) => el.isDeleted === false)
       : [];
+  //table data
   const Tbdata =
     filterEmployeeDatas && filterEmployeeDatas.length > 0
       ? filterEmployeeDatas.map((el, i) => {
@@ -370,6 +357,10 @@ async function generateRandomUsername (firstName, lastName,id)
         })
       : [];
 
+
+
+
+
   // popup-window
   const [modelOpen, setModelOpen] = useState(false);
   const ModelOpen = () => setModelOpen(true);
@@ -391,12 +382,39 @@ async function generateRandomUsername (firstName, lastName,id)
       width: 300, // Adjust the width as needed
     });
   };
+
+
+
+
+
   //new emp id
   const [newempid, setNewempId] = useState("");
+  const [Validate, setValidate] = useState({
+    firstName: false,
+    lastName: false,
+    gender: false,
+    personalEmail: false,
+    officeEmail: false,
+    mobileNumber: false,
+    dateOfBirth: false,
+    maritalStatus: false,
+    dateOfJoin: false,
+    bloodGroup: false,
+    alternateContactNo: false,
+    contactPersonName: false,
+    relationship: false,
+    officeLocationId: false,
+    department: false,
+    role: false,
+  });
+
+
+
+
+
 
   // Modal
   // post methods
-  // 1.information
   const informationPostBtn = async () => {
     //check all empty fields
     if (
@@ -423,9 +441,10 @@ async function generateRandomUsername (firstName, lastName,id)
       message.error("Personal email is not a valid email");
     }
 
-    // check the office email
+    // // check the office email
     // else if (validateEmail(EmployeeInput.officeEmail) === false) {
-    //   message.error("Office email is not a valid email");
+    //    message.error("Office email is not a valid email");
+    //   setValidate(pre => ({...pre,officeEmail:true}));
     // }
 
     // check the mobile number
@@ -451,7 +470,7 @@ async function generateRandomUsername (firstName, lastName,id)
   };
 
   // Table Delete Icon
-  const DeleteIcon = async(data) => {
+  const DeleteIcon = async (data) => {
     console.log(data.key);
     await dispatch(deleteEmployee(data.key));
     await setFullComponentLoading(!FullComponentLoading);
@@ -652,14 +671,28 @@ async function generateRandomUsername (firstName, lastName,id)
   // all fields set
   const EmployeeInputsOnchange = (e) => {
     const { name, value } = e.target;
+
     setEmployeeInput((pre) => ({
       ...pre,
       [name]: value,
     }));
+
+    if (name === "officeEmail") {
+      validateEmail(value);
+    } else if (name === "personalEmail") {
+      pvalidateEmail(value);
+    }
+
+    if (name === "mobileNumber") {
+      validateMobileNumber(value);
+    } else if (name === "alternateContactNo") {
+      avalidateMobileNumber(value);
+    }
   };
   // gender set
   const GengerDropDown = (data) => {
     setEmployeeInput((prevState) => ({ ...prevState, gender: data }));
+    setValidate((pre) => ({ ...pre, gender: false }));
   };
   // date of birth set
   const DateOfBirthValue = (date, dateString) => {
@@ -732,6 +765,27 @@ async function generateRandomUsername (firstName, lastName,id)
       departmentId: null,
       isDeleted: false,
     });
+
+    setValidate({
+      firstName: false,
+      lastName: false,
+      gender: false,
+      personalEmail: false,
+      officeEmail: false,
+      mobileNumber: false,
+      dateOfBirth: false,
+      maritalStatus: false,
+      dateOfJoin: false,
+      bloodGroup: false,
+      alternateContactNo: false,
+      contactPersonName: false,
+      relationship: false,
+      officeLocationId: false,
+      department: false,
+      role: false,
+    });
+
+    setSkipAccount(false);
   };
 
   // Roll Details
@@ -979,38 +1033,41 @@ async function generateRandomUsername (firstName, lastName,id)
     });
   };
 
-  const [LoginData,setLoginData] = useState({
-    userName:'',
-    password:'',
-    isDeleted:false,
+  const [LoginData, setLoginData] = useState({
+    userName: "",
+    password: "",
+    isDeleted: false,
     // createdDate:'',
     // createdBy:'',
     // modifiedDate:'',
     // modifiedBy:''
   });
-  
+
   const [loadings, setLoading] = useState(true);
-  const LeaveRef = (id)=>{
-   return leavetable.map(data=> ({
-    employeeId:id,
-    sickLeave:data.sickLeave,
-    casualLeave:data.casualLeave,
-    total:data.total,
-    leaveAvailed:data.leaveAvailed,
-    isDeleted:false
+  const LeaveRef = (id) => {
+    return leavetable.map((data) => ({
+      employeeId: id,
+      sickLeave: data.sickLeave,
+      casualLeave: data.casualLeave,
+      total: data.total,
+      leaveAvailed: data.leaveAvailed,
+      isDeleted: false,
     }));
   };
 
-  
   const newEmployee = async () => {
     try {
       const employeeDatas = await dispatch(postEmployees(EmployeeInput));
-      
+
       if (employeeDatas && employeeDatas.payload.id) {
         setNewempId(employeeDatas.payload.id);
-        
-       const LoginDatas = await generateRandomUsername(EmployeeInput.firstName,EmployeeInput.lastName,employeeDatas.payload.id);
-       const LeaveData =await LeaveRef(employeeDatas.payload.id);
+
+        const LoginDatas = await generateRandomUsername(
+          EmployeeInput.firstName,
+          EmployeeInput.lastName,
+          employeeDatas.payload.id
+        );
+        const LeaveData = await LeaveRef(employeeDatas.payload.id);
         // console.log({ employeeId: employeeDatas.payload.id });
         //role creation
         await dispatch(
@@ -1034,7 +1091,7 @@ async function generateRandomUsername (firstName, lastName,id)
         await dispatch(
           postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
         );
-         
+
         await dispatch(PostLogin(LoginDatas));
         await dispatch(Postemployeeleave(...LeaveData));
         await dispatch(getRoleDetail());
@@ -1051,7 +1108,7 @@ async function generateRandomUsername (firstName, lastName,id)
   };
 
   //put employee
-  const [FullComponentLoading,setFullComponentLoading]= useState(false);
+  const [FullComponentLoading, setFullComponentLoading] = useState(false);
   const PutEmployee = async () => {
     await dispatch(putEmployees(EmployeeInput)); //employee
     await dispatch(putRoleDetail(RoleValue)); //role
@@ -1060,7 +1117,7 @@ async function generateRandomUsername (firstName, lastName,id)
     await dispatch(putAddress(PermanetFAdd)); //address2
     await dispatch(putaccount(AccF)); //account
     await setLoading(false);
-    setFullComponentLoading(!FullComponentLoading)
+    setFullComponentLoading(!FullComponentLoading);
   };
 
   //initial reneder
@@ -1075,14 +1132,14 @@ async function generateRandomUsername (firstName, lastName,id)
     dispatch(GetLogin());
     dispatch(Getleavetable());
     // console.log("loading all");
-  }, [dispatch,loadings,FullComponentLoading]);
+  }, [dispatch, loadings, FullComponentLoading]);
 
   //table loading
   useEffect(() => {
     setRoledetailData(role);
     setEmpData(employee);
     DataLoading();
-  }, [employee, officeData, role,FullComponentLoading]);
+  }, [employee, officeData, role, FullComponentLoading]);
 
   //form edit initial loading screen
   const InitialFormEdit = () => {
@@ -1094,9 +1151,21 @@ async function generateRandomUsername (firstName, lastName,id)
       done: "wait",
     });
   };
-  useEffect(() => {
+  useEffect(() => { 
     InitialFormEdit();
   }, [modelOpen]);
+   
+  //skip
+  const [SkipAccount,setSkipAccount] = useState(false);
+  
+  const skipAccount = async ()=>{
+    await setSkipAccount(true);
+    if (accFormRef.current) {
+     await accFormRef.current.accountValidateData();
+     await setSkipAccount(false);
+    }
+    await setSkipAccount(false);
+  };
 
   return (
     <div>
@@ -1258,17 +1327,28 @@ async function generateRandomUsername (firstName, lastName,id)
               Next
             </Button>
           ) : processbar.team === "process" ? ( //condition
-            <Button key="submit8" type="submit" onClick={postTeam}>
+           <>
+            {EditPencilState === false ? <Button key="submit8" type="submit" onClick={teamPostProcessBar}>
+              Skip
+            </Button> :""}
+             <Button key="submit8" type="submit" onClick={postTeam}>
               Next
             </Button>
+           </>
           ) : processbar.address === "process" ? ( //condition
             <Button key="submit9" type="submit" onClick={postAdd}>
               Next
             </Button>
           ) : processbar.account === "process" ? ( //condition
-            <Button key="submit10" type="submit" onClick={postAcc}>
+            <>
+            {EditPencilState === false ?  <Button key="submit10" type="submit" onClick={skipAccount}>
+              Skip
+            </Button> : ""}
+            
+              <Button key="submit10" type="submit" onClick={postAcc}>
               Next
             </Button>
+            </>
           ) : (
             ""
           ),
@@ -1282,7 +1362,7 @@ async function generateRandomUsername (firstName, lastName,id)
         <FontAwesomeIcon className="text-2xl " icon={faInfoCircle} />
       </div> */}
             {/* <h1 className='font-bold mt-2 text-center'>Employee Details</h1> */}
-            <Form form={form} layout="vertical " >
+            <Form form={form} layout="vertical ">
               <Row>
                 <Col span={6}>
                   {/* firstName */}
@@ -1290,6 +1370,7 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="firstName"
                     label="First Name"
                     className="px-3"
+                    validateStatus={Validate.firstName === true ? "error" : ""}
                   >
                     <Input
                       style={{ width: filedWidth }}
@@ -1301,7 +1382,12 @@ async function generateRandomUsername (firstName, lastName,id)
                   </Form.Item>
 
                   {/* lastName */}
-                  <Form.Item name="lastName" label="Last Name" className="px-3">
+                  <Form.Item
+                    name="lastName"
+                    label="Last Name"
+                    className="px-3"
+                    validateStatus={Validate.lastName === true ? "error" : ""}
+                  >
                     <Input
                       style={{ width: filedWidth }}
                       placeholder="last name"
@@ -1319,6 +1405,7 @@ async function generateRandomUsername (firstName, lastName,id)
                     ]}
                     label="Gender"
                     className="px-3"
+                    validateStatus={Validate.gender === true ? "error" : ""}
                   >
                     <Select
                       optionFilterProp="children"
@@ -1348,10 +1435,13 @@ async function generateRandomUsername (firstName, lastName,id)
 
                   {/* personalEmail */}
                   <Form.Item
-                    rules={[{ type: "email" }]}
+                    // rules={[{ type: "email" }]}
                     className="px-3"
                     label="Personal Email"
                     name="personalEmail"
+                    validateStatus={
+                      Validate.personalEmail === true ? "error" : ""
+                    }
                   >
                     <Input
                       style={{ width: filedWidth }}
@@ -1364,10 +1454,13 @@ async function generateRandomUsername (firstName, lastName,id)
 
                   {/* officeEmail */}
                   <Form.Item
-                    rules={[{ type: "email" }]}
+                    // rules={[{ type: "email" }]}
                     className="px-3"
                     name="officeEmail"
                     label="Office Email (optional)"
+                    validateStatus={
+                      Validate.officeEmail === true ? "error" : ""
+                    }
                   >
                     <Input
                       style={{ width: filedWidth }}
@@ -1385,13 +1478,16 @@ async function generateRandomUsername (firstName, lastName,id)
                     className="px-3"
                     label="Mobile Number"
                     name="mobileNumber"
-                    rules={[
-                      { message: "Please enter your mobile number" },
-                      {
-                        pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                        message: "Enter 10-digit number",
-                      },
-                    ]}
+                    // rules={[
+                    //   { message: "Please enter your mobile number" },
+                    //   {
+                    //     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
+                    //     message: "Enter 10-digit number",
+                    //   },
+                    // ]}
+                    validateStatus={
+                      Validate.mobileNumber === true ? "error" : ""
+                    }
                   >
                     <Input
                       style={{ width: filedWidth }}
@@ -1406,6 +1502,9 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="dateOfBirth"
                     className="px-3"
                     label="Date Of Birth"
+                    validateStatus={
+                      Validate.dateOfBirth === true ? "error" : ""
+                    }
                   >
                     <DatePicker
                       style={{ width: filedWidth }}
@@ -1418,6 +1517,9 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="maritalStatus"
                     className="px-3"
                     label="Marital Status"
+                    validateStatus={
+                      Validate.maritalStatus === true ? "error" : ""
+                    }
                   >
                     <Select
                       optionFilterProp="children"
@@ -1442,6 +1544,9 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="dateOfJoin"
                     className="px-3"
                     label="Date Of Join"
+                    validateStatus={
+                      Validate.dateOfBirth === true ? "error" : ""
+                    }
                   >
                     <DatePicker
                       style={{ width: filedWidth }}
@@ -1455,6 +1560,7 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="bloodGroup"
                     className="px-3"
                     label="Blood Group"
+                    validateStatus={Validate.bloodGroup === true ? "error" : ""}
                   >
                     <Select
                       //mode="multiple"
@@ -1513,13 +1619,16 @@ async function generateRandomUsername (firstName, lastName,id)
                     className="px-3"
                     label="Alternate Contact No"
                     name="alternateContactNo"
-                    rules={[
-                      { message: "Please enter your mobile number" },
-                      {
-                        pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                        message: "Enter 10-digit number",
-                      },
-                    ]}
+                    // rules={[
+                    //   { message: "Please enter your mobile number" },
+                    //   {
+                    //     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
+                    //     message: "Enter 10-digit number",
+                    //   },
+                    // ]}
+                    validateStatus={
+                      Validate.alternateContactNo === true ? "error" : ""
+                    }
                   >
                     <Input
                       style={{ width: filedWidth }}
@@ -1534,6 +1643,9 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="contactPersonName"
                     className="px-3"
                     label="Contact Person Name"
+                    validateStatus={
+                      Validate.contactPersonName === true ? "error" : ""
+                    }
                   >
                     <Input
                       style={{ width: filedWidth }}
@@ -1548,6 +1660,9 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="relationship"
                     className="px-3"
                     label="Relationship"
+                    validateStatus={
+                      Validate.relationship === true ? "error" : ""
+                    }
                   >
                     <Select
                       optionFilterProp="children"
@@ -1645,6 +1760,9 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="officeLocationId"
                     className="px-3"
                     label="Office Location"
+                    validateStatus={
+                      Validate.officeLocationId === true ? "error" : ""
+                    }
                   >
                     <Select
                       optionFilterProp="children"
@@ -1661,6 +1779,7 @@ async function generateRandomUsername (firstName, lastName,id)
                     name="departmentId"
                     className="px-3"
                     label="Department"
+                    validateStatus={Validate.department === true ? "error" : ""}
                   >
                     <Select
                       optionFilterProp="children"
@@ -1674,7 +1793,12 @@ async function generateRandomUsername (firstName, lastName,id)
                 </Col>
                 <Col span={6}>
                   {/* Roll Detail */}
-                  <Form.Item name="Role" className="px-3" label="Role">
+                  <Form.Item
+                    name="Role"
+                    className="px-3"
+                    label="Role"
+                    validateStatus={Validate.role === true ? "error" : ""}
+                  >
                     <Select
                       optionFilterProp="children"
                       placeholder="select role"
@@ -1723,6 +1847,7 @@ async function generateRandomUsername (firstName, lastName,id)
             EditData={EditPencilData} //edit data
             EditPencilState={EditPencilState} // true put method
             PutEmployee={PutEmployee}
+            SkipAccount={SkipAccount}
           />
         ) : processbar.done === "finish" ? (
           <FinishForm
@@ -1737,7 +1862,7 @@ async function generateRandomUsername (firstName, lastName,id)
             modelclose={ModelClose}
             EditData={EditPencilData} //edit data
             EditPencilState={EditPencilState} // true put method
-            DisplayLogin={DisplayLogin}//one time login data
+            DisplayLogin={DisplayLogin} //one time login data
           />
         ) : (
           ""
