@@ -23,6 +23,7 @@ import {
   postProductsDetail,
 } from "../redux/slices/productsDetailSlice";
 import { getProductStorageLocation, postProductStorageLocation, putProductStorageLocation } from "../redux/slices/productStorageLocationSlice";
+import Storage from './Storage';
 
 const formatter = (value) => <CountUp end={value} />;
 
@@ -114,6 +115,59 @@ const Products = ({ officeData }) => {
           </Button>
         </div>
       ),
+    },
+  ];
+
+  const modalColumn= [
+    {
+      title: "S.No",
+      dataIndex: "SNo",
+      key: "SNo"
+    },
+    {
+      title: "Product Name",
+      dataIndex: "productName",
+      key: "productName",
+    },
+    {
+      title: "Product Type",
+      dataIndex: "producttype",
+      key: "producttype",
+      render: (text) => <a>{text}</a>,
+      filteredValue: [searchText],
+      onFilter: (value, record) => {
+        return (
+          String(record.productName)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.producttype)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.brand).toLowerCase().includes(value.toLowerCase()) ||
+          String(record.modelNumber)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.serialNumber)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.tags).toLowerCase().includes(value.toLowerCase())
+        );
+      },
+    },
+    {
+      title: "Brand",
+      dataIndex: "brand",
+      key: "brand",
+    },
+    {
+      title: "Model",
+      dataIndex: "modelNumber",
+      key: "modelNo",
+    },
+    {
+      title: "Serial Number",
+      dataIndex: "serialNumber",
+      key: "serialNumber",
     },
   ];
 
@@ -216,6 +270,7 @@ const Products = ({ officeData }) => {
   //Delete Icon
   const DeleteIcon = async (id) => {
     const PreviousValue = TableDatas.filter((pr) => pr.id === id.id);
+    console.log(PreviousValue);
     const DeleteData = {
       id: PreviousValue[0].id,
       accessoriesId: PreviousValue[0].accessoriesId,
@@ -311,11 +366,10 @@ const Products = ({ officeData }) => {
         productName: system.productName,
         modelNumber: system.modelNumber,
         serialNumber: system.serialNumber,
-        tags: system.isAssigned,
         isAssigned: false
       };
       try {
-        await dispatch(postProductsDetail(newProduct));
+        await dispatch(postProductsDetail(newProduct));   
         await dispatch(getProductsDetail());
         setModalOpen(false);
         clearFields();
@@ -326,13 +380,16 @@ const Products = ({ officeData }) => {
   };
 
   //Displaying data in table data
-  const consolesUnDeleted = productsDetail.filter(
-    (consoleItem) => consoleItem.isDeleted === false
-  );
-  const TableDATA = consolesUnDeleted.map((cnsl, i) => ({
+const productsCopy = [...productsDetail];
+productsCopy.sort((a, b) => a.id - b.id);
+
+// Map the sorted productsDetail array to TableDATA
+const TableDATA = productsCopy
+  .filter((consoleItem) => !consoleItem.isDeleted)
+  .map((cnsl, i) => ({
     SNo: i + 1,
     key: cnsl.id,
-    id: cnsl.id,
+    id:cnsl.id,
     producttype: cnsl.accessoryName,
     brand: cnsl.brandName,
     productName: cnsl.productName,
@@ -340,6 +397,7 @@ const Products = ({ officeData }) => {
     serialNumber: cnsl.serialNumber,
     tags: cnsl.isAssigned
   }));
+// console.log(TableDATA);
 
   const [empData, setEmpData] = useState([]);
 
@@ -348,7 +406,6 @@ const Products = ({ officeData }) => {
     dispatch(getaccessories());
     dispatch(getProductsDetail());
     dispatch(getbrand());
-
   }, [dispatch]);
 
   function DataLoading() {
@@ -402,7 +459,7 @@ const Products = ({ officeData }) => {
   //office Dropdown
   const officeNameDropdown = (data, value) => {  
     setStorage((pre) => ({ ...pre, officeLocationId: value.value }));
-    console.log(value);
+    // console.log(value);
   }
 
   //Product Input 
@@ -431,6 +488,8 @@ const Products = ({ officeData }) => {
   const [popConfirmVisible, setPopConfirmVisible] = useState(false);
 
   //Transfer Ok Button function
+  const [temporarySelectedRowKeys, setTemporarySelectedRowKeys] = useState([]);
+
   const handleTransferConfirm = () => {
     setStorage({
       productDetailsId: null,
@@ -440,7 +499,8 @@ const Products = ({ officeData }) => {
     })
     OpenTransferModal();  
     setPopConfirmVisible(false);
-    setSelectedRowKeys([]);
+    setSelectedRowKeys(temporarySelectedRowKeys);
+    setTemporarySelectedRowKeys([]);
   };
 
   //Transfer Cancel Button function
@@ -473,6 +533,7 @@ const Products = ({ officeData }) => {
     await setTypeCounsts(filteredCounts);
   };
 
+  //Row Selection
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
@@ -484,7 +545,7 @@ const Products = ({ officeData }) => {
       Table.SELECTION_INVERT,
       Table.SELECTION_NONE,
       {
-        key: 'odd',
+        id: 'odd',
         text: 'Select Odd Row',
         onSelect: (changeableRowKeys) => {
           let newSelectedRowKeys = [];
@@ -498,7 +559,7 @@ const Products = ({ officeData }) => {
         },
       },
       {
-        key: 'even',
+        id: 'even',
         text: 'Select Even Row',
         onSelect: (changeableRowKeys) => {
           let newSelectedRowKeys = [];
@@ -518,11 +579,8 @@ const Products = ({ officeData }) => {
   //Assigned data
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 19);
+
   const PostStorage = async () => {        
-    if (storage.officeLocationId === null) {
-      message.error("Please Fill all the Fields!")
-    }
-    else {
       const ProductAssign = await productsDetail.filter(data => SelectedIds.some(id => id === data.id));
       const UpdateProductDetails = await ProductAssign.map(data => ({
         id: data.id,
@@ -543,6 +601,7 @@ const Products = ({ officeData }) => {
       //product details
       UpdateProductDetails.map(data => {
         dispatch(putProductsDetail(data));
+        // dispatch(getProductsDetail());
       });
 
       const TransferData = SelectedIds.map(id => ({
@@ -551,13 +610,17 @@ const Products = ({ officeData }) => {
         isDeleted: false,
         isAssigned: false,
       }));
+      // console.log(TransferData);
       await TransferData.map(data => {
         dispatch(postProductStorageLocation(data));
       });
      CloseTransferModal();
-     setIsButtonEnabled(false);
-    }
+     setIsButtonEnabled(false); 
   };
+
+  
+  const selectedrowDatas=TableDATA.filter(row => selectedRowKeys.includes(row.key));
+  // console.log(selectedrowDatas);
 
   return (
     <div>
@@ -593,13 +656,15 @@ const Products = ({ officeData }) => {
             onCancel={handleTransferCancel}
             okText="Yes"
             cancelText="No"
-
           >
             <Button
               type="primary"
               className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"
               open={TransferModal}
-              onClick={() => setPopConfirmVisible(true)}
+              onClick={() => {
+                setPopConfirmVisible(true);
+                setTemporarySelectedRowKeys(selectedRowKeys); // Store the temporary selected row keys
+              }}
               disabled={!isButtonEnabled}>
               <span>Transfer Data to Storage</span>
 
@@ -627,7 +692,7 @@ const Products = ({ officeData }) => {
         columns={columns}
         dataSource={TableDATA}
         pagination={{
-          pageSize: 4,
+          pageSize: 6,
         }}
       />
 
@@ -726,11 +791,12 @@ const Products = ({ officeData }) => {
           {/* Add more form fields as needed */}
         </Form>
       </Modal>
-
+   
       <Modal
         title="Add to Storage"
         open={TransferModal}
         onCancel={CloseTransferModal}
+        width={"1200px"}
         footer={[
           <Button key="1" onClick={PostStorage}>
             Transfer
@@ -745,28 +811,25 @@ const Products = ({ officeData }) => {
             Cancel
           </Button>
         ]}>
-        <Form>
-          <Form.Item label="Product Detail" style={{ marginBottom: 0, marginTop: 10 }}
-          >
-            {
-              Object.entries(TypeCounts).map(([product, count]) => {
-                return <><span key={product}>{product + ` -${count}`}</span>, </>
-              })
-            }
-          </Form.Item>
-
-          <Form.Item label="Office Location" style={{ marginBottom: 0, marginTop: 10 }} >
-            <Select style={{ float: "right", width: "380px" }}
-              placeholder="Select Office Location"
-              options={officeOption}
-              value={storage.officeLocationId}
-              name="Office Location"
-              onChange={officeNameDropdown}
-            />
-          </Form.Item>
-        </Form>
-
+        <div style={{ display: "flex", flexDirection: "column"}}>
+    <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+    <Select
+      style={{ width: "20%" }}
+      placeholder="Select Office Location"
+      options={officeOption}
+      onChange={officeNameDropdown}
+    />
+    </div>
+  </div>
+      <Table columns={modalColumn}
+      dataSource={selectedrowDatas}
+      pagination={{
+        pageSize: 6,
+      }}  
+      >
+      </Table>
       </Modal>
+     
     </div>
   );
 };

@@ -33,7 +33,6 @@ const productsDetailSlice = createSlice({
     },
     // reducers:{},
     extraReducers:(builder)=>{
-        
         builder
         //Get Method
         .addCase(getProductsDetail.pending,(state)=>{
@@ -68,7 +67,7 @@ const productsDetailSlice = createSlice({
         .addCase(putProductsDetail.fulfilled, (state, action) => {
             state.loading = false;
             state.productsDetail = state.productsDetail.map((item) => item.id === action.payload.id ? action.payload : item);
-            console.log(state.productsDetail);
+            // console.log(state.productsDetail);
         })
         .addCase(putProductsDetail.rejected, (state) => {
             state.loading = false;
