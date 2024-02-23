@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Popconfirm, Table, message } from 'antd';
-import { Col, Row, Statistic, Divider, Tag ,Card} from 'antd';
+import { Col, Row, Statistic, Divider, Tag, Card, Modal, Select } from 'antd';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faPen, faL } from "@fortawesome/free-solid-svg-icons";
 import CountUp from 'react-countup';
@@ -21,6 +21,7 @@ const EditableRow = ({ index, ...props }) => {
     </Form>
   );
 };
+
 const EditableCell = ({
   title,
   editable,
@@ -89,8 +90,6 @@ const EditableCell = ({
 };
 
 const Storage = ({ officeData }) => {
-
-
   const [searchText, setSearchText] = useState("");
   const [dataSource, setDataSource] = useState([
     {
@@ -106,11 +105,11 @@ const Storage = ({ officeData }) => {
       address: 'Hp',
     },
   ]);
-  const [count, setCount] = useState(2);
-  const handleDelete = (key) => {
-    const newData = dataSource.filter((item) => item.key !== key);
-    setDataSource(newData);
-  };
+
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [SelectedIds, setSelectedIds] = useState([]);
+
+  //Columns
   const defaultColumns = [
     {
       title: "S.No",
@@ -166,39 +165,89 @@ const Storage = ({ officeData }) => {
       title: "Status",
       key: "tags",
       dataIndex: "tags",
-      render: (x, text) => (
-        <>
-          {text.tags === false ? <Tag color="red">Not Assigned</Tag> : <Tag color="green">Assigned</Tag>}
-        </>
+      // render: (x, text) => (
+      //   <>
+      //     {text.isAssigned === false && text.isRepair === false ?
+      //       <Tag color="red">Not Assigned</Tag> : text.isAssigned === true && text.isRepair === false ?
+      //         <Tag color="green">Assigned</Tag> :
+      //         text.isAssigned === false && text.isRepair === true ?
+      //           <Tag color="yellow">Repair</Tag> : <Tag color="yellow">Repair</Tag>}
+      //   </>
+      // )
+      render: (x, text) =>   
+      (
+       <>{
+         text.isRepair === true ? <Tag color="yellow">Repair</Tag> 
+         : text.isAssigned === true 
+         ?  <Tag color="green">Assigned</Tag> 
+         :text.isStorage === true? <Tag color ="orange">Storage</Tag>
+         : text.isAssigned === false ? <Tag color="red">Not Assigned</Tag> :0
+         
+       }</>
       ),
+    },
+    // {
+    //   title: "Comments",
+    //   key: "comments",
+    //   dataIndex: "comments",
+    // },
+  ];
+
+  //Columns that are appeared in the modal 
+  const modalColumn = [
+    {
+      title: "S.No",
+      dataIndex: "SNo",
+      key: "SNo"
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <div className="flex gap-x-2">
-          <Popconfirm
-            title="Are you sure to delete this?"
-            okText="Yes"
-            cancelText="No"
-            okButtonProps={{
-              style: { backgroundColor: "red", color: "white" },
-            }}
-          onConfirm={() => DeleteIcon(record)}
-          >
-            <Button >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </Popconfirm>
-
-          {/* <Button >
-            <FontAwesomeIcon icon={faPen} />
-          </Button> */}
-        </div>
-      ),
+      title: "Product Name",
+      dataIndex: "productName",
+      key: "productName",
+    },
+    {
+      title: "Product Type",
+      dataIndex: "producttype",
+      key: "producttype",
+      render: (text) => <a>{text}</a>,
+      filteredValue: [searchText],
+      onFilter: (value, record) => {
+        return (
+          String(record.productName)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.producttype)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.brand).toLowerCase().includes(value.toLowerCase()) ||
+          String(record.modelNumber)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.serialNumber)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.tags).toLowerCase().includes(value.toLowerCase())
+        );
+      },
+    },
+    {
+      title: "Brand",
+      dataIndex: "brand",
+      key: "brand",
+    },
+    {
+      title: "Model",
+      dataIndex: "modelNumber",
+      key: "modelNo",
+    },
+    {
+      title: "Serial Number",
+      dataIndex: "serialNumber",
+      key: "serialNumber",
     },
   ];
- 
+
+
   const handleSave = (row) => {
     const newData = [...dataSource];
     const index = newData.findIndex((item) => row.key === item.key);
@@ -233,87 +282,51 @@ const Storage = ({ officeData }) => {
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 19);
 
-  
-  const DeleteIcon =async(id)=>{
-    
-   
-
-
-    const PreviousValue = TableDatas.filter((pr) => selectedRowKeys.some(id => pr.id ===id));
-    
-
+  //Delete Button Function
+  const DeleteIcon = async (id) => {
+    const PreviousValue = TableDatas.filter((pr) => selectedRowKeys.some(id => pr.id === id));
     //true 
     const DeletedData = PreviousValue.map(data => ({
-      id:data.id,
-      productDetailsId:data.productDetailsId,
-      officeLocationId:data.officeLocationId,
-      isDeleted:true,
-      isAssigned:data.isAssigned,
-      createdDate:data.createdDate,
-      createdBy:data.createdBy,
-      modifiedDate:formattedDate,
-      modifiedBy:data.modifiedBy
+      id: data.id,
+      productName:data.productName,
+      producttype:data.producttype,
+      brand:data.brand,
+      modelNumber:data.modelNumber,
+      serialNumber:data.serialNumber,
+      officeLocationId: data.officeLocationId,
+      isDeleted: data.isDeleted,
+      isAssigned: data.isAssigned,
+      isRepair: false,
+      isStorage:data.isStorage,
+      createdDate: data.createdDate,
+      createdBy: data.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: data.modifiedBy
     }));
+console.log(DeletedData);
+    // await DeletedData.map(async data => {
+    //   await dispatch(putProductsDetail(data));
+    //   await dispatch(getProductsDetail());
+    // });
+  };
+    // const DeletedIds = await DeletedData.map(data => {
+    //   return data.productDetailsId;
 
-   await DeletedData.map(async data=>{
-     await dispatch(putProductStorageLocation(data))
-    });
+    // });
 
-    const DeletedIds =await DeletedData.map(data =>{
-    return  data.productDetailsId
-  });
-    
-  const productfl = await productsDetail.filter(data => data.isDeleted ===false);
+    // const productfl = await productsDetail.filter(data => data.isDeleted === false);
 
-    const UpdatedDeletedDatas =await productfl.filter(data => DeletedIds.some(id => data.id ===id));
-    
-   //updated datas 
-   const UpdatedDates =await UpdatedDeletedDatas.map(data=>({
-    id: data.id,
-    accessoriesId: data.accessoriesId,
-    brandId: data.brandId,
-    productName: data.productName,
-    modelNumber: data.modelNumber,
-    serialNumber: data.serialNumber,
-    isDeleted: false,
-    isRepair: false,
-    isAssigned: false,
-    createdDate: data.createdDate,
-    createdBy: data.createdBy,
-    modifiedDate: formattedDate,
-    modifiedBy: data.modifiedBy
-   }));
+    // // const UpdatedDeletedDatas = await productfl.filter(data => DeletedIds.some(id => data.id === id));
 
-  await UpdatedDates.map(async data=> {
-    await dispatch(putProductsDetail(data));
-  });
-    // const DeleteData = {
-    //   id:PreviousValue[0].id,
-    //   productDetailsId:PreviousValue[0].productDetailsId,
-    //   officelocationId:PreviousValue[0].officelocationId,
-    //   productName:PreviousValue[0].productName,
-    //   producttype:PreviousValue[0].producttype,
-    //   brand:PreviousValue[0].brand,
-    //   modelNumber:PreviousValue[0].modelNumber,
-    //   serialNumber:PreviousValue[0].serialNumber,
-    //   tags:PreviousValue[0].isAssigned,
-    //   isDeleted:true,
-    //   isAssigned:false,
-    // }
-    // console.log(DeleteData);
-    // // await dispatch(putProductStorageLocation(DeleteData));
-    // // dispatch(getProductStorageLocation());
-    // message.success("Row Deleted Successfully!");
-
-    // const SelectedIdinTable= productstoragelocation.filter((data) => data.id ===data.productDetailsId );
-    
-    // console.log(SelectedIdinTable);
-
-    // const unAssignedRow = PreviousValue.map(data=> ({
+    // //updated datas 
+    // const UpdatedDates = await UpdatedDeletedDatas.map(data => ({
     //   id: data.id,
+    //   accessoriesId: data.accessoriesId,
+    //   brandId: data.brandId,
     //   productName: data.productName,
     //   modelNumber: data.modelNumber,
     //   serialNumber: data.serialNumber,
+    //   isRepair: data.isRepair,
     //   isDeleted: false,
     //   isRepair: false,
     //   isAssigned: false,
@@ -322,85 +335,131 @@ const Storage = ({ officeData }) => {
     //   modifiedDate: formattedDate,
     //   modifiedBy: data.modifiedBy
     // }));
-    // console.log(unAssignedRow);
 
-    // await unAssignedRow.map(data => {
-    //   dispatch(postProductsDetail(data));
-    // })
-  };
+    // await UpdatedDates.map(async data => {
+    //   await dispatch(putProductsDetail(data));
+    // });
+  
 
 
-  useEffect(() =>{
-    dispatch(getProductStorageLocation());
-  },[]);
+  // useEffect(() => {
+  //   dispatch(getProductStorageLocation());
+  // }, []);
+
+  // //Storage
+  // const [storage, setStorage] = useState({
+  //   productDetailsId: null,
+  //   officeLocationId: null,
+  //   isDeleted: false,
+  //   isAssigned: false,
+  // })
+
+
 
   const dispatch = useDispatch();
 
-  const { productstoragelocation } = useSelector(state => state.productstoragelocation);
-  const {productsDetail} = useSelector(state=> state.productsDetail)
+  // const { productstoragelocation } = useSelector(state => state.productstoragelocation);
+
+  const { productsDetail } = useSelector(state => state.productsDetail);
+
+  const { office } = useSelector((state) => state.office);
 
   const [storagelocData, setProLocData] = useState();
 
   const [storageLocationCount, setstorageLocationCount] = useState([]);
 
-  const [tableData,setTableData] = useState([]);
+  const [tableData, setTableData] = useState([]);
+
+  const [RepairModal, setRepairModal] = useState(false);
+  const OpenRepairModal = () => setRepairModal(true);
+  const CloseRepairModal = () => setRepairModal(false);
+
+  //Input Field Value
+  const [system, setSystem] = useState({
+    id: null,
+    accessoriesId: null,
+    brandId: null,
+    productName: "",
+    modelNumber: "",
+    serialNumber: "",
+    tags: "",
+    isAssigned: false,
+    isdeleted: false,
+    isRepair: false,
+    isStorage:false,
+    officeLocationId:null,
+    comments:""
+  });
+
+
+  const [popConfirmRepairVisible, setPopConfirmRepairVisible] = useState(false);
+
 
   useEffect(() => {
-    dispatch(getProductStorageLocation());
+    // dispatch(getProductStorageLocation());
     dispatch(getProductsDetail());
   }, []);
 
   useEffect(() => {
-    setProLocData(productstoragelocation);
+    // setProLocData(productstoragelocation);
+    setProLocData(productsDetail);
+    setTableData(productsDetail);
     DataLoading();
-  }, [productstoragelocation, officeData]);
+  }, [ officeData,productsDetail]);
 
-
+  //Filter Table Data Based on the Office in Dropdown 
   function DataLoading() {
 
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
-    
+
     var officeNames = numberOfOffice.map((off) => {
       return off.officename;
     });
 
     if (officeNames.length === 1) {
-      const filterOneOffice = storagelocData ? storagelocData.filter(storage => storage.isDeleted === false && storage.officename ===officeNames[0]) :0;
+      const filterOneOffice = storagelocData ? storagelocData.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isStorage ===true) : 0;
+      console.log(filterOneOffice);
       setstorageLocationCount(filterOneOffice.length);
       setTableData(filterOneOffice);
     }
-    else{
-      const filterAllOffice = storagelocData?storagelocData.filter(storage => storage.isDeleted === false):0;
+    else {
+      const filterAllOffice = storagelocData ? storagelocData.filter(system => system.isDeleted === false && system.isStorage ===true) : 0;
       setstorageLocationCount(filterAllOffice.length);
       setTableData(filterAllOffice);
 
     }
   }
+// console.log(productsDetail);
+//   console.log(tableData);
 
- 
-  const TableDatas = tableData && tableData.length>0 ?tableData.filter(data => data.isDeleted === false).map((data, i) => ({
+  //Table Data 
+  const TableDatas = tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted === false && data.isStorage===true ).map((data, i) => ({
     SNo: i + 1,
-    key:data.id,
-    id:data.id,
-    productDetailsId:data.productDetailsId,
-    officeLocationId:data.officeLocationId,
+    key: data.id,
+    id: data.id,
+    officeLocationId: data.officeLocationId,
     productName: data.productName,
     producttype: data.accessoryName,
     brand: data.brandName,
     modelNumber: data.modelNumber,
     serialNumber: data.serialNumber,
-    tags: data.isAssigned,
-    isDeleted:false,
-    isAssigned:false
-  })):[];
+    isRepair: data.isRepair,
+    tags:data.isRepair,
+    isDeleted: false,
+    isAssigned: false,
+    isStorage:false,
+    comments:data.comments
+  })) : [];
 
-  console.log(TableDatas);
-  // console.log(productstoragelocation);
+
+  //Row key selection
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const onSelectChange = (newSelectedRowKeys) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-    setSelectedRowKeys(newSelectedRowKeys);
+  const onSelectChange = async (newSelectedRowKeys, x) => {
+    await setSelectedRowKeys(newSelectedRowKeys);
+    await setIsButtonEnabled(newSelectedRowKeys.length > 0);
+    await setSelectedIds(newSelectedRowKeys);
   };
+
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
@@ -439,24 +498,151 @@ const Storage = ({ officeData }) => {
     ],
   };
 
+  // //office Dropdown Option
+  // const officeFilter = office.filter((ofc) => ofc.isdeleted === false);
+  // const officeOption = officeFilter.map((off) => ({
+  //   label: off.officename,
+  //   value: off.id,
+  // }));
+
+  // //office Dropdown
+  // const officeNameDropdown = (data, value) => {
+  //   setSystem((pre) => ({ ...pre, officeLocationId: value.value }));
+  //   // console.log(value);
+  // }
+
+  //Repair Ok Button Function
+  const [temporaryKey, setTemporaryKey] = useState([]);
+
+  const handleRepairConfirm = () => {
+    setSystem({
+      SNo: null,
+      key: null,
+      id: null,
+      producttype: null,
+      brand: null,
+      productName: null,
+      modelNumber: null,
+      serialNumber: null,
+      tags: null,
+      isdeleted: false,
+      isRepair: false,
+      isStorage:false,
+      isAssigned:false,
+      officeLocationId:null,
+      comments:null
+    })
+    OpenRepairModal();
+    setPopConfirmRepairVisible(false);
+    setSelectedRowKeys(temporaryKey);
+    setTemporaryKey([]);
+  };
+
+  //Repair Cancel Button
+
+  const handleRepairCancel = () => {
+    setPopConfirmRepairVisible(false);
+  };
+
+   //Send Repair Function
+const PostRepair =async ()=>{
+  const ProductRepair = await productsDetail.filter(data => SelectedIds.some(id =>id ===data.id));
+  console.log(ProductRepair);
+  
+  const UpdateRepairedProductDetails=await ProductRepair.map(data => ({
+    id:data.id,
+    accessoriesId:data.accessoriesId,
+    brandId: data.brandId,
+    productName: data.productName,
+    modelNumber: data.modelNumber,
+    serialNumber: data.serialNumber,
+    isDeleted: false,      
+    isRepair: true,
+    isAssigned: false,
+    createdDate: data.createdDate,
+    createdBy: data.createdBy,
+    modifiedDate: formattedDate,
+    modifiedBy: data.modifiedBy,
+    isStorage:data.isStorage,
+    officeLocationId:data.officeLocationId,
+    comments:data.comments
+  }));
+  console.log(UpdateRepairedProductDetails);
+
+  UpdateRepairedProductDetails.map(async data =>{
+   await dispatch(putProductsDetail(data));
+   await dispatch (getProductsDetail());
+  });
+
+  CloseRepairModal();
+  setIsButtonEnabled(false);
+
+}
+
+  
+
+  const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
   return (
     <div>
       <Row justify='space-between' align='middle'>
         <Col span={4}>
           <Card bordered={true}>
-          <Statistic
-            title="Stored Products"
-            value={storageLocationCount}
-            formatter={formatter}
-            valueStyle={{ color: "#3f8600" }}
-          />
+            <Statistic
+              title="Stored Products"
+              value={storageLocationCount}
+              formatter={formatter}
+              valueStyle={{ color: "#3f8600" }}
+            />
           </Card>
         </Col>
-        {/* <Col justify='flex-end' style={{right :'1%'}}><Button onClick={handleAdd} type="primary">Add to Storage</Button></Col> */}
+        {/* <Col justify='flex-end' style={{ left: '39%' }}>
+          <Button type="primary" className='bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3'
+            disabled={!isButtonEnabled}
+          >Assign to Employee</Button>
+        </Col> */}
+        <Col justify='flex-end' style={{ left: '19%' }}>
+          <Popconfirm
+            title="Are you sure you want to transfer the Products to Repair?"
+            open={popConfirmRepairVisible}
+            onConfirm={handleRepairConfirm}
+            onCancel={handleRepairCancel}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="primary" className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"    //Transfer to Repair Button
+              open={RepairModal}
+              onClick={() => {
+                setPopConfirmRepairVisible(true);
+                setTemporaryKey(selectedRowKeys); // Store the temporary selected row keys
+              }}
+              disabled={!isButtonEnabled}
+            >Add to Repair</Button></Popconfirm></Col>
+
+        <Col justify='flex-end' style={{ right: '1%' }}>
+          <Popconfirm
+            title="Are you sure to delete this?"
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{
+              style: { backgroundColor: "red", color: "white" },
+            }}
+            onClick={() => DeleteIcon(selectedRowKeys)
+            }
+          >
+            <Button
+              disabled={selectedRowKeys.length === 0}
+            >
+              <FontAwesomeIcon icon={faTrash} />
+
+            </Button>
+          </Popconfirm>
+
+        </Col>
+
       </Row>
       <Divider />
       <Table
-      rowSelection={rowSelection}
+        rowSelection={rowSelection}
         rowClassName={() => 'editable-row'}
         bordered
         dataSource={TableDatas}
@@ -465,8 +651,49 @@ const Storage = ({ officeData }) => {
           pageSize: 6,
         }}
       />
+
+       <Modal                                //Add to Repair Modal 
+        title="Add to Repair"
+        open={RepairModal}
+        onCancel={CloseRepairModal}
+        width={"1200px"}
+        footer={[
+          <Button key="1" 
+          onClick={PostRepair}
+          >
+            Send
+          </Button>,
+          <Button
+            type="text"
+            key="2"
+            danger="red"
+            style={{ border: "0.5px solid red" }}
+            onClick={() => CloseRepairModal()}
+          >
+            Cancel
+          </Button>
+        ]}>
+        {/* <div style={{ display: "flex", flexDirection: "column"}}>
+    <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+    <Select
+      style={{ width: "20%" }}
+      placeholder="Select Office Location"
+      options={officeOption}
+      onChange={officeNameDropdowninProduct}
+    />
+    </div>
+  </div> */}
+      <Table 
+      columns={modalColumn}
+      dataSource={selectedrowrepairData}
+      pagination={{
+        pageSize: 6,
+      }}  
+      >
+      </Table>
+      </Modal>
     </div>
   );
-      }
+}
 
-export default Storage
+export default Storage;

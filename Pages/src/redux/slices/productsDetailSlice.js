@@ -10,14 +10,35 @@ export const getProductsDetail = createAsyncThunk('get/getProductsDetail',async(
 export const postProductsDetail = createAsyncThunk('productsDetail/postProductsDetail', async (newProductData) => {
     console.log(newProductData);
     return Axios.post(ApiLink.productsDetail, newProductData)
-        .then(res => { return res.data });
+        .then(res => { 
+            // console.log(res.data);
+            return res.data 
+        });
         
 });
 
 
+// export const putProductsDetail = createAsyncThunk('productsDetail/putProductsDetail', async (updatedProductData) => {
+//     const { id, ...restData } = updatedProductData;
+//     console.log({ id, ...restData });
+//     return  Axios.put(`${ApiLink.productsDetail}/${id}`,{id,...restData}).then(res => console.log(res.data)
+//     // {return res.data});
+//     );
+// });
+
 export const putProductsDetail = createAsyncThunk('productsDetail/putProductsDetail', async (updatedProductData) => {
     const { id, ...restData } = updatedProductData;
-    return await Axios.put(`${ApiLink.productsDetail}/${id}`,{id,...restData}).then(res => res.data);
+
+    try {
+        const response = await Axios.put(`${ApiLink.productsDetail}/${id}`, { id, ...restData });
+        console.log(response.data); // Log the response data
+        return response.data;
+    } catch (error) {
+        console.error('Error updating product:', error);
+        // Handle the error appropriately
+        // You might want to throw an error or return a specific error structure
+        throw error;
+    }
 });
 
 export const deleteProductsDetail = createAsyncThunk('productsDetail/deleteProductsDetail', async (id) => {
@@ -37,12 +58,12 @@ const productsDetailSlice = createSlice({
         //Get Method
         .addCase(getProductsDetail.pending,(state)=>{
             state.loading = true;
-            console.log('getProducts is pending');
+            // console.log('getProducts is pending');
         })
         .addCase(getProductsDetail.fulfilled,(state,action)=>{
             state.loading = false;
             state.productsDetail = action.payload;
-            console.log('getProducts fulfilled. Updated products:', state.productsDetail);
+            // console.log('getProducts fulfilled. Updated products:', state.productsDetail);
         })
         .addCase(getProductsDetail.rejected,(state,action)=>{
             state.loading = false;
@@ -67,7 +88,7 @@ const productsDetailSlice = createSlice({
         .addCase(putProductsDetail.fulfilled, (state, action) => {
             state.loading = false;
             state.productsDetail = state.productsDetail.map((item) => item.id === action.payload.id ? action.payload : item);
-            // console.log(state.productsDetail);
+            console.log(state.productsDetail);
         })
         .addCase(putProductsDetail.rejected, (state) => {
             state.loading = false;

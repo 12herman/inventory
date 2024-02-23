@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Popconfirm, Table } from 'antd';
-import { Col, Row, Statistic, Divider } from 'antd';
+import { Col, Row, Statistic, Divider,Tag,Card } from 'antd';
 import CountUp  from 'react-countup';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faTrash, faPen, faL } from "@fortawesome/free-solid-svg-icons";
 import {useSelector,useDispatch} from 'react-redux'
 import { getEmployees } from '../redux/slices/employeeSlice';
+
 
 const formatter = (value) => <CountUp end={value} />;
 
@@ -87,10 +90,16 @@ const EditableCell = ({
 
 
 const Repair = () => {
-
+  const [searchText, setSearchText] = useState("");
   const dispatch = useDispatch();
   const {employee,loading} = useSelector(state => state.employee);
   const [empData,setEmpData] = useState([]);
+
+  const {productsDetail} = useSelector(state => state.productsDetail);
+
+  const [proData,setProData] = useState([]);
+
+  const [proCount,setProCount] = useState();
 
   useEffect(()=>{
     dispatch(getEmployees());
@@ -98,7 +107,16 @@ const Repair = () => {
 
   useEffect(()=>{
     setEmpData(employee)
-  },[employee]);
+    setTableData(productsDetail);
+    setProData(productsDetail);
+    DataLoading();
+  },[employee,productsDetail]);
+
+  async function DataLoading(){
+  const filteredProducts = await productsDetail.filter((products) => products.isDeleted === false && products.isRepair === true);
+  console.log(filteredProducts);
+  setProCount(filteredProducts.length);
+  }
   
   const [dataSource, setDataSource] = useState([
     {
@@ -119,35 +137,122 @@ const Repair = () => {
     const newData = dataSource.filter((item) => item.key !== key);
     setDataSource(newData);
   };
+  // const defaultColumns = [
+  //   {
+  //     title: 'Name',
+  //     dataIndex: 'name',
+  //     width: '25%',
+  //     editable: true,
+  //   },
+  //   {
+  //     title: 'Count',
+  //     dataIndex: 'age',
+  //     width: '25%',
+  //     editable: true,
+  //   },
+  //   {
+  //     title: 'address',
+  //     dataIndex: 'address',
+  //     width: '25%',
+  //     editable: true,
+  //   },
+  //   {
+  //     title: 'operation',
+  //     dataIndex: 'operation',
+  //     render: (_, record) =>
+  //       dataSource.length >= 1 ? (
+  //         <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
+  //           <a>Delete</a>
+  //         </Popconfirm>
+  //       ) : null,
+  //   },
+  // ];
   const defaultColumns = [
     {
-      title: 'Name',
-      dataIndex: 'name',
-      width: '25%',
-      editable: true,
+      title: "S.No",
+      dataIndex: "SNo",
+      key: "SNo"
     },
     {
-      title: 'Count',
-      dataIndex: 'age',
-      width: '25%',
-      editable: true,
+      title: "Product Name",
+      dataIndex: "productName",
+      key: "productName",
     },
     {
-      title: 'address',
-      dataIndex: 'address',
-      width: '25%',
-      editable: true,
+      title: "Product Type",
+      dataIndex: "producttype",
+      key: "producttype",
+      render: (text) => <a>{text}</a>,
+      filteredValue: [searchText],
+      onFilter: (value, record) => {
+        return (
+          String(record.productName)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.producttype)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.brand).toLowerCase().includes(value.toLowerCase()) ||
+          String(record.modelNumber)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.serialNumber)
+            .toLowerCase()
+            .includes(value.toLowerCase()) ||
+          String(record.tags).toLowerCase().includes(value.toLowerCase())
+        );
+      },
     },
     {
-      title: 'operation',
-      dataIndex: 'operation',
-      render: (_, record) =>
-        dataSource.length >= 1 ? (
-          <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
-            <a>Delete</a>
-          </Popconfirm>
-        ) : null,
+      title: "Brand",
+      dataIndex: "brand",
+      key: "brand",
     },
+    {
+      title: "Model",
+      dataIndex: "modelNumber",
+      key: "modelNo",
+    },
+    {
+      title: "Serial Number",
+      dataIndex: "serialNumber",
+      key: "serialNumber",
+    },
+    // {
+    //   title: "Status",
+    //   key: "tags",
+    //   dataIndex: "tags",
+    //   render: (x, text) => (
+    //     <>
+    //       {text.tags === false ? <Tag color="red">Not Assigned</Tag> : <Tag color="green">Assigned</Tag>}
+    //     </>
+    //   ),
+    // },
+    // {
+    //   title: "Action",
+    //   key: "action",
+    //   render: (_, record) => (
+    //     <div className="flex gap-x-2">
+    //       <Popconfirm
+    //         title="Are you sure to delete this?"
+    //         okText="Yes"
+    //         cancelText="No"
+    //         okButtonProps={{
+    //           style: { backgroundColor: "red", color: "white" },
+    //         }}
+    //       // onConfirm={() => DeleteIcon(record)}
+    //       >
+    //         <Button >
+    //           <FontAwesomeIcon icon={faTrash} />
+    //         </Button>
+    //       </Popconfirm>
+
+    //       {/* <Button >
+    //         <FontAwesomeIcon icon={faPen} />
+    //       </Button> */}
+    //     </div>
+    //   ),
+    // },
   ];
   const handleAdd = () => {
     const newData = {
@@ -190,18 +295,82 @@ const Repair = () => {
       }),
     };
   });
+const [tableData,setTableData] = useState([]);
+  const TableDatas= tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted ===false && data.isRepair ===true).map((data,i)=> ({
+    SNo: i + 1,
+    key:data.id,
+    id:data.id,
+    productName: data.productName,
+    producttype: data.accessoryName,
+    brand: data.brandName,
+    modelNumber: data.modelNumber,
+    serialNumber: data.serialNumber,
+    tags: data.isAssigned,
+    isDeleted:false,
+    isAssigned:false
+  })):[];
+  console.log(TableDatas);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const onSelectChange = (newSelectedRowKeys) => {
+    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: 'odd',
+        text: 'Select Odd Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        key: 'even',
+        text: 'Select Even Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+  };
+
   return (
     <div>
       <Row justify='space-between' align='middle'>
-      <Col><Statistic title="Product in Repair" value={3} formatter={formatter}/></Col>
-      <Col justify='flex-end' style={{right :'1%'}}><Button onClick={handleAdd} type="primary">Add to Repair</Button></Col>
+      <Col span={4}>
+          <Card bordered={true}>
+      <Statistic title="Product in Repair" value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }}/>
+      </Card>
+      </Col>
+      <Col justify='flex-end' style={{right :'1%'}}><Button onClick={handleAdd} type="primary" >Send to Storage</Button></Col>
       </Row>
       <Divider />
       <Table
+      rowSelection={rowSelection}
         components={components}
         rowClassName={() => 'editable-row'}
         bordered
-        dataSource={dataSource}
+        dataSource={TableDatas}
         columns={columns}
       />
       
