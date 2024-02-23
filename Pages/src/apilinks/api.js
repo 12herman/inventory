@@ -17,5 +17,6 @@ export const ApiLink = {
     login:"https://localhost:7129/api/Login",
     loginauth:"https://localhost:7129/api/Login/login",
     leavetable:"https://localhost:7129/api/LeaveTable",
+    otpapi:"https://localhost:7129/api/Otp"
   };
   

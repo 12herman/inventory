@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 
 
 
-const AccountForm = forwardRef((props, ref) => {
+const AccountForm = forwardRef((props, ref,) => {
   
   const widthSize = "810px";
   const [form] = Form.useForm();
@@ -25,7 +25,8 @@ const AccountForm = forwardRef((props, ref) => {
     PostPermenantAdd,
     newEmployee,
     EditPencilState,
-    PutEmployee
+    PutEmployee,
+    SkipAccount
   } = props;
 
 
@@ -79,6 +80,10 @@ const AccountForm = forwardRef((props, ref) => {
     ) {
        accountPostProcessBar();
       PutEmployee();
+    }
+    else if(SkipAccount === true){
+      accountPostProcessBar();
+      newEmployee();
     }
     //  accountPostProcessBar();
     //  newEmployee();
