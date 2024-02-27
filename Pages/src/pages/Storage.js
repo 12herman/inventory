@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Popconfirm, Table, message } from 'antd';
-import { Col, Row, Statistic, Divider, Tag, Card, Modal, Select } from 'antd';
+import { Col, Row, Statistic, Divider, Tag, Card, Modal, Select ,Tooltip} from 'antd';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faPen, faL } from "@fortawesome/free-solid-svg-icons";
 import CountUp from 'react-countup';
@@ -90,6 +90,15 @@ const EditableCell = ({
 };
 
 const Storage = ({ officeData }) => {
+  const [form] = Form.useForm();
+  const onFinish = () => {
+    form.validateFields().then((values) => {
+      // Handle form submission if validation succeeds
+      PostRepair();
+    }).catch((errorInfo) => {
+      console.log('Validation failed:', errorInfo);
+    });
+  };
   const [searchText, setSearchText] = useState("");
   const [dataSource, setDataSource] = useState([
     {
@@ -165,15 +174,6 @@ const Storage = ({ officeData }) => {
       title: "Status",
       key: "tags",
       dataIndex: "tags",
-      // render: (x, text) => (
-      //   <>
-      //     {text.isAssigned === false && text.isRepair === false ?
-      //       <Tag color="red">Not Assigned</Tag> : text.isAssigned === true && text.isRepair === false ?
-      //         <Tag color="green">Assigned</Tag> :
-      //         text.isAssigned === false && text.isRepair === true ?
-      //           <Tag color="yellow">Repair</Tag> : <Tag color="yellow">Repair</Tag>}
-      //   </>
-      // )
       render: (x, text) =>   
       (
        <>{
@@ -186,11 +186,6 @@ const Storage = ({ officeData }) => {
        }</>
       ),
     },
-    // {
-    //   title: "Comments",
-    //   key: "comments",
-    //   dataIndex: "comments",
-    // },
   ];
 
   //Columns that are appeared in the modal 
@@ -245,6 +240,11 @@ const Storage = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
+    {
+      title: "Office Location",
+      dataIndex: "officeLocationId",
+      key: "officeLocationId",
+    }
   ];
 
 
@@ -304,61 +304,9 @@ const Storage = ({ officeData }) => {
       modifiedBy: data.modifiedBy
     }));
 console.log(DeletedData);
-    // await DeletedData.map(async data => {
-    //   await dispatch(putProductsDetail(data));
-    //   await dispatch(getProductsDetail());
-    // });
-  };
-    // const DeletedIds = await DeletedData.map(data => {
-    //   return data.productDetailsId;
-
-    // });
-
-    // const productfl = await productsDetail.filter(data => data.isDeleted === false);
-
-    // // const UpdatedDeletedDatas = await productfl.filter(data => DeletedIds.some(id => data.id === id));
-
-    // //updated datas 
-    // const UpdatedDates = await UpdatedDeletedDatas.map(data => ({
-    //   id: data.id,
-    //   accessoriesId: data.accessoriesId,
-    //   brandId: data.brandId,
-    //   productName: data.productName,
-    //   modelNumber: data.modelNumber,
-    //   serialNumber: data.serialNumber,
-    //   isRepair: data.isRepair,
-    //   isDeleted: false,
-    //   isRepair: false,
-    //   isAssigned: false,
-    //   createdDate: data.createdDate,
-    //   createdBy: data.createdBy,
-    //   modifiedDate: formattedDate,
-    //   modifiedBy: data.modifiedBy
-    // }));
-
-    // await UpdatedDates.map(async data => {
-    //   await dispatch(putProductsDetail(data));
-    // });
-  
-
-
-  // useEffect(() => {
-  //   dispatch(getProductStorageLocation());
-  // }, []);
-
-  // //Storage
-  // const [storage, setStorage] = useState({
-  //   productDetailsId: null,
-  //   officeLocationId: null,
-  //   isDeleted: false,
-  //   isAssigned: false,
-  // })
-
-
+  }; 
 
   const dispatch = useDispatch();
-
-  // const { productstoragelocation } = useSelector(state => state.productstoragelocation);
 
   const { productsDetail } = useSelector(state => state.productsDetail);
 
@@ -369,6 +317,10 @@ console.log(DeletedData);
   const [storageLocationCount, setstorageLocationCount] = useState([]);
 
   const [tableData, setTableData] = useState([]);
+
+  const [LocationStatus,setLocationStatus] =useState(false);
+
+  const { TextArea } = Input;
 
   const [RepairModal, setRepairModal] = useState(false);
   const OpenRepairModal = () => setRepairModal(true);
@@ -429,8 +381,6 @@ console.log(DeletedData);
 
     }
   }
-// console.log(productsDetail);
-//   console.log(tableData);
 
   //Table Data 
   const TableDatas = tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted === false && data.isStorage===true ).map((data, i) => ({
@@ -448,10 +398,10 @@ console.log(DeletedData);
     isDeleted: false,
     isAssigned: false,
     isStorage:false,
-    comments:data.comments
+    comments:system.comments
   })) : [];
 
-
+console.log(TableDatas);
   //Row key selection
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const onSelectChange = async (newSelectedRowKeys, x) => {
@@ -497,19 +447,6 @@ console.log(DeletedData);
       },
     ],
   };
-
-  // //office Dropdown Option
-  // const officeFilter = office.filter((ofc) => ofc.isdeleted === false);
-  // const officeOption = officeFilter.map((off) => ({
-  //   label: off.officename,
-  //   value: off.id,
-  // }));
-
-  // //office Dropdown
-  // const officeNameDropdown = (data, value) => {
-  //   setSystem((pre) => ({ ...pre, officeLocationId: value.value }));
-  //   // console.log(value);
-  // }
 
   //Repair Ok Button Function
   const [temporaryKey, setTemporaryKey] = useState([]);
@@ -564,7 +501,7 @@ const PostRepair =async ()=>{
     modifiedDate: formattedDate,
     modifiedBy: data.modifiedBy,
     isStorage:data.isStorage,
-    officeLocationId:data.officeLocationId,
+    officeLocationId:system.officeLocationId,
     comments:data.comments
   }));
   console.log(UpdateRepairedProductDetails);
@@ -595,11 +532,11 @@ const PostRepair =async ()=>{
             />
           </Card>
         </Col>
-        {/* <Col justify='flex-end' style={{ left: '39%' }}>
+        <Col justify='flex-end' style={{ left: '39%' }}>
           <Button type="primary" className='bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3'
             disabled={!isButtonEnabled}
           >Assign to Employee</Button>
-        </Col> */}
+        </Col>
         <Col justify='flex-end' style={{ left: '19%' }}>
           <Popconfirm
             title="Are you sure you want to transfer the Products to Repair?"
@@ -659,7 +596,7 @@ const PostRepair =async ()=>{
         width={"1200px"}
         footer={[
           <Button key="1" 
-          onClick={PostRepair}
+          onClick={onFinish }
           >
             Send
           </Button>,
@@ -673,16 +610,15 @@ const PostRepair =async ()=>{
             Cancel
           </Button>
         ]}>
-        {/* <div style={{ display: "flex", flexDirection: "column"}}>
-    <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
-    <Select
-      style={{ width: "20%" }}
-      placeholder="Select Office Location"
-      options={officeOption}
-      onChange={officeNameDropdowninProduct}
-    />
-    </div>
-  </div> */}
+  <Form form={form}>
+        <Form.Item
+          name="comments"
+          rules={[{ required: true, message: 'Add a Comment!' }]}
+        >
+          <Input.TextArea rows={3} style={{ width: "40%" }} placeholder='Add a Comment...' />
+        </Form.Item>
+      </Form>
+  <Divider />
       <Table 
       columns={modalColumn}
       dataSource={selectedrowrepairData}

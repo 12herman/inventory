@@ -179,6 +179,7 @@ const Products = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
+    
   ];
 
   const dispatch = useDispatch();
