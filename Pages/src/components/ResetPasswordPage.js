@@ -59,6 +59,7 @@ export default function ResetPasswordPage({ data ,LoginId}) {
     await dataFilter(LoginId,HashedPassword);
     console.log(HashedPassword);
     form.resetFields();
+    message.success('Password reseted successfully')
   };
 
   return (

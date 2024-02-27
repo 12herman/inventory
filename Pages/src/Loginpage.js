@@ -1,5 +1,5 @@
 import { React, useEffect, useState } from "react";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { CheckAuthentication, GetLogin } from "./redux/slices/loginSlice";
 import bcrpt from "bcryptjs";
@@ -28,7 +28,7 @@ const onFinish = (value) => {
 
   if (isPasswordValid === true) {
     console.log("Correct password");
-
+    message.success('Login successfully');
   } else {  
     console.log("Incorrect password");
   }
