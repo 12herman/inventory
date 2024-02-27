@@ -23,11 +23,11 @@ import {
   postProductsDetail,
 } from "../redux/slices/productsDetailSlice";
 import { getProductStorageLocation, postProductStorageLocation, putProductStorageLocation } from "../redux/slices/productStorageLocationSlice";
-import Storage from './Storage';
 
 const formatter = (value) => <CountUp end={value} />;
 
 const Products = ({ officeData }) => {
+  const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
 
   const columns = [
@@ -81,15 +81,25 @@ const Products = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
+    // {
+    //   title: "Office Location",
+    //   dataIndex: "officeLocationId",
+    //   key: "offLoc",
+    // },
     {
       title: "Status",
       key: "tags",
       dataIndex: "tags",
-      render: (x, text) => (      
-        <>
-          {text.tags === false ? <Tag color="red">Not Assigned</Tag> : <Tag color="green">Assigned</Tag>}
-        </>
-      ),
+      render: (x, text) =>   
+       (
+        <>{
+          text.isRepair === true ? <Tag color="yellow">Repair</Tag> 
+          : text.isAssigned === true ?  <Tag color="green">Assigned</Tag> 
+          :text.isStorage === true? <Tag color ="orange">Storage</Tag>
+          : text.isAssigned === false ? <Tag color="red">Not Assigned</Tag> :0
+          
+        }</>
+       ),
     },
     {
       title: "Action",
@@ -169,6 +179,7 @@ const Products = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
+    
   ];
 
   const dispatch = useDispatch();
@@ -193,10 +204,12 @@ const Products = ({ officeData }) => {
 
   const [pcCounts, setPcCounts] = useState();
 
+  const [tableDATA,setTableDATA] = useState([]);
+
   //pop-Up Window
   const [modalOpen, setModalOpen] = useState(false);
   const ModalOpen = () => setModalOpen(true);
-  const ModalClose = () => setModalOpen(false);
+  const ModalClose = () => {setModalOpen(false);   setSystem(pre => ({...pre,officeLocationId:undefined}));};
 
   //Save or Add Button State
   const [saveBtn, setsaveBtn] = useState(false);
@@ -208,6 +221,9 @@ const Products = ({ officeData }) => {
     clearFields();
     saveBtnOff();
     ModalOpen();
+    if (form) {
+      form.resetFields(["officeLocationId"])};
+      setSystem(pre =>({...pre,officeLocationId:undefined}));
   };
 
   //Input Field Value
@@ -219,17 +235,24 @@ const Products = ({ officeData }) => {
     modelNumber: "",
     serialNumber: "",
     tags: "",
-    isdeleted: false,
+    isAssigned:false,
+    isDeleted: false,
+    isRepair:false,
+    officeLocationId:undefined,
+    isStorage:false
   });
+ 
 
   //Storage
   const [storage, setStorage] = useState({
     productDetailsId: null,
-    officeLocationId: null,
+    officeLocationId:null,
     isDeleted: false,
     isAssigned: false,
+    isStorage:false,
+    isRepair:false
   })
-
+// console.log(productsDetail);
   //Table data and Column
   const TableDatas = productsDetail.map((cnsl, i) => ({
     id: cnsl.id,
@@ -239,8 +262,13 @@ const Products = ({ officeData }) => {
     modelNumber: cnsl.modelNumber,
     serialNumber: cnsl.serialNumber,
     tags: cnsl.isAssigned,
-    isdeleted: false,
+    isAssigned:false,
+    isRepair:false,
+    isDeleted: false,
+    isStorage:false,
+    officeLocationId:cnsl.officeLocationId,
   }));
+  // console.log(TableDatas);
 
   //Modify
   const [putSystem, setPutSystem] = useState([]);
@@ -254,11 +282,18 @@ const Products = ({ officeData }) => {
       modelNumber: "",
       serialNumber: "",
       tags: "",
-      isdeleted: false,
+      isDeleted: false,
+      isAssigned:false,
+      isRepair:false,
+      officeLocationId:"",
+      isStorage:false
     });
+    setSystem(pre => ({...pre,officeLocationId:undefined}));
+    
   };
   useEffect(() => {
-    dispatch(getProductStorageLocation());
+    // dispatch(getProductStorageLocation());
+    dispatch(getProductsDetail());
   }, []);
 
   //Brand Dropdown
@@ -279,7 +314,11 @@ const Products = ({ officeData }) => {
       modelNumber: PreviousValue[0].modelNumber,
       serialNumber: PreviousValue[0].serialNumber,
       tags: PreviousValue[0].isAssigned,
-      isdeleted: true,
+      isDeleted: true,
+      isStorage:false,
+      isRepair:false,
+      isAssigned:false,
+      officeLocationId:PreviousValue[0].officeLocationId,
     };
     await dispatch(putProductsDetail(DeleteData));
     await dispatch(getProductsDetail());
@@ -305,7 +344,11 @@ const Products = ({ officeData }) => {
       modelNumber: filterConsoleData[0].modelNumber,
       serialNumber: filterConsoleData[0].serialNumber,
       tags: filterConsoleData[0].isAssigned,
-      isdeleted: false,
+      isDeleted: false,
+      isAssigned:false,
+      isRepair:false,
+      isStorage:false,
+      officeLocationId:filterConsoleData[0].officeLocationId,
     });
     setPutSystem({
       id: filterConsoleData[0].id,
@@ -315,7 +358,11 @@ const Products = ({ officeData }) => {
       modelNumber: filterConsoleData[0].modelNumber,
       serialNumber: filterConsoleData[0].serialNumber,
       tags: filterConsoleData[0].isAssigned,
-      isdeleted: false,
+      isDeleted: false,
+      isStorage:false,
+      isRepair:false,
+      isAssigned:false,
+      officeLocationId:filterConsoleData[0].officeLocationId,
     });
     saveBtnOn();
     ModalOpen();
@@ -323,12 +370,13 @@ const Products = ({ officeData }) => {
 
   //PutMethod
   const PutMethod = async () => {
+    setLocationStatus(false);
     if (
       !system.productName ||
       !system.accessoriesId ||
       !system.brandId ||
       !system.modelNumber ||
-      !system.serialNumber
+      !system.serialNumber     
     ) {
       message.error("Please Fill all the Fields!");
     } else {
@@ -340,8 +388,13 @@ const Products = ({ officeData }) => {
         modelNumber: system.modelNumber,
         serialNumber: system.serialNumber,
         tags: system.isAssigned,
-        isdeleted: putSystem.isdeleted,
+        isDeleted: system.isDeleted,
+        isStorage:LocationStatus,
+        isAssigned:system.isAssigned,
+        isRepair:system.isRepair,
+        officeLocationId:system.officeLocationId
       };
+      // console.log(putData);
       await dispatch(putProductsDetail(putData));
       dispatch(getProductsDetail());
       ModalClose();
@@ -349,14 +402,18 @@ const Products = ({ officeData }) => {
     }
   };
 
+const [LocationStatus,setLocationStatus] =useState(false)
   //Add Product Button
   const addProduct = async () => {
+    
+    setLocationStatus(false);
     if (
       !system.productName ||
       !system.accessoriesId ||
       !system.brandId ||
       !system.modelNumber ||
-      !system.serialNumber
+      !system.serialNumber ||
+      system.officeLocationId === undefined
     ) {
       message.error("Please Fill all the fields!");
     } else {
@@ -366,8 +423,13 @@ const Products = ({ officeData }) => {
         productName: system.productName,
         modelNumber: system.modelNumber,
         serialNumber: system.serialNumber,
-        isAssigned: false
+        isAssigned: false,
+        isDeleted:false,
+        isRepair:false,
+        officeLocationId:system.officeLocationId,
+        isStorage:LocationStatus
       };
+      console.log(newProduct);
       try {
         await dispatch(postProductsDetail(newProduct));   
         await dispatch(getProductsDetail());
@@ -376,15 +438,20 @@ const Products = ({ officeData }) => {
       } catch (error) {
         console.error("Error adding product:", error);
       }
+      await dispatch(getProductsDetail());
+     await setSystem(pre=>({...pre,officeLocationId:undefined}));
     }
   };
 
   //Displaying data in table data
-const productsCopy = [...productsDetail];
+const productsCopy = [...tableDATA];
 productsCopy.sort((a, b) => a.id - b.id);
 
+// console.log(productsCopy);
+// console.log(tableDATA);
+
 // Map the sorted productsDetail array to TableDATA
-const TableDATA = productsCopy
+const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
   .filter((consoleItem) => !consoleItem.isDeleted)
   .map((cnsl, i) => ({
     SNo: i + 1,
@@ -395,11 +462,14 @@ const TableDATA = productsCopy
     productName: cnsl.productName,
     modelNumber: cnsl.modelNumber,
     serialNumber: cnsl.serialNumber,
-    tags: cnsl.isAssigned
-  }));
+    tags: cnsl.isAssigned,
+    isAssigned:cnsl.isAssigned,
+    isDeleted:cnsl.isDeleted,
+    isRepair:cnsl.isRepair,
+    officeLocationId:cnsl.officeLocationId,
+    isStorage:cnsl.isStorage
+  })):[];
 // console.log(TableDATA);
-
-  const [empData, setEmpData] = useState([]);
 
   useEffect(() => {
     dispatch(getEmployees());
@@ -408,27 +478,31 @@ const TableDATA = productsCopy
     dispatch(getbrand());
   }, [dispatch]);
 
+  //Filter Table Data Based on the Office in Dropdown 
   function DataLoading() {
-    const filteredProducts = productsDetail.filter(
-      (products) => products.isDeleted === false
-    );
-    setProCounts(filteredProducts.length);
-    const filteredPcData = productsDetail.filter(
-      (pc) => pc.accessoryName === "Pc" && pc.isDeleted === false
-    );
-    setPcCounts(filteredPcData.length);
+
+    var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
+
+    var officeNames = numberOfOffice.map((off) => {
+      return off.officename;
+    });
+
+    if (officeNames.length === 1) {
+      const filterOneOffice = proData ? proData.filter(products => products.isDeleted === false && products.officeName === officeNames[0]) : 0;
+      setProCounts(filterOneOffice.length);
+      setTableDATA(filterOneOffice);
+    }
+    else {
+      const filterAllOffice = proData ? proData.filter(products => products.isDeleted === false) : 0;
+      setProCounts(filterAllOffice.length);
+      setTableDATA(filterAllOffice);
+
+    }
   }
-  useEffect(() => {
-    setEmpData(employee);
+  useEffect(()=> {
     setProData(productsDetail);
-    setPcData(productsDetail);
     DataLoading();
-  }, [employee, productsDetail, officeData]);
-  // useEffect(() => {
-  //   const combinedData = accessories.map((item) => ({
-  //     name: item.name,
-  //   }));
-  // }, [accessories]);
+  },[productsDetail,officeData]);
 
   const productFilter = accessories.filter((acc) => acc.isdeleted === false);
   const productOption = productFilter.map((pr, i) => ({
@@ -450,16 +524,36 @@ const TableDATA = productsCopy
   }));
 
   //office Dropdown Option
-  const officeFilter = office.filter((ofc) => ofc.isdeleted === false);
-  const officeOption = officeFilter.map((off) => ({
-    label: off.officename,
-    value: off.id,
-  }));
+  // const officeFilter = office.filter((ofc) => ofc.isdeleted === false);
+  // const officeOption = officeFilter.map((off) => ({
+  //   label: off.officename,
+  //   value: off.id,
+  // }));
+  const officeOption = [
+    { label: 'Not Assigned', value: null }, // Static option
+    ...office.filter(ofc => !ofc.isdeleted).map(off => ({
+      label: off.officename,
+      value: off.id, // Assuming 'id' is the unique identifier for each office
+    })),
+  ];
 
-  //office Dropdown
-  const officeNameDropdown = (data, value) => {  
-    setStorage((pre) => ({ ...pre, officeLocationId: value.value }));
-    // console.log(value);
+  
+
+  const [OptionClick,setOptionClick] = useState(false);
+  const dropdownOffice =()=>{
+    console.log("hi");
+  }
+  const officeNameDropdowninProduct = (data,value) =>{
+    
+    setOptionClick(true)
+    setSystem((pre) =>({...pre,officeLocationId:value.value}));
+    // setLocationStatus(true);
+    if(value.value === null){
+      setLocationStatus(false);
+    }
+    else{
+      setLocationStatus(true);
+    }
   }
 
   //Product Input 
@@ -485,17 +579,27 @@ const TableDATA = productsCopy
   const OpenTransferModal = () => setTransferModal(true);
   const CloseTransferModal = () => setTransferModal(false);
 
+  //Repair Modal Popup
+  const [RepairModal,setRepairModal] = useState(false);
+  const OpenRepairModal =()=> setRepairModal(true);
+  const CloseRepairModal =()=> setRepairModal(false);
+
   const [popConfirmVisible, setPopConfirmVisible] = useState(false);
 
-  //Transfer Ok Button function
+  const [popConfirmRepairVisible,setPopConfirmRepairVisible] = useState(false);
+
+  //Transfer Storage Ok Button function
   const [temporarySelectedRowKeys, setTemporarySelectedRowKeys] = useState([]);
 
   const handleTransferConfirm = () => {
+    setStorage(productstoragelocation);
     setStorage({
       productDetailsId: null,
-      officeLocationId: null,
+      officeLocationId:null,
       isDeleted: false,
       isAssigned: false,
+      isStorage:false,
+      isRepair:false
     })
     OpenTransferModal();  
     setPopConfirmVisible(false);
@@ -508,12 +612,43 @@ const TableDATA = productsCopy
     setPopConfirmVisible(false);
   };
 
+  //Repair Ok Button Function
+  const [temporaryKey,setTemporaryKey] = useState([]);
+
+  const handleRepairConfirm =()=> {
+    setSystem({
+      SNo: null,
+    key: null,
+    id:null,
+    producttype: null,
+    brand:null ,
+    productName: null,
+    modelNumber: null,
+    serialNumber:null,
+    tags: null,
+    isDeleted: false,
+    isRepair:false
+    })
+    OpenRepairModal();
+    setPopConfirmRepairVisible(false);
+    setSelectedRowKeys(temporaryKey);
+    setTemporaryKey([]);
+  };
+
+  //Repair Cancel Button
+
+  const handleRepairCancel =()=>{
+    setPopConfirmRepairVisible(false);
+  };
+
   //Table Row Selection Check box
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const [SelectedIds, setSelectedIds] = useState([]);
   const [TypeCounts, setTypeCounsts] = useState([]);
+ 
   const onSelectChange = async (newSelectedRowKeys, x) => {
+    console.log(newSelectedRowKeys.length > 0);
     await setSelectedRowKeys(newSelectedRowKeys);
     await setIsButtonEnabled(newSelectedRowKeys.length > 0);
     await setSelectedIds(newSelectedRowKeys);
@@ -538,7 +673,7 @@ const TableDATA = productsCopy
     selectedRowKeys,
     onChange: onSelectChange,
     getCheckboxProps: (record) => ({
-      disabled: record.tags === true
+      disabled: record.isAssigned === true  || record.isRepair===true 
     }),
     selections: [
       Table.SELECTION_ALL,
@@ -580,48 +715,100 @@ const TableDATA = productsCopy
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 19);
 
-  const PostStorage = async () => {        
-      const ProductAssign = await productsDetail.filter(data => SelectedIds.some(id => id === data.id));
-      const UpdateProductDetails = await ProductAssign.map(data => ({
-        id: data.id,
-        accessoriesId: data.accessoriesId,
-        brandId: data.brandId,
-        productName: data.productName,
-        modelNumber: data.modelNumber,
-        serialNumber: data.serialNumber,
-        isDeleted: false,
-        isRepair: false,
-        isAssigned: true,
-        createdDate: data.createdDate,
-        createdBy: data.createdBy,
-        modifiedDate: formattedDate,
-        modifiedBy: data.modifiedBy
-      }));
-
-      //product details
-      UpdateProductDetails.map(data => {
-        dispatch(putProductsDetail(data));
-        // dispatch(getProductsDetail());
-      });
-
-      const TransferData = SelectedIds.map(id => ({
-        productDetailsId: id,
-        officeLocationId: storage.officeLocationId,
-        isDeleted: false,
-        isAssigned: false,
-      }));
-      // console.log(TransferData);
-      await TransferData.map(data => {
-        dispatch(postProductStorageLocation(data));
-      });
-     CloseTransferModal();
-     setIsButtonEnabled(false); 
+  //put storage
+  const PostStorage = async () => {    
+     
+      if(system.officeLocationId === undefined){
+        message.error("select office location");
+      }else{
+        const ProductAssign = await productsDetail.filter(data => SelectedIds.some(id => id === data.id));
+        console.log(ProductAssign);
+        
+        const UpdateProductDetails = await ProductAssign.map(data => ({
+          id: data.id,
+          accessoriesId: data.accessoriesId,
+          brandId: data.brandId,
+          productName: data.productName,
+          modelNumber: data.modelNumber,
+          serialNumber: data.serialNumber,
+          isDeleted: false,
+          isRepair: false,
+          isAssigned: false,
+          isStorage:true,
+          officeLocationId:system.officeLocationId,
+          createdDate: data.createdDate,
+          createdBy: data.createdBy,
+          modifiedDate: formattedDate,
+          modifiedBy: data.modifiedBy
+        }));
+        console.log(UpdateProductDetails);
+     
+        // //product details
+        UpdateProductDetails.map(async data => {
+          console.log(data);
+          await dispatch(putProductsDetail(data));
+        });
+  
+       await dispatch(getProductsDetail());
+       CloseTransferModal();
+       setIsButtonEnabled(false);
+       setSystem(pre =>({...pre,officeLocationId:undefined}))
+      
+      }
   };
+
+  //Send Repair Function
+const PostRepair =async ()=>{
+    const ProductRepair = await productsDetail.filter(data => SelectedIds.some(id =>id ===data.id));
+    console.log(ProductRepair);
+    const UpdateRepairedProductDetails=await ProductRepair.map(data => ({
+      id:data.id,
+      accessoriesId:data.accessoriesId,
+      brandId: data.brandId,
+      productName: data.productName,
+      modelNumber: data.modelNumber,
+      serialNumber: data.serialNumber,
+      isDeleted: false,      
+      isRepair: true,
+      tags:data.isRepair,
+      isAssigned: false,
+      createdDate: data.createdDate,
+      createdBy: data.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: data.modifiedBy,
+      isStorage:false,
+      officeLocationId:data.officeLocationId,
+      comments:data.comments
+    }));
+    // console.log("UpdateRepairedProductDetails:",UpdateRepairedProductDetails);
+    setSelectedRowKeys([])
+    UpdateRepairedProductDetails.map(async data =>{
+     await dispatch(putProductsDetail(data));
+     await dispatch (getProductsDetail());
+    });
+ 
+    // const TransferRepairData = SelectedIds.map(id =>({
+    //   id: id,
+    //   isAssigned:false,
+    //   isdeleted: false,
+    //   isRepair:false
+    // }));
+    // // console.log("TransferRepairData:",TransferRepairData);
+    // await TransferRepairData.map(data=>{
+    //    dispatch(postProductsDetail(data))
+    // });
+    CloseRepairModal();
+    setIsButtonEnabled(false);
+
+}
+
 
   
   const selectedrowDatas=TableDATA.filter(row => selectedRowKeys.includes(row.key));
   // console.log(selectedrowDatas);
 
+  const selectedrowrepairData =TableDATA.filter(row => selectedRowKeys.includes(row.key));
+//   // console.log(selectedrowrepairData);
   return (
     <div>
       <Row justify="space-between" align="middle" gutter={16}>
@@ -635,7 +822,7 @@ const TableDATA = productsCopy
             />
           </Card>
         </Col>{" "}
-        <Col span={12} style={{ left: "35%" }}>
+        <Col span={10} style={{ right: "1%" }}>
           {" "}
           <Input.Search
             placeholder="Search here...."
@@ -648,9 +835,10 @@ const TableDATA = productsCopy
             style={{ width: `30%` }}
           />
         </Col>
+
         <Col justify="flex-end" style={{ right: "0.5%" }}>
           <Popconfirm
-            title="Are you sure you want to transfer the data to Storage?"
+            title="Are you sure you want to transfer the data to Storage?"   //Transfer to Storage Button 
             open={popConfirmVisible}
             onConfirm={handleTransferConfirm}
             onCancel={handleTransferCancel}
@@ -666,17 +854,45 @@ const TableDATA = productsCopy
                 setTemporarySelectedRowKeys(selectedRowKeys); // Store the temporary selected row keys
               }}
               disabled={!isButtonEnabled}>
-              <span>Transfer Data to Storage</span>
+              <span>Move Products to Other Storage</span>
 
             </Button>
+
+            
           </Popconfirm>
+         
 
         </Col>
+
+        <Col  justify="flex-end" style={{ right: "1%" }}>
+        <Popconfirm
+            title="Are you sure you want to transfer the Products to Repair?"
+            open={popConfirmRepairVisible}
+            onConfirm={handleRepairConfirm}
+            onCancel={handleRepairCancel}
+            okText="Yes"
+            cancelText="No"
+          >
+        <Button
+              type="primary"
+              className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"    //Transfer to Repair Button
+              open={RepairModal}
+              onClick={() => {
+                setPopConfirmRepairVisible(true);
+                setTemporaryKey(selectedRowKeys); // Store the temporary selected row keys
+              }}
+              disabled={!isButtonEnabled}
+              >
+              <span>Transfer Products to Repair</span>
+
+            </Button>
+            </Popconfirm>
+            </Col>
 
         <Col justify="flex-end" style={{ right: "1.5%" }}>
 
           <Button
-
+            disabled={isButtonEnabled}
             onClick={() => AddNewBtn()}
             type="primary"
             className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
@@ -696,7 +912,7 @@ const TableDATA = productsCopy
         }}
       />
 
-      <Modal
+      <Modal                             //Add Product Modal
         title="Add Product"
         open={modalOpen}
         onCancel={ModalClose}
@@ -720,7 +936,7 @@ const TableDATA = productsCopy
           </Button>,
         ]}
       >
-        <Form>
+        <Form form={form}>
           <Form.Item
             label="Product Name"
             style={{ marginBottom: 0, marginTop: 10 }}
@@ -787,18 +1003,34 @@ const TableDATA = productsCopy
               onChange={serialNumberInputChange}
             />
           </Form.Item>
+          <Form.Item
+            label="Office Location"
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
+            <Select
+              style={{ float: "right", width: "380px" }}
+              placeholder="Select Office Location"
+              options={officeOption}
+              value={system.officeLocationId || undefined}
+              name="officeLocationId"
+              onChange={officeNameDropdowninProduct}
+            />
+          </Form.Item>
 
           {/* Add more form fields as needed */}
         </Form>
       </Modal>
    
-      <Modal
+   
+      <Modal                                  //Add to Storage Modal 
         title="Add to Storage"
         open={TransferModal}
         onCancel={CloseTransferModal}
         width={"1200px"}
         footer={[
-          <Button key="1" onClick={PostStorage}>
+          <Button key="1" 
+          onClick={PostStorage}
+          >
             Transfer
           </Button>,
           <Button
@@ -817,7 +1049,8 @@ const TableDATA = productsCopy
       style={{ width: "20%" }}
       placeholder="Select Office Location"
       options={officeOption}
-      onChange={officeNameDropdown}
+      value={system.officeLocationId}
+      onChange={officeNameDropdowninProduct}
     />
     </div>
   </div>
@@ -829,7 +1062,47 @@ const TableDATA = productsCopy
       >
       </Table>
       </Modal>
-     
+
+      <Modal                                //Add to Repair Modal 
+        title="Add to Repair"
+        open={RepairModal}
+        onCancel={CloseRepairModal}
+        width={"1200px"}
+        footer={[
+          <Button key="1" 
+          onClick={PostRepair}
+          >
+            Send
+          </Button>,
+          <Button
+            type="text"
+            key="2"
+            danger="red"
+            style={{ border: "0.5px solid red" }}
+            onClick={() => CloseRepairModal()}
+          >
+            Cancel
+          </Button>
+        ]}>
+        {/* <div style={{ display: "flex", flexDirection: "column"}}>
+    <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+    <Select
+      style={{ width: "20%" }}
+      placeholder="Select Office Location"
+      options={officeOption}
+      onChange={officeNameDropdowninProduct}
+    />
+    </div>
+  </div> */}
+      <Table 
+      columns={modalColumn}
+      dataSource={selectedrowrepairData}
+      pagination={{
+        pageSize: 6,
+      }}  
+      >
+      </Table>
+      </Modal>
     </div>
   );
 };

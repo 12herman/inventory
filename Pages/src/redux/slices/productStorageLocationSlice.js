@@ -38,12 +38,12 @@ const productStorageLocationSlice = createSlice({
         //Get Method
         .addCase(getProductStorageLocation.pending,(state)=>{
             state.loading = true;
-            console.log('getProducts is pending');
+            // console.log('getProducts is pending');
         })
         .addCase(getProductStorageLocation.fulfilled,(state,action)=>{
             state.loading = false;
             state.productstoragelocation = action.payload;
-            console.log('getProducts fulfilled. Updated products:', state.productstoragelocation);
+            // console.log('getProducts fulfilled. Updated products:', state.productstoragelocation);
         })
         .addCase(getProductStorageLocation.rejected,(state,action)=>{
             state.loading = false;
