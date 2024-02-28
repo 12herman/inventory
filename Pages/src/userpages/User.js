@@ -15,8 +15,8 @@ import Holiday from './Holiday';
 
 const { Header, Sider, Content } = Layout;
 
-const User = () => {
-
+const User = ({}) => {
+ const Id =164;
   const [collapsed, setCollapsed] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
 
@@ -33,37 +33,37 @@ const User = () => {
       key: '1',
       icon: <FontAwesomeIcon icon={faHouse} />,
       label: 'Dashboard',
-      Content: <UserDashboard />,
+      Content: <UserDashboard Id={Id}/>,
     },
     {
       key: '2',
       icon: <FontAwesomeIcon icon={faUser} />,
       label: 'Personal',
-      Content: <Personal />,
+      Content: <Personal Id={Id}/>,
     },
     {
       key: '3',
       icon: <FontAwesomeIcon icon={faVault} />,
       label: 'Bank Info',
-      Content: <Bank />,
+      Content: <Bank Id={Id}/>,
     },
     {
       key: '4',
       icon: <FontAwesomeIcon icon={faMoneyBill} />,
       label: 'Pay Details',
-      Content: <Pay />,
+      Content: <Pay Id={Id}/>,
     },
     {
       key: '5',
       icon: <FontAwesomeIcon icon={faDesktop} />,
       label: 'System Assigned',
-      Content: <System />,
+      Content: <System Id={Id}/>,
     },
     {
       key: '6',
       icon: <FontAwesomeIcon icon={faCalendarDays} />,
       label: 'Holiday Calender',
-      Content: <Holiday />
+      Content: <Holiday Id={Id}/>
     },
   ];
 

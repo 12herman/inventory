@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Space, message } from "antd";
+import { Form, Input, Button, Space, message,Modal } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { GetLogin, PutLogin } from "../redux/slices/loginSlice";
 import bcrpt from "bcryptjs";
 import { LockOutlined } from '@ant-design/icons'; 
+import { useNavigate,useHistory  } from "react-router-dom";
+import bcrypt from 'bcryptjs';
+
 
 export default function ResetPasswordPage({ data ,LoginId}) {
 
@@ -51,6 +54,10 @@ export default function ResetPasswordPage({ data ,LoginId}) {
 
   
 
+// const navigate = useNavigate();
+// const handleNav = ()=>{
+//   navigate('/');
+// }
 
 //rest btn
   const onFinish = async (values) => {
@@ -59,22 +66,25 @@ export default function ResetPasswordPage({ data ,LoginId}) {
     await dataFilter(LoginId,HashedPassword);
     console.log(HashedPassword);
     form.resetFields();
+    message.success('Password reseted successfully');
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1000);
   };
 
   return (
     <>
-      
-
       <Form
       form={form}
       name="passwordForm"
       onFinish={onFinish}
       initialValues={{ remember: true }}
       layout="vertical"
+      className="mt-5"
     >
       <Form.Item
         name="newPassword"
-        label="New Password"
+        
         rules={[
           {
             required: true,
@@ -94,7 +104,7 @@ export default function ResetPasswordPage({ data ,LoginId}) {
 
       <Form.Item
         name="confirmPassword"
-        label="Confirm Password"
+        
         dependencies={['newPassword']}
         hasFeedback
         rules={[
@@ -118,12 +128,10 @@ export default function ResetPasswordPage({ data ,LoginId}) {
         />
       </Form.Item>
 
-      <Form.Item>
-        <Space direction="vertical">
-          <Button type="dashed" htmlType="submit">
+      <Form.Item >
+      <Button className='w-full bg-blue-500'  type="primary" htmlType="submit">
             Reset Password
           </Button>
-        </Space>
       </Form.Item>
     </Form>
     </>

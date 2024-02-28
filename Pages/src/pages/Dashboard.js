@@ -55,10 +55,9 @@ function DataLoading() {
                             }}
                             prefix={<ArrowUpOutlined />}
                         />
+
                     </Card>
                 </Col>
-               
-               
             </Row>
         </div>
 

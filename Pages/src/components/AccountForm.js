@@ -47,12 +47,16 @@ const AccountForm = forwardRef((props, ref,) => {
   const accountValidateData =  () => {
  
     const accountno = FormAccF.accountNumber;
-    if (
-      FormAccF.bankName === "" ||
-      FormAccF.branchName === "" ||
-      FormAccF.bankLocation === "" ||
-      FormAccF.accountNumber === "" ||
-      FormAccF.ifsc === ""
+    if( SkipAccount === true){
+      accountPostProcessBar();
+      newEmployee();
+    }
+    else if (
+      FormAccF.bankName === "" || FormAccF.bankName === null ||
+      FormAccF.branchName === "" || FormAccF.branchName === null ||
+      FormAccF.bankLocation === "" || FormAccF.bankLocation === null ||
+      FormAccF.accountNumber === "" ||   FormAccF.accountNumber === null ||
+      FormAccF.ifsc === "" || FormAccF.ifsc === null 
     ) {
       message.error("Fill all the fields");
     } else if (isNaN(accountno) === true){//true
@@ -81,10 +85,7 @@ const AccountForm = forwardRef((props, ref,) => {
        accountPostProcessBar();
       PutEmployee();
     }
-    else if(SkipAccount === true){
-      accountPostProcessBar();
-      newEmployee();
-    }
+   
     //  accountPostProcessBar();
     //  newEmployee();
   };

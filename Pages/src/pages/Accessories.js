@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MenuFoldOutlined, MenuUnfoldOutlined, DownOutlined } from '@ant-design/icons';
-import { Layout, Menu, Button, theme, Modal, Dropdown, Space, Col, Row, Form, Input, message, } from 'antd';
+import { Layout, Menu, Button, theme, Modal, Dropdown, Space, Col, Row, Form, Input, message,Popconfirm } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSliders, faHouse, faUser, faDesktop, faWarehouse, faScrewdriverWrench, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faSliders, faHouse, faUser, faDesktop, faWarehouse, faScrewdriverWrench, faPlus, faRightFromBracket, faQuoteLeftAlt } from '@fortawesome/free-solid-svg-icons';
 import { PlusOutlined } from '@ant-design/icons';
 
 import Dashboard from './Dashboard';
@@ -19,13 +19,14 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import Employee from './employee';
 import LoginPage from "../Loginpage"
+import LogoutPage from '../components/LogoutPage';
 // import { getEmployees } from '../redux/slices/employeeSlice';
 
 const { Header, Sider, Content } = Layout;
 
 
 
-const Accessories = () => {
+const Accessories = ({Id}) => {
   
   // Apis
   const dispatch = useDispatch();
@@ -96,6 +97,22 @@ const Accessories = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const showPopconfirm = () => {
+    setOpen(true);
+  };
+  const handleOk = () => {
+    setConfirmLoading(true);
+    setTimeout(() => {
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 2000);
+  };
+  const handleCancel = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
+  };
   const menuItems = [
     {
       key: '1',
@@ -146,14 +163,10 @@ const Accessories = () => {
       Content: <Settings />,
       Components: 'Settings'
     },
-    {
-      key: '7',
-      icon: <FontAwesomeIcon icon={faSliders} />,
-      label: 'Login',
-      Content: <LoginPage />,
-      Components: 'Login'
-    },
+    
+    
   ];
+
 
 
   // const [newOfficePopup, setNewOfficePopup] = useState(false);
@@ -213,8 +226,8 @@ const Accessories = () => {
   theme="dark"
   mode="inline"
   defaultSelectedKeys={['1']}
-  onClick={({ key }) => handleMenuClick(menuItems.find((item) => item.key === key))}
-  items={menuItems.map((item) => ({
+  onClick={({ key }) => handleMenuClick(menuItems.find((item) =>  item.key === key ))}
+  items={ menuItems.map((item) => ({
     key: item.key,
     icon: item.icon,
     label: item.label,
@@ -249,7 +262,7 @@ const Accessories = () => {
             </Col>
             <Col justify='flex-end' style={{ right: '1%' }}>
 
-              <div>
+              <div className='flex justify-center items-center gap-x-2'>
                 
                   <Dropdown  overlay={officeMenu} trigger={['click']} placement="bottomLeft">
                     <Button>
@@ -258,6 +271,8 @@ const Accessories = () => {
                       </Space>
                     </Button>
                   </Dropdown>
+                  <LogoutPage/>
+                
               </div>
             </Col>
           </Row>
@@ -285,7 +300,7 @@ const Accessories = () => {
 
         </Content>
       </Layout>
-
+      
     </Layout>
   );
 };
