@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Popconfirm, Table } from 'antd';
-import { Col, Row, Statistic, Divider, Tag, Card,Modal,Select } from 'antd';
+import { Col, Row, Statistic, Divider, Tag, Card,Modal,Select,message } from 'antd';
 import CountUp from 'react-countup';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faPen, faL } from "@fortawesome/free-solid-svg-icons";
@@ -90,7 +90,7 @@ const EditableCell = ({
 };
 
 
-const Repair = () => {
+const Repair = ({officeData}) => {
 
   //Input Field Value
   const [system, setSystem] = useState({
@@ -100,12 +100,11 @@ const Repair = () => {
     productName: "",
     modelNumber: "",
     serialNumber: "",
-    tags: "",
     isAssigned: false,
-    isdeleted: false,
+    isDeleted: false,
     isRepair: false,
     isStorage:false,
-    officeLocationId:null,
+    officeLocationId:undefined,
     comments:""
   });
   const [searchText, setSearchText] = useState("");
@@ -135,25 +134,17 @@ const Repair = () => {
 
   const { office } = useSelector((state) => state.office);
 
-  const [LocationStatus,setLocationStatus] =useState(false)
+  const [LocationStatus,setLocationStatus] =useState(false);
+
+  const [storagelocData, setProLocData] = useState();
 
   useEffect(() => {
     dispatch(getEmployees());
     dispatch(getProductsDetail());
   }, []);
 
-  useEffect(() => {
-    setEmpData(employee)
-    setTableData(productsDetail);
-    setProData(productsDetail);
-    DataLoading();
-  }, [employee, productsDetail]);
-
-  async function DataLoading() {
-    const filteredProducts = await productsDetail.filter((products) => products.isDeleted === false && products.isRepair === true);
-    console.log(filteredProducts);
-    setProCount(filteredProducts.length);
-  }
+ 
+  
 
   const [dataSource, setDataSource] = useState([
     {
@@ -328,13 +319,12 @@ const Repair = () => {
     productName: null,
     modelNumber: null,
     serialNumber: null,
-    tags: null,
-    isdeleted: false,
+    // tags: null,
+    isDeleted: false,
     isRepair: false,
     isStorage:false,
     isAssigned:false,
     officeLocationId:null,
-    officeName:null,
     comments:null
   })
   openStorageModal();
@@ -348,6 +338,9 @@ const handleStorageCancel = () => {
 };
 
   const PostStorage =async ()=>{
+    if(system.officeLocationId === undefined){
+      message.error("select office location");
+    }else{
     const ProductStorage= await productsDetail.filter(data=> SelectedIds.some(id=>id===data.id));
     console.log(ProductStorage);
 
@@ -377,7 +370,8 @@ const handleStorageCancel = () => {
     });
     closeStorageModal();
     setIsButtonEnabled(false);
-    
+    setSystem(pre =>({...pre,officeLocationId:undefined}))
+  }
   };
   const handleSave = (row) => {
     const newData = [...dataSource];
@@ -410,8 +404,46 @@ const handleStorageCancel = () => {
       }),
     };
   });
+ 
   const [tableData, setTableData] = useState([]);
-  const TableDatas = tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted === false && data.isRepair === true).map((data, i) => ({
+
+  useEffect(() => {
+    // setEmpData(employee)
+    setTableData(productsDetail);
+    setProData(productsDetail);
+    DataLoading();
+  }, [ productsDetail,officeData]);
+
+   function DataLoading() {
+
+    var numberOfOffice = officeData.filter((off) => off.isdeleted ===false);
+
+    var officeNames = numberOfOffice.map((off) => {
+      return off.officename;
+    })
+
+    if(officeNames.length ===1){
+      // const filteredProducts = await productsDetail.filter((products) => products.isDeleted === false && products.isRepair === true);
+      // console.log(filteredProducts);
+      // setProCount(filteredProducts.length);
+      
+      const filterOneOffice = proData? proData.filter(system => system.isDeleted ===false && system.officeName ===officeNames[0] && system.isRepair ===true) : 0;
+      console.log(filterOneOffice);
+      setProCount(filterOneOffice.length);
+      setTableData(filterOneOffice);
+    }else{
+      const filterAllOffice = proData ? proData.filter(system =>system.isDeleted ===false && system.isRepair ===true):0;
+      setProCount(filterAllOffice.length);
+      setTableData(filterAllOffice);
+    }
+    
+  }
+
+  const repairCopy = tableData && tableData.length>0 ? [...tableData]:[];
+  const SortedTableData =repairCopy.sort((a,b) => a.id - b.id);
+
+
+  const TableDatas = SortedTableData && SortedTableData.length > 0 ? SortedTableData.filter(data => data.isDeleted === false && data.isRepair === true).map((data, i) => ({
     SNo: i + 1,
     key: data.id,
     id: data.id,
@@ -420,7 +452,7 @@ const handleStorageCancel = () => {
     brand: data.brandName,
     modelNumber: data.modelNumber,
     serialNumber: data.serialNumber,
-    tags: data.isAssigned,
+    // tags: data.isAssigned,
     isDeleted: data.isDeleted,
     isAssigned: data.isAssigned,
     isStorage:data.isStorage,
@@ -499,7 +531,7 @@ const handleStorageCancel = () => {
     }
   }
   const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
-  console.log(selectedrowrepairData);
+  // console.log(selectedrowrepairData);
   return (
     <div>
       <Row justify='space-between' align='middle'>
@@ -507,6 +539,19 @@ const handleStorageCancel = () => {
           <Card bordered={true}>
             <Statistic title="Product in Repair" value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
           </Card>
+        </Col>{" "}
+        <Col span={10} style={{ right: "16%" }}>
+          {" "}
+          <Input.Search
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+            style={{ width: `30%` }}
+          />
         </Col>
         <Col justify='flex-end' style={{ right: '1%' }} >
         <Popconfirm

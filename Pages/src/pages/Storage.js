@@ -7,6 +7,7 @@ import CountUp from 'react-countup';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProductStorageLocation, putProductStorageLocation } from '../redux/slices/productStorageLocationSlice';
 import { getProductsDetail, postProductsDetail, putProductsDetail } from '../redux/slices/productsDetailSlice';
+import { getEmployeeAccessories,putEmployeeAccessories,postEmployeeAccessories } from '../redux/slices/employeeaccessoriesSlice';
 
 const formatter = (value) => <CountUp end={value} />;
 
@@ -91,12 +92,21 @@ const EditableCell = ({
 
 const Storage = ({ officeData }) => {
   const [form] = Form.useForm();
+
   const onFinish = () => {
     form.validateFields().then((values) => {
       // Handle form submission if validation succeeds
       PostRepair();
     }).catch((errorInfo) => {
       console.log('Validation failed:', errorInfo);
+    });
+  };
+
+  const onAssign =()=> {
+    form.validateFields().then((values) =>{
+      ProductAssign();
+    }).catch((errorInfo)=>{
+      console.log("Validation Failed",errorInfo);
     });
   };
   const [searchText, setSearchText] = useState("");
@@ -124,7 +134,7 @@ const Storage = ({ officeData }) => {
       title: "S.No",
       dataIndex: "SNo",
       key: "SNo"
-    },
+    },  
     {
       title: "Product Name",
       dataIndex: "productName",
@@ -186,9 +196,14 @@ const Storage = ({ officeData }) => {
        }</>
       ),
     },
+    // {
+    //   title: "Comments",
+    //   dataIndex: "comments",
+    //   key: "comments",
+    // },
   ];
 
-  //Columns that are appeared in the modal 
+  //Columns that are appeared in the Repair modal 
   const modalColumn = [
     {
       title: "S.No",
@@ -247,6 +262,21 @@ const Storage = ({ officeData }) => {
     }
   ];
 
+  //Columns that are displayed in the Assign Modal
+
+  const AssignModalColumn =[
+      {
+        title: "Employee Name",
+        dataIndex: "employeename",
+        key: "employeename",
+      },
+      {
+        title: "Products Detail",
+        dataIndex: "productsdetail",
+        key: "productsdetail",
+      },
+ ]
+  const [comments, setComments] = useState('');
 
   const handleSave = (row) => {
     const newData = [...dataSource];
@@ -316,15 +346,21 @@ console.log(DeletedData);
 
   const [storageLocationCount, setstorageLocationCount] = useState([]);
 
-  const [tableData, setTableData] = useState([]);
-
-  const [LocationStatus,setLocationStatus] =useState(false);
+  const [AssignStatus,setAssignStatus] =useState(false);
 
   const { TextArea } = Input;
 
+  const {employeeaccessories} = useSelector((state) => state.employeeaccessories);
+
+  const {employee} = useSelector((state) => state.employee);
+ 
   const [RepairModal, setRepairModal] = useState(false);
   const OpenRepairModal = () => setRepairModal(true);
   const CloseRepairModal = () => setRepairModal(false);
+
+  const [AssignModal,setAssignModal] = useState(false);
+  const OpenAssignModal =()=> setAssignModal(true);
+  const CloseAssignModal =()=> setAssignModal(false);
 
   //Input Field Value
   const [system, setSystem] = useState({
@@ -343,9 +379,17 @@ console.log(DeletedData);
     comments:""
   });
 
+  //Input Storage Field Value
+  const [storage,setStorage]=useState({
+    id:null,
+    productsDetailsId:null,
+    employeeId:null,
+    isDeleted:false,
+  });
+
 
   const [popConfirmRepairVisible, setPopConfirmRepairVisible] = useState(false);
-
+  const [popConfirmAssignVisible, setPopConfirmAssignVisible] = useState(false);
 
   useEffect(() => {
     // dispatch(getProductStorageLocation());
@@ -381,9 +425,18 @@ console.log(DeletedData);
 
     }
   }
+  // const sortedTableDatas=[...tableData]
+  // const sortedTableData = Array.isArray(sortedTableDatas) ? sortedTableDatas.sort((a, b) => a.id - b.id) : [];
 
   //Table Data 
-  const TableDatas = tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted === false && data.isStorage===true ).map((data, i) => ({
+  const [tableData, setTableData] = useState([]);
+
+  //sort 
+  const storageCopy = tableData && tableData.length>0 ? [...tableData]:[];
+  const SortedTableData =storageCopy.sort((a,b) => a.id - b.id);
+
+
+  const TableDatas = SortedTableData && SortedTableData.length > 0 ? SortedTableData.filter(data => data.isDeleted === false && data.isStorage===true &data.isRepair===false).map((data, i) => ({
     SNo: i + 1,
     key: data.id,
     id: data.id,
@@ -396,9 +449,9 @@ console.log(DeletedData);
     isRepair: data.isRepair,
     tags:data.isRepair,
     isDeleted: false,
-    isAssigned: false,
+    isAssigned:data.isAssigned,
     isStorage:false,
-    comments:system.comments
+    comments:data.comments
   })) : [];
 
 console.log(TableDatas);
@@ -446,6 +499,45 @@ console.log(TableDatas);
         },
       },
     ],
+  };
+
+  //Assign Ok Button Function
+  const [temporaryCheckKey, setTemporaryCheckKey] = useState([]);
+
+  const handleAsssignConfirm = () => {
+    setSystem({
+      SNo: null,
+      key: null,
+      id: null,
+      producttype: null,
+      brand: null,
+      productName: null,
+      modelNumber: null,
+      serialNumber: null,
+      tags: null,
+      isdeleted: false,
+      isRepair: false,
+      isStorage:false,
+      isAssigned:false,
+      officeLocationId:null,
+      comments:null
+    });
+    setStorage({
+      id:null,
+      productsDetailsId:null,
+      employeeId:null,
+      isDeleted:false
+    })
+    OpenAssignModal();
+    setPopConfirmAssignVisible(false);
+    setSelectedRowKeys(temporaryCheckKey);
+    setTemporaryCheckKey([]);
+  };
+
+  //Repair Cancel Button
+
+  const handleAssignCancel = () => {
+    setPopConfirmAssignVisible(false);
   };
 
   //Repair Ok Button Function
@@ -500,9 +592,9 @@ const PostRepair =async ()=>{
     createdBy: data.createdBy,
     modifiedDate: formattedDate,
     modifiedBy: data.modifiedBy,
-    isStorage:data.isStorage,
-    officeLocationId:system.officeLocationId,
-    comments:data.comments
+    isStorage:false,
+    officeLocationId:data.officeLocationId,
+    comments:comments
   }));
   console.log(UpdateRepairedProductDetails);
 
@@ -516,6 +608,52 @@ const PostRepair =async ()=>{
 
 }
 
+const ProductAssign=async()=>{
+     if(storage.employeeId ===undefined){
+      message.error("Select an Employee")
+     }else{
+      const ProductAssignation = await employeeaccessories.filter(data => SelectedIds.some(id => id ===data.id));
+      console.log(ProductAssignation);
+     
+     const updateProductAssignation = await ProductAssignation.map(data => ({
+      id:data.id,
+      productsDetailsId:data.productsDetailsId,
+      employeeId:data.employeeId,
+      isDeleted:false,
+      createdDate: data.createdDate,
+      createdBy: data.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: data.modifiedBy
+     }))
+     console.log(updateProductAssignation);
+
+     updateProductAssignation.map(async data =>{
+      await dispatch(putProductsDetail(data));
+      await dispatch(getEmployeeAccessories());
+     });
+     CloseAssignModal();
+     setIsButtonEnabled(false);
+     setStorage(pre => ({...pre,employeeId:null}))
+    };
+}
+
+const employeeOption=[
+  {label:'Select an Employee',value:null},
+  ...employee.filter(empacc => !empacc.isDeleted).map(emp =>({  
+    label:emp.firstName,
+    value:emp.id
+  })),
+];
+
+const employeeNameDropdowninProduct=(data,value) => {
+  console.log(value.value);
+  setStorage((pre) => ({...pre,employeeId:value.value}));
+  if(value.value ===null){
+    setAssignStatus(false);
+  }else{
+    setAssignStatus(true);
+  }
+}
   
 
   const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
@@ -531,13 +669,42 @@ const PostRepair =async ()=>{
               valueStyle={{ color: "#3f8600" }}
             />
           </Card>
+        </Col>{" "}
+        <Col span={10} style={{ right: "4.9%" }}>
+          {" "}
+          <Input.Search
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+            style={{ width: `30%` }}
+          />
         </Col>
-        <Col justify='flex-end' style={{ left: '39%' }}>
+
+        <Col justify='flex-end' style={{ left: '5%' }}>
+          <Popconfirm                                                              //Assign to Employee Button
+          title="Are you sure you want to assign the Products to Employee?"
+          open={popConfirmAssignVisible}
+          onConfirm={handleAsssignConfirm}
+          onCancel={handleAssignCancel}
+          okText="Yes"
+          cancelText="No"
+          >
           <Button type="primary" className='bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3'
+           open={AssignModal}
+           onClick={() => {
+             setPopConfirmAssignVisible(true);
+             setTemporaryCheckKey(selectedRowKeys); // Store the temporary selected row keys
+           }}
             disabled={!isButtonEnabled}
           >Assign to Employee</Button>
+          </Popconfirm>  
         </Col>
-        <Col justify='flex-end' style={{ left: '19%' }}>
+
+        <Col justify='flex-end' style={{ left: '2%' }}>
           <Popconfirm
             title="Are you sure you want to transfer the Products to Repair?"
             open={popConfirmRepairVisible}
@@ -553,7 +720,8 @@ const PostRepair =async ()=>{
                 setTemporaryKey(selectedRowKeys); // Store the temporary selected row keys
               }}
               disabled={!isButtonEnabled}
-            >Add to Repair</Button></Popconfirm></Col>
+            >Add to Repair</Button></Popconfirm>
+            </Col>
 
         <Col justify='flex-end' style={{ right: '1%' }}>
           <Popconfirm
@@ -589,6 +757,53 @@ const PostRepair =async ()=>{
         }}
       />
 
+<Modal                                //Assign to Employee Modal 
+        title="Add to Repair"
+        open={AssignModal}
+        onCancel={CloseAssignModal}
+        width={"1200px"}
+        footer={[
+          <Button key="1" 
+          onClick={onAssign}
+          >
+            Assign
+          </Button>,
+          <Button
+            type="text"
+            key="2"
+            danger="red"
+            style={{ border: "0.5px solid red" }}
+            onClick={() => CloseAssignModal()}
+          >
+            Cancel
+          </Button>
+        ]}>
+          <Form>
+          <Form.Item
+           
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
+            <Select
+              style={{ float: "right", width: "380px" }}
+              placeholder="Select Employee Name"
+              options={employeeOption}
+              value={storage.employeeId || undefined}
+              name="employeeId"
+              onChange={employeeNameDropdowninProduct}
+            />
+          </Form.Item>
+          </Form>
+          <Divider />
+      <Table 
+      columns={modalColumn}
+      dataSource={selectedrowrepairData}
+      pagination={{
+        pageSize: 6,
+      }}  
+      >
+      </Table>
+      </Modal>
+
        <Modal                                //Add to Repair Modal 
         title="Add to Repair"
         open={RepairModal}
@@ -615,7 +830,7 @@ const PostRepair =async ()=>{
           name="comments"
           rules={[{ required: true, message: 'Add a Comment!' }]}
         >
-          <Input.TextArea rows={3} style={{ width: "40%" }} placeholder='Add a Comment...' />
+          <Input.TextArea rows={3} style={{ width: "40%" }} placeholder='Add a Comment...' value={comments} onChange={(e) => setComments(e.target.value)}/>
         </Form.Item>
       </Form>
   <Divider />

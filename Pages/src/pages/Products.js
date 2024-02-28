@@ -28,6 +28,15 @@ const formatter = (value) => <CountUp end={value} />;
 
 const Products = ({ officeData }) => {
   const [form] = Form.useForm();
+  const onFinish = () => {
+    form.validateFields().then((values) => {
+      // Handle form submission if validation succeeds
+      PostRepair();
+    }).catch((errorInfo) => {
+      console.log('Validation failed:', errorInfo);
+    });
+  };
+  
   const [searchText, setSearchText] = useState("");
 
   const columns = [
@@ -179,6 +188,11 @@ const Products = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
+    {
+      title: "Office",
+      dataIndex: "officeLocationId",
+      key: "officeLocationId",
+    },
     
   ];
 
@@ -209,7 +223,7 @@ const Products = ({ officeData }) => {
   //pop-Up Window
   const [modalOpen, setModalOpen] = useState(false);
   const ModalOpen = () => setModalOpen(true);
-  const ModalClose = () => {setModalOpen(false);   setSystem(pre => ({...pre,officeLocationId:undefined}));};
+  const ModalClose = () => {setModalOpen(false);   setSystem({...system,officeLocationId:undefined});};
 
   //Save or Add Button State
   const [saveBtn, setsaveBtn] = useState(false);
@@ -402,10 +416,9 @@ const Products = ({ officeData }) => {
     }
   };
 
-const [LocationStatus,setLocationStatus] =useState(false)
+const [LocationStatus,setLocationStatus] =useState(false);
   //Add Product Button
   const addProduct = async () => {
-    
     setLocationStatus(false);
     if (
       !system.productName ||
@@ -413,23 +426,28 @@ const [LocationStatus,setLocationStatus] =useState(false)
       !system.brandId ||
       !system.modelNumber ||
       !system.serialNumber ||
-      system.officeLocationId === undefined
+      !system.officeLocationId === undefined
     ) {
       message.error("Please Fill all the fields!");
     } else {
-      const newProduct = {
-        accessoriesId: system.accessoriesId,
-        brandId: system.brandId,
-        productName: system.productName,
-        modelNumber: system.modelNumber,
-        serialNumber: system.serialNumber,
-        isAssigned: false,
-        isDeleted:false,
-        isRepair:false,
-        officeLocationId:system.officeLocationId,
-        isStorage:LocationStatus
-      };
-      console.log(newProduct);
+      const serialNumberExists = tableDATA.some((product) => product.serialNumber === system.serialNumber);
+      if(serialNumberExists){
+        message.error("Serial Number already exists!");
+      }else{
+        const newProduct = {
+          accessoriesId: system.accessoriesId,
+          brandId: system.brandId,
+          productName: system.productName,
+          modelNumber: system.modelNumber,
+          serialNumber: system.serialNumber,
+          isAssigned: false,
+          isDeleted:false,
+          isRepair:false,
+          officeLocationId:system.officeLocationId,
+          isStorage:LocationStatus
+        };
+        console.log(newProduct);
+      
       try {
         await dispatch(postProductsDetail(newProduct));   
         await dispatch(getProductsDetail());
@@ -439,8 +457,9 @@ const [LocationStatus,setLocationStatus] =useState(false)
         console.error("Error adding product:", error);
       }
       await dispatch(getProductsDetail());
-     await setSystem(pre=>({...pre,officeLocationId:undefined}));
+     await setSystem((pre)=>({...pre,officeLocationId:undefined,}));
     }
+  }
   };
 
   //Displaying data in table data
@@ -544,7 +563,7 @@ const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
     console.log("hi");
   }
   const officeNameDropdowninProduct = (data,value) =>{
-    
+    console.log(value.value);
     setOptionClick(true)
     setSystem((pre) =>({...pre,officeLocationId:value.value}));
     // setLocationStatus(true);
@@ -590,6 +609,8 @@ const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
 
   //Transfer Storage Ok Button function
   const [temporarySelectedRowKeys, setTemporarySelectedRowKeys] = useState([]);
+
+  const [comments, setComments] = useState('');
 
   const handleTransferConfirm = () => {
     setStorage(productstoragelocation);
@@ -747,6 +768,7 @@ const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
         UpdateProductDetails.map(async data => {
           console.log(data);
           await dispatch(putProductsDetail(data));
+          await dispatch(getProductsDetail());
         });
   
        await dispatch(getProductsDetail());
@@ -778,7 +800,7 @@ const PostRepair =async ()=>{
       modifiedBy: data.modifiedBy,
       isStorage:false,
       officeLocationId:data.officeLocationId,
-      comments:data.comments
+      comments:comments
     }));
     // console.log("UpdateRepairedProductDetails:",UpdateRepairedProductDetails);
     setSelectedRowKeys([])
@@ -836,7 +858,7 @@ const PostRepair =async ()=>{
           />
         </Col>
 
-        <Col justify="flex-end" style={{ right: "0.5%" }}>
+        <Col justify="flex-end" style={{ left: "0.5%" }}>
           <Popconfirm
             title="Are you sure you want to transfer the data to Storage?"   //Transfer to Storage Button 
             open={popConfirmVisible}
@@ -1070,7 +1092,7 @@ const PostRepair =async ()=>{
         width={"1200px"}
         footer={[
           <Button key="1" 
-          onClick={PostRepair}
+          onClick={onFinish}
           >
             Send
           </Button>,
@@ -1084,16 +1106,15 @@ const PostRepair =async ()=>{
             Cancel
           </Button>
         ]}>
-        {/* <div style={{ display: "flex", flexDirection: "column"}}>
-    <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
-    <Select
-      style={{ width: "20%" }}
-      placeholder="Select Office Location"
-      options={officeOption}
-      onChange={officeNameDropdowninProduct}
-    />
-    </div>
-  </div> */}
+        <Form form={form}>
+        <Form.Item
+          name="comments"
+          rules={[{ required: true, message: 'Add a Comment!' }]}
+        >
+          <Input.TextArea rows={3} style={{ width: "40%" }} placeholder='Add a Comment...' value={comments} onChange={(e) => setComments(e.target.value)}/>
+        </Form.Item>
+      </Form>
+  <Divider />
       <Table 
       columns={modalColumn}
       dataSource={selectedrowrepairData}
