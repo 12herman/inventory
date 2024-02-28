@@ -7,7 +7,7 @@ import { PostOtp } from "../redux/slices/otpApiSlice";
 import { GetLogin } from "../redux/slices/loginSlice";
 import CryptoJS from "crypto-js";
 
-export default function OtpPage({ CheckAccount, UserNamePass }) {
+export default function OtpPage({ CheckAccount, UserNamePass,currentSection2, }) {
   // radom generator
   function generateRandomPassword() {
     const charset = "123456789";
@@ -31,7 +31,7 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
     if (isRunning) {
       intervalId = setInterval(() => {
         setCount((prevCount) => {
-          if (prevCount < 5) {
+          if (prevCount < 30) {
             return prevCount + 1;
           } else {
             clearInterval(intervalId);
@@ -70,6 +70,7 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
     return decryptedText;
   }
 
+
   // submit btn go to new password pages
   const onFinish = async (e) => {
     const LoginFilter = login.filter((data) => data.userName === UserNamePass);
@@ -80,6 +81,8 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
     if (e.otp === DecryptOTP) {
      await setOtpReset((pre) => ({ ...pre, passwordpage: true }));
      await setLoginId(LoId);
+    //  goToNextSection()
+    goToNextSection3();
     } else {
       message.error("OTP is Wrong");
     }
@@ -95,11 +98,25 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
     await dispatch(GetLogin());
   };
 
+  const [currentSection3,setCurrentSection3]= useState(currentSection2);
+
+  const goToNextSection3 = () => {
+    if (currentSection3 < 4) {
+      setCurrentSection3(currentSection3 + 1);
+    }
+  };
+  const goToPreviousSection3 = () => {
+    if (currentSection3 > 1) {
+      setCurrentSection3(currentSection3 - 1);
+    }
+  };
+
   return (
     <>
-      {OtpReset.passwordpage === false ? (
+
+      {currentSection3 === 3 && (
         <div>
-          <h2 className="mt-[10%] text-center">
+          <h2 className="mt-5 text-center text-gray-600 text-xs">
             click the send button get the opt{" "}
             <Tag
               color="blue"
@@ -112,13 +129,13 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
             <Form
               //layout="vertical"
               name="basic"
-              labelCol={{
-                span: 8,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              className="w-full mt-5 flex flex-col justify-center items-center"
+              // labelCol={{
+              //   span: 8,
+              // }}
+              // wrapperCol={{
+              //   span: 16,
+              // }}
+              className=" mt-5 flex flex-col justify-center items-center"
               initialValues={{
                 remember: true,
               }}
@@ -127,7 +144,7 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
               autoComplete="off"
             >
               <Form.Item
-                label="OTP"
+                
                 name="otp"
                 rules={[
                   {
@@ -136,21 +153,21 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
                   },
                 ]}
               >
-                <Input className="w-[100%]" />
+                <Input className="w-full" placeholder="Enter the OTP" />
               </Form.Item>
 
-              <Row>
+              <Row >
                 <Col>
                   <Form.Item
-                    wrapperCol={{
-                      offset: 8,
-                      span: 16,
-                    }}
+                    // wrapperCol={{
+                    //   offset: 8,
+                    //   span: 16,
+                    // }}
                   >
                     <Button
                       onClick={ResetOTP}
                       disabled={OtpReset.disablebtn}
-                      className=" mr-2"
+                      className=" mr-1"
                       type="dashed"
                     >
                       {OtpReset.disablebtn === false ? "Send" : "Resend"}
@@ -160,10 +177,10 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
 
                 <Col>
                   <Form.Item
-                    wrapperCol={{
-                      offset: 8,
-                      span: 16,
-                    }}
+                    // wrapperCol={{
+                    //   offset: 8,
+                    //   span: 16,
+                    // }}
                   >
                     <Button
                       className="bg-blue-500"
@@ -178,9 +195,17 @@ export default function OtpPage({ CheckAccount, UserNamePass }) {
             </Form>
           </section>
         </div>
-      ) : (
-        <ResetPasswordPage LoginId={LoginId} data={CheckAccount} />
-      )}
+      )  
+        
+      }
+
+      {currentSection3 === 4 && 
+                <>
+
+                <ResetPasswordPage LoginId={LoginId} data={CheckAccount} />
+
+                </>}
+                
     </>
   );
 }

@@ -6,10 +6,13 @@ import { getEmployees } from "../redux/slices/employeeSlice";
 import ResetPasswordPage from "./ResetPasswordPage";
 import OtpPage from "./OtpPage";
 import { PostOtp } from "../redux/slices/otpApiSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faLeftLong } from "@fortawesome/free-solid-svg-icons";
+import Loginpage from "../Loginpage";
 // import nodemailer from "nodemailer";
 // import { google } from "googleapis";
 
-const ForgetPage = () => {
+const ForgetPage = ({goToPreviousSection,goToNextSection,currentSection}) => {
   
   //Dispath method
   const dispatch = useDispatch();
@@ -17,7 +20,6 @@ const ForgetPage = () => {
   const {employee} = useSelector(state => state.employee)
   const[CheckAccount,setCheckAccount] = useState({id:null,email:null});
   const [UserNamePass,setUserNamePass] = useState(undefined);
-
 
 
   const onFinish = async (value) => {
@@ -32,7 +34,9 @@ const ForgetPage = () => {
     }
     else{
       setUserNamePass(UserName);
-      setRestPage(true);
+      goToNextSection2();
+      // LoginPage()
+      //setBackToLogin(pre => ({...pre,Login:true}));
     };
     // const EmpId = Logindatas === undefined ? undefined : Logindatas.employeeId;
     // //user_email
@@ -68,29 +72,39 @@ const ForgetPage = () => {
   };
   const onFinishFailed = () => {};
   
-  const [RestPage,setRestPage] = useState(false);
 
-  
+
   
   useEffect(() => {
     dispatch(GetLogin());
     dispatch(getEmployees());
   }, []);
 
- 
+  
+  const [currentSection2,setCurrentSection2] = useState(currentSection);
+
+  const goToNextSection2 = () => {
+    if (currentSection2 < 3) {
+      setCurrentSection2(currentSection2 + 1);
+    }
+  };
+  const goToPreviousSection2 = () => {
+    if (currentSection2 > 1) {
+      setCurrentSection2(currentSection2 - 1);
+    }
+  };
    return (
     <>
-      {RestPage === false ?  <Form
+    
+      
+      { currentSection2 === 2 &&
+      <>
+        <Button onClick={()=>goToPreviousSection()} type="link"><FontAwesomeIcon  icon={faArrowLeft}/></Button>
+        <Form
+      className="mt-5"
+        layout="vertical"
         name="basic"
-        labelCol={{
-          span: 8,
-        }}
-        wrapperCol={{
-          span: 16,
-        }}
-        style={{
-          maxWidth: 600,
-        }}
+        
         initialValues={{
           remember: true,
         }}
@@ -99,7 +113,6 @@ const ForgetPage = () => {
         autoComplete="off"
       >
         <Form.Item
-          label="Username"
           name="userName"
           rules={[
             {
@@ -108,35 +121,21 @@ const ForgetPage = () => {
             },
           ]}
         >
-          <Input />
+          <Input placeholder="User Name" />
         </Form.Item>
-
-        {/* <Form.Item
-          label="Useremail"
-          name="userEmail"
-          rules={[
-            {
-              required: true,
-              message: "Please input your useremail!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item> */}
-
         <Form.Item
-          wrapperCol={{
-            offset: 8,
-            span: 16,
-          }}
         >
-          <Button className="bg-blue-500" type="primary" htmlType="submit">
+          <Button className="bg-blue-500 w-full" type="primary" htmlType="submit">
             Submit
           </Button>
         </Form.Item>
       </Form> 
-      :<OtpPage UserNamePass={UserNamePass}  CheckAccount={CheckAccount} />
+      </>
       }
+
+      {currentSection2 === 3 && <>
+        <Button onClick={()=>goToPreviousSection2()} type="link"><FontAwesomeIcon  icon={faArrowLeft}/></Button>
+       <OtpPage currentSection2={currentSection2} UserNamePass={UserNamePass}  CheckAccount={CheckAccount} /></>}
 
     </>
   );

@@ -28,8 +28,13 @@ import User from './userpages/User';
 import Accessories from './pages/Accessories';
 import {useDispatch, useSelector} from 'react-redux';
 import { getOffice } from './redux/slices/officeSlice';
+import Loginpage from './Loginpage';
+import { BrowserRouter as Router, Route, Link, Switch,Routes } from 'react-router-dom';
+import UserDashboard from './userpages/UserDashboard';
 /* src/index.css */
 
+// Admin
+// eQVa
 
 
 
@@ -41,7 +46,17 @@ const App = () => {
 // },[]);
 
     return(
-       <Accessories />
+        <>
+        {/* <Accessories /> */}
+{/* <User/> */}
+     <Loginpage/>
+        </>
+    // <Router>
+    //     <Routes>
+    //         <Route exact path='/' Component={Loginpage}/>
+    //     </Routes>
+    // </Router>
+       
     );
 };
 

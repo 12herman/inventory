@@ -1,12 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Statistic } from 'antd';
 import CountUp  from 'react-countup';
 import { Progress,Flex,Button,Timeline,Divider } from 'antd';
 import { SmileOutlined } from '@ant-design/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { GetHoliday } from '../redux/slices/holidaySlice';
+import { Getemployeeleave } from '../redux/slices/employeeLeaveSlice';
 
 const formatter = (value) => <CountUp end={value} />;
 
-const UserDashboard = () => {
+const UserDashboard = ({}) => {
+    const Id = 164;
+    const dispatch = useDispatch();
+    const {holiday} = useSelector(state => state.holiday);
+    const {employeeleave} = useSelector(state => state.employeeleave);
+
+    useEffect(()=>{
+        dispatch(GetHoliday());
+        dispatch(Getemployeeleave());
+        circleData();
+    },[dispatch]);
+
+    
+    //leave 
+    const LeavesData =  employeeleave.filter(leave => leave.employeeId === Id);
+    const [Leaves,setLeaves] = useState({
+        total: null,
+        sickleave:null,
+        casualleave:null,
+        leaveavailed:null
+    });
+    const circleData = ()=>{
+        LeavesData.map(leave => {
+            setLeaves({
+                total: leave.total,
+                sickleave:leave.sickLeave,
+                casualleave:leave.casualLeave,
+                leaveavailed:leave.leaveAvailed
+            });
+        });
+    };
+
+
     return (
         <div>
             <Row gutter={16}>
@@ -15,14 +50,14 @@ const UserDashboard = () => {
                     <Flex justify="space-between" align='center'>
                         <Statistic
                             title="Total Working Days"
-                            value={172}
+                            value={Leaves.total}
                             formatter={formatter} 
                             valueStyle={{
                                 color: '#3f8600',
                                 fontWeight:'bold',
                             }}
                         />
-                        <Progress type="circle" percent={100} status="active" format={() => `172 Days`}/>
+                        <Progress type="circle" percent={100} status="active" format={() => `${Leaves.total} Days`}/>
                         </Flex>
                     </Card>
                 </Col>
@@ -30,15 +65,15 @@ const UserDashboard = () => {
                     <Card>
                     <Flex justify="space-between" align='center'>
                         <Statistic
-                            title="Personal Leave"
-                            value={12}
+                            title="Casual Leave"
+                            value={Leaves.casualleave}
                             formatter={formatter} 
                             valueStyle={{
                                 color: '#3f8600',
                                 fontWeight:'bold',
                             }}
                         />
-                        <Progress type="circle" percent={80} status="active" format={() => '10 Days'}/>
+                        <Progress type="circle" percent={80} status="active" format={() => `${Leaves.casualleave} Days`}/>
                         </Flex>
                     </Card>
                 </Col>
@@ -47,14 +82,14 @@ const UserDashboard = () => {
                     <Flex justify="space-between" align='center'>
                         <Statistic
                             title="Sick Leave"
-                            value={12}
+                            value={Leaves.sickleave}
                             formatter={formatter} 
                             valueStyle={{
                                 color: '#3f8600',
                                 fontWeight:'bold',
                             }}
                         />
-                        <Progress type="circle" percent={50} status="active" format={() => '6 Days'} />
+                        <Progress type="circle" percent={50} status="active" format={() => `${Leaves.sickleave} Days`} />
                         </Flex>
                     </Card>
                 </Col>
@@ -62,15 +97,15 @@ const UserDashboard = () => {
                     <Card>
                     <Flex justify="space-between" align='center'>
                         <Statistic
-                            title="Comp Off"
-                            value={1}
+                            title="Leave Availed"
+                            value={Leaves.leaveavailed}
                             formatter={formatter} 
                             valueStyle={{
                                 color: '#3f8600',
                                 fontWeight:'bold',
                             }}
                         />
-                        <Progress type="circle" percent={0} status="active" format={() => '0 Days'}/>
+                        <Progress type="circle" percent={0} status="active" format={() => `${Leaves.leaveavailed}Days`}/>
                         </Flex>
                     </Card>
                 </Col>
