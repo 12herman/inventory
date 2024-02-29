@@ -181,6 +181,11 @@ const Storage = ({ officeData }) => {
       key: "serialNumber",
     },
     {
+      title: "Employee Name",
+      dataIndex: "employeeName",
+      key: "employeeName",
+    },
+    {
       title: "Status",
       key: "tags",
       dataIndex: "tags",
@@ -376,16 +381,17 @@ console.log(DeletedData);
     isRepair: false,
     isStorage:false,
     officeLocationId:null,
-    comments:""
+    comments:"",
+    employeeId:null
   });
 
-  //Input Storage Field Value
-  const [storage,setStorage]=useState({
-    id:null,
-    productsDetailsId:null,
-    employeeId:null,
-    isDeleted:false,
-  });
+  // //Input Storage Field Value
+  // const [storage,setStorage]=useState({
+  //   id:null,
+  //   productsDetailsId:null,
+  //   employeeId:null,
+  //   isDeleted:false,
+  // });
 
 
   const [popConfirmRepairVisible, setPopConfirmRepairVisible] = useState(false);
@@ -451,7 +457,8 @@ console.log(DeletedData);
     isDeleted: false,
     isAssigned:data.isAssigned,
     isStorage:false,
-    comments:data.comments
+    comments:data.comments,
+    employeeId:data.employeeId
   })) : [];
 
 console.log(TableDatas);
@@ -520,14 +527,15 @@ console.log(TableDatas);
       isStorage:false,
       isAssigned:false,
       officeLocationId:null,
-      comments:null
+      comments:null,
+      employeeId:null
     });
-    setStorage({
-      id:null,
-      productsDetailsId:null,
-      employeeId:null,
-      isDeleted:false
-    })
+    // setStorage({
+    //   id:null,
+    //   productsDetailsId:null,
+    //   employeeId:null,
+    //   isDeleted:false
+    // })
     OpenAssignModal();
     setPopConfirmAssignVisible(false);
     setSelectedRowKeys(temporaryCheckKey);
@@ -594,7 +602,8 @@ const PostRepair =async ()=>{
     modifiedBy: data.modifiedBy,
     isStorage:false,
     officeLocationId:data.officeLocationId,
-    comments:comments
+    comments:comments,
+    employeeId:data.employeeId
   }));
   console.log(UpdateRepairedProductDetails);
 
@@ -609,31 +618,40 @@ const PostRepair =async ()=>{
 }
 
 const ProductAssign=async()=>{
-     if(storage.employeeId ===undefined){
+     if(system.employeeId ===undefined){
       message.error("Select an Employee")
      }else{
-      const ProductAssignation = await employeeaccessories.filter(data => SelectedIds.some(id => id ===data.id));
+      const ProductAssignation = await productsDetail.filter(data => SelectedIds.some(id => id ===data.id));
       console.log(ProductAssignation);
      
      const updateProductAssignation = await ProductAssignation.map(data => ({
       id:data.id,
-      productsDetailsId:data.productsDetailsId,
-      employeeId:data.employeeId,
-      isDeleted:false,
-      createdDate: data.createdDate,
-      createdBy: data.createdBy,
-      modifiedDate: formattedDate,
-      modifiedBy: data.modifiedBy
+    accessoriesId:data.accessoriesId,
+    brandId: data.brandId,
+    productName: data.productName,
+    modelNumber: data.modelNumber,
+    serialNumber: data.serialNumber,
+    isDeleted: false,      
+    isRepair: false,
+    isAssigned: true,
+    createdDate: data.createdDate,
+    createdBy: data.createdBy,
+    modifiedDate: formattedDate,
+    modifiedBy: data.modifiedBy,
+    isStorage:false,
+    officeLocationId:data.officeLocationId,
+    comments:comments,
+    employeeId:data.employeeId
      }))
      console.log(updateProductAssignation);
 
      updateProductAssignation.map(async data =>{
       await dispatch(putProductsDetail(data));
-      await dispatch(getEmployeeAccessories());
+      await dispatch(getProductsDetail());
      });
      CloseAssignModal();
      setIsButtonEnabled(false);
-     setStorage(pre => ({...pre,employeeId:null}))
+     setSystem(pre => ({...pre,employeeId:null}))
     };
 }
 
@@ -647,7 +665,7 @@ const employeeOption=[
 
 const employeeNameDropdowninProduct=(data,value) => {
   console.log(value.value);
-  setStorage((pre) => ({...pre,employeeId:value.value}));
+  setSystem((pre) => ({...pre,employeeId:value.value}));
   if(value.value ===null){
     setAssignStatus(false);
   }else{
@@ -787,7 +805,7 @@ const employeeNameDropdowninProduct=(data,value) => {
               style={{ float: "right", width: "380px" }}
               placeholder="Select Employee Name"
               options={employeeOption}
-              value={storage.employeeId || undefined}
+              value={system.employeeId || undefined}
               name="employeeId"
               onChange={employeeNameDropdowninProduct}
             />
