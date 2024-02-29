@@ -47,9 +47,9 @@ const App = () => {
 
     return(
         <>
-        {/* <Accessories /> */}
+        <Accessories /> 
 {/* <User/> */}
-     <Loginpage/>
+     {/*<Loginpage/>*/}
         </>
     // <Router>
     //     <Routes>

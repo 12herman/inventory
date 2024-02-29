@@ -253,7 +253,8 @@ const Products = ({ officeData }) => {
     isDeleted: false,
     isRepair:false,
     officeLocationId:undefined,
-    isStorage:false
+    isStorage:false,
+    employeeId:null
   });
  
 
@@ -281,6 +282,7 @@ const Products = ({ officeData }) => {
     isDeleted: false,
     isStorage:false,
     officeLocationId:cnsl.officeLocationId,
+    employeeId:cnsl.employeeId
   }));
   // console.log(TableDatas);
 
@@ -300,7 +302,8 @@ const Products = ({ officeData }) => {
       isAssigned:false,
       isRepair:false,
       officeLocationId:"",
-      isStorage:false
+      isStorage:false,
+      employeeId:""
     });
     setSystem(pre => ({...pre,officeLocationId:undefined}));
     
@@ -486,9 +489,10 @@ const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
     isDeleted:cnsl.isDeleted,
     isRepair:cnsl.isRepair,
     officeLocationId:cnsl.officeLocationId,
-    isStorage:cnsl.isStorage
+    isStorage:cnsl.isStorage,
+    employeeId:cnsl.employeeId
   })):[];
-// console.log(TableDATA);
+console.log(TableDATA);
 
   useEffect(() => {
     dispatch(getEmployees());
