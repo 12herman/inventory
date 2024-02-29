@@ -56,7 +56,6 @@ const App = () => {
     //         <Route exact path='/' Component={Loginpage}/>
     //     </Routes>
     // </Router>
-       
     );
 };
 
