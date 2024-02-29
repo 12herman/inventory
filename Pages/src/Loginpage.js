@@ -52,8 +52,10 @@ const Loginpage = () => {
       (emp) =>
         emp.id === EmpId &&
         emp.isDeleted === false &&
-        emp.roleDetails[0].rollName === "Admin"
+        emp.roleDetails[0].roleName === "Admin"
     );
+
+    console.log(employee);
     const admin = filterEmployee.length > 0 ? true : false;
     
     if (isPasswordValid === true && admin === true) {

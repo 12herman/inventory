@@ -1091,9 +1091,12 @@ const Employee = ({ officeData }) => {
         await dispatch(
           postaccount({ employeeId: employeeDatas.payload.id, ...AccF })
         );
-
+        //login data (automatically created)
         await dispatch(PostLogin(LoginDatas));
+        //leave data (automatically created)
         await dispatch(Postemployeeleave(...LeaveData));
+
+
         await dispatch(getRoleDetail());
         await dispatch(getleaderemployee());
         await dispatch(getAddress());
@@ -1104,6 +1107,8 @@ const Employee = ({ officeData }) => {
       }
     } catch (error) {
       console.error("Error creating new employee:", error);
+      message.error(error);
+      await setLoading(false);
     }
   };
 
