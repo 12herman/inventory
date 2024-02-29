@@ -52,7 +52,7 @@ const Loginpage = () => {
       (emp) =>
         emp.id === EmpId &&
         emp.isDeleted === false &&
-        emp.roleDetails[0].roleId === 86
+        emp.roleDetails[0].rollName === "Admin"
     );
     const admin = filterEmployee.length > 0 ? true : false;
     
