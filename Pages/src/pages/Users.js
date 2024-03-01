@@ -27,7 +27,7 @@ import {
   putEmployees,
 } from "../redux/slices/employeeSlice";
 import { getrole } from "../redux/slices/roleSlice";
-import "../css/user.css";
+// import "../css/user.css";
 import { CountriesAPI } from "../apilinks/countrycode";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -52,6 +52,8 @@ import TeamForm from "../components/TeamForm";
 import AddressForm from "../components/AddressForm";
 import AccountForm from "../components/AccountForm";
 import FinishForm from "../components/FinishForm";
+// import "../css/user.css"
+
 
 const dateFormat = "YYYY-MM-DD";
 const formatter = (value) => <CountUp end={value} />;

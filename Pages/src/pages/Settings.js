@@ -7,7 +7,7 @@ import RoleSettings from './settingsPages/RoleSettings';
 import AccountDetailSettings from './settingsPages/AccountDetailsSettings';
 import DepartmentSettings from './settingsPages/DepartmentSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright,faChampagneGlasses, faCalendarDays, faTable} from '@fortawesome/free-solid-svg-icons';
+import {faBuilding,faToolbox,faBuildingColumns,faBuildingUser,faKeyboard,faCopyright,faChampagneGlasses, faCalendarDays, faTable, faUserTie} from '@fortawesome/free-solid-svg-icons';
 import BrandSettings  from './settingsPages/BrandSettings';
 import AccessoriesSettings from './settingsPages/AccessoriesSettings';
 import HolidaySetting from './settingsPages/HolidaySettings';
@@ -112,10 +112,11 @@ const Settings = () => {
       {
         settingsBack === true ? 
         <Row align="middle">
+        <Col key="1"><FontAwesomeIcon className='text-3xl ' icon={faUserTie}/></Col>
         {
           settingList.map((settings, i) => {
             return (
-                <Col key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer block w-full py-2 hover:text-gray-500 z-50'> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span>{settings.settingname}</span>  <Divider style={{ marginTop: 0, marginBottom: 3 }} /></Col>
+                <Col key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer block w-full py-4 hover:text-blue-500 z-50 '> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></Col>
             )
           })
         }

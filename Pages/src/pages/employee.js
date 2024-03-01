@@ -25,7 +25,7 @@ import {
   putEmployees,
 } from "../redux/slices/employeeSlice";
 import { getrole } from "../redux/slices/roleSlice";
-import "../css/user.css";
+// import "../css/user.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrash,
@@ -260,6 +260,10 @@ const Employee = ({ officeData }) => {
       key: "action",
       render: (_, record) => (
         <div className="flex gap-x-2">
+ <Button className="text-black" type="link" onClick={() => EditPencilIcon(record)}>
+            <FontAwesomeIcon icon={faPen} />
+          </Button>
+
           <Popconfirm
             title="Are you sure to delete this?"
             okText="Yes"
@@ -269,14 +273,12 @@ const Employee = ({ officeData }) => {
             }}
             onConfirm={() => DeleteIcon(record)}
           >
-            <Button>
+            <Button type="link" className="text-[#fd5353]" >
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </Popconfirm>
 
-          <Button onClick={() => EditPencilIcon(record)}>
-            <FontAwesomeIcon icon={faPen} />
-          </Button>
+         
         </div>
       ),
     },
@@ -1174,15 +1176,16 @@ const Employee = ({ officeData }) => {
 
   return (
     <div>
-      <Row gutter={[16, 16]} align="middle">
-        <Col span={3}>
+      {/* <Row align="middle">
+        <Col span={4}>
           <Statistic
             title="User Count"
             value={empCounts}
+            valueStyle={{ color: "#3f8600" }}
             formatter={formatter}
           />
         </Col>
-        <Col span={17} style={{ left: "0%" }}>
+        <Col span={4} style={{ right: "0%" }}>
           {" "}
           <Input.Search
             placeholder="Search here...."
@@ -1202,7 +1205,40 @@ const Employee = ({ officeData }) => {
             className="bg-blue-500"
           >{`Add ${headingValue}`}</Button>
         </Col>
-      </Row>
+      </Row> */}
+     <ul className="flex justify-between items-center">
+      <li className="grid grid-flow-col gap-x-10 items-center">
+      <Statistic
+      className="block w-fit"
+            title="User Count"
+            value={empCounts}
+            valueStyle={{ color: "#3f8600" }}
+            formatter={formatter}
+          />
+         
+           <Input.Search
+           className="block w-fit"
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+            style={{ width: `100%` }}
+          />
+          </li>
+
+        
+          <li >
+         
+          <Button
+            onClick={AddEmployeeBtn}
+            type="primary"
+            className="bg-blue-500"
+          >{`Add ${headingValue}`}</Button>
+          </li>
+     </ul>
 
       <Divider />
 

@@ -1,30 +1,31 @@
-/* Your CSS file or style block */
+/* Your CSS file or style block
 .ant-modal-body {
-    max-height: 70vh; /* Set the maximum height for the scrollbar to appear */
-    overflow-y: auto; /* Enable vertical scrollbar */
-    scrollbar-width: thin; /* Set the width of the scrollbar on Firefox */
-    scrollbar-color: darkgrey lightgrey; /* Set the color of the scrollbar on Firefox */
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin; 
+    scrollbar-color: darkgrey lightgrey;
   }
   
-  /* For Webkit browsers (Chrome, Safari) */
+
   .ant-modal-body::-webkit-scrollbar {
-    width: 4px; /* Set the width of the scrollbar */
+    width: 4px; 
   }
   
   .ant-modal-body::-webkit-scrollbar-thumb {
-    background-color: darkgrey; /* Set the color of the thumb */
+    background-color: darkgrey;
   }
   
   .ant-modal-body::-webkit-scrollbar-track {
-    background-color: lightgrey; /* Set the color of the track */
+    background-color: lightgrey; 
   }
   .custom-button.ant-btn:hover {
-    background-color: transparent;  /* Change the background color on hover if needed */
-    color: inherit;  /* Inherit the text color on hover */
-    border-color: transparent;  /* Change the border color on hover if needed */
-    box-shadow: none;  /* Remove the box shadow on hover */
+    background-color: transparent;  
+    color: inherit;  
+    border-color: transparent;  
+    box-shadow: none;  
   }
   
   .custom-button.ant-btn:hover .anticon {
-    display: none;  /* Hide the icon on hover */
-  }
+    display: none; 
+  } */
+ 

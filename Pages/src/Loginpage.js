@@ -100,10 +100,10 @@ const [EmployeeId,setEmployeeId] = useState(null);
     <section className="w-10/12 mx-auto my-20 sm:grid sm:grid-cols-3 ">
       <div className="col-span-1 lg:col-span-2"></div>
       <div className="sm:col-span-2 lg:col-span-1">
-        <h2 className="text-5xl lg:text-7xl font-black text-center sm:text-left">
-          Inventory
+        <h2 className="text-5xl lg:text-7xl font-black text-center ">
+          Qosteq
         </h2>
-        <h3 className="text-4xl font-bold text-center mt-5">Management</h3>
+        <h3 className="text-4xl font-bold text-center mt-5">Payroll</h3>
         <h3 className="text-2xl font-black text-center mt-5">Login</h3>
         
         {currentSection === 1 && (
