@@ -90,11 +90,6 @@ const Products = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
-    // {
-    //   title: "Office Location",
-    //   dataIndex: "officeLocationId",
-    //   key: "offLoc",
-    // },
     {
       title: "Status",
       key: "tags",
@@ -115,6 +110,10 @@ const Products = ({ officeData }) => {
       key: "action",
       render: (_, record) => (
         <div className="flex gap-x-2">
+           <Button onClick={() => PencilBtn(record.id)}  type='link'>
+            <FontAwesomeIcon icon={faPen} color="#000000"/>
+          </Button>
+
           <Popconfirm
             title="Are you sure to delete this?"
             okText="Yes"
@@ -124,14 +123,12 @@ const Products = ({ officeData }) => {
             }}
             onConfirm={() => DeleteIcon(record)}
           >
-            <Button >
-              <FontAwesomeIcon icon={faTrash} />
+            <Button  type='link'>
+              <FontAwesomeIcon icon={faTrash} color="#fd5353"/>
             </Button>
           </Popconfirm>
 
-          <Button onClick={() => PencilBtn(record.id)}>
-            <FontAwesomeIcon icon={faPen} />
-          </Button>
+         
         </div>
       ),
     },
@@ -189,7 +186,7 @@ const Products = ({ officeData }) => {
       key: "serialNumber",
     },
     {
-      title: "Office",
+      title: "Office Name",
       dataIndex: "officeLocationId",
       key: "officeLocationId",
     },
@@ -198,7 +195,7 @@ const Products = ({ officeData }) => {
 
   const dispatch = useDispatch();
 
-  const { employee } = useSelector((state) => state.employee);
+  // const { employee } = useSelector((state) => state.employee);
 
   const { accessories } = useSelector((state) => state.accessories);
 
@@ -214,10 +211,6 @@ const Products = ({ officeData }) => {
 
   const [proCounts, setProCounts] = useState();
 
-  const [pcData, setPcData] = useState([]);
-
-  const [pcCounts, setPcCounts] = useState();
-
   const [tableDATA,setTableDATA] = useState([]);
 
   //pop-Up Window
@@ -230,13 +223,17 @@ const Products = ({ officeData }) => {
   const saveBtnOn = () => setsaveBtn(true);
   const saveBtnOff = () => setsaveBtn(false);
 
+
+  const [notAssign,setNotAssign] = useState(false);
   //Add New Field
   const AddNewBtn = () => {
+     setNotAssign(!notAssign)
     clearFields();
     saveBtnOff();
     ModalOpen();
     if (form) {
-      form.resetFields(["officeLocationId"])};
+      form.resetFields()
+    };
       setSystem(pre =>({...pre,officeLocationId:undefined}));
   };
 
@@ -305,8 +302,10 @@ const Products = ({ officeData }) => {
       isStorage:false,
       employeeId:""
     });
-    setSystem(pre => ({...pre,officeLocationId:undefined}));
-    
+     setSystem(pre => ({...pre,officeLocationId:''}));
+    if (form) {
+      form.resetFields(["officeLocationId"])
+    }
   };
   useEffect(() => {
     // dispatch(getProductStorageLocation());
@@ -352,7 +351,7 @@ const Products = ({ officeData }) => {
 
   //Edit Icon
   const PencilBtn = (record) => {
-    const filterConsoleData = productsDetail.filter((cl) => cl.id === record);
+    const filterConsoleData = tableDATA.filter((cl) => cl.id === record);
     setSystem({
       id: filterConsoleData[0].id,
       accessoriesId: filterConsoleData[0].accessoriesId,
@@ -420,8 +419,10 @@ const Products = ({ officeData }) => {
   };
 
 const [LocationStatus,setLocationStatus] =useState(false);
+
   //Add Product Button
   const addProduct = async () => {
+  
     setLocationStatus(false);
     if (
       !system.productName ||
@@ -429,7 +430,7 @@ const [LocationStatus,setLocationStatus] =useState(false);
       !system.brandId ||
       !system.modelNumber ||
       !system.serialNumber ||
-      !system.officeLocationId === undefined
+      system.officeLocationId === undefined
     ) {
       message.error("Please Fill all the fields!");
     } else {
@@ -460,22 +461,19 @@ const [LocationStatus,setLocationStatus] =useState(false);
         console.error("Error adding product:", error);
       }
       await dispatch(getProductsDetail());
-     await setSystem((pre)=>({...pre,officeLocationId:undefined,}));
+     await setSystem((pre)=>({...pre,officeLocationId:undefined}));
+     if (form) {
+      form.resetFields(["officeLocationId"])
+    }
+
     }
   }
   };
 
-  //Displaying data in table data
-const productsCopy = [...tableDATA];
-productsCopy.sort((a, b) => a.id - b.id);
-
-// console.log(productsCopy);
-// console.log(tableDATA);
-
 // Map the sorted productsDetail array to TableDATA
-const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
-  .filter((consoleItem) => !consoleItem.isDeleted)
-  .map((cnsl, i) => ({
+const FilterData =tableDATA&&tableDATA.length>0? tableDATA.filter((consoleItem) => !consoleItem.isDeleted).sort((a, b) => a.id - b.id):[];
+
+const TableDATA = FilterData.map((cnsl, i) => ({
     SNo: i + 1,
     key: cnsl.id,
     id:cnsl.id,
@@ -488,10 +486,10 @@ const TableDATA =productsCopy&&productsCopy.length>0? productsCopy
     isAssigned:cnsl.isAssigned,
     isDeleted:cnsl.isDeleted,
     isRepair:cnsl.isRepair,
-    officeLocationId:cnsl.officeLocationId,
+    officeLocationId:cnsl.officeName,
     isStorage:cnsl.isStorage,
     employeeId:cnsl.employeeId
-  })):[];
+  }));
 console.log(TableDATA);
 
   useEffect(() => {
@@ -546,18 +544,13 @@ console.log(TableDATA);
     value: br.id,
   }));
 
-  //office Dropdown Option
-  // const officeFilter = office.filter((ofc) => ofc.isdeleted === false);
-  // const officeOption = officeFilter.map((off) => ({
-  //   label: off.officename,
-  //   value: off.id,
-  // }));
   const officeOption = [
     { label: 'Not Assigned', value: null }, // Static option
     ...office.filter(ofc => !ofc.isdeleted).map(off => ({
       label: off.officename,
       value: off.id, // Assuming 'id' is the unique identifier for each office
     })),
+   
   ];
 
   
@@ -567,7 +560,7 @@ console.log(TableDATA);
     console.log("hi");
   }
   const officeNameDropdowninProduct = (data,value) =>{
-    console.log(value.value);
+    console.log(value.value,data);
     setOptionClick(true)
     setSystem((pre) =>({...pre,officeLocationId:value.value}));
     // setLocationStatus(true);
@@ -767,19 +760,23 @@ console.log(TableDATA);
           modifiedBy: data.modifiedBy
         }));
         console.log(UpdateProductDetails);
-     
-        // //product details
-        UpdateProductDetails.map(async data => {
-          console.log(data);
-          await dispatch(putProductsDetail(data));
-          await dispatch(getProductsDetail());
-        });
-  
-       await dispatch(getProductsDetail());
+
+        await Promise.all(UpdateProductDetails.map(async data => {
+         await dispatch(putProductsDetail(data));
+         await dispatch(getEmployees());
+         await dispatch(getbrand());
+         await dispatch(getaccessories());
+        await dispatch(getProductsDetail()); 
+        }));
+      
+        await dispatch(getEmployees());
+        await dispatch(getbrand());
+        await dispatch(getaccessories());
+       await dispatch(getProductsDetail()); 
+
        CloseTransferModal();
        setIsButtonEnabled(false);
        setSystem(pre =>({...pre,officeLocationId:undefined}))
-      
       }
   };
 
@@ -806,47 +803,38 @@ const PostRepair =async ()=>{
       officeLocationId:data.officeLocationId,
       comments:comments
     }));
-    // console.log("UpdateRepairedProductDetails:",UpdateRepairedProductDetails);
     setSelectedRowKeys([])
     UpdateRepairedProductDetails.map(async data =>{
      await dispatch(putProductsDetail(data));
      await dispatch (getProductsDetail());
     });
- 
-    // const TransferRepairData = SelectedIds.map(id =>({
-    //   id: id,
-    //   isAssigned:false,
-    //   isdeleted: false,
-    //   isRepair:false
-    // }));
-    // // console.log("TransferRepairData:",TransferRepairData);
-    // await TransferRepairData.map(data=>{
-    //    dispatch(postProductsDetail(data))
-    // });
     CloseRepairModal();
     setIsButtonEnabled(false);
 
 }
-
-
-  
+ 
   const selectedrowDatas=TableDATA.filter(row => selectedRowKeys.includes(row.key));
-  // console.log(selectedrowDatas);
 
   const selectedrowrepairData =TableDATA.filter(row => selectedRowKeys.includes(row.key));
-//   // console.log(selectedrowrepairData);
+
+  useEffect(()=>{
+  //    setSystem((pre)=>({...pre,officeLocationId:undefined}));
+  //   if (form) {
+  //    form.resetFields(["officeLocationId"])
+  //  }
+   console.log("hi");
+  },[notAssign]);
+
   return (
     <div>
       <Row justify="space-between" align="middle" gutter={16}>
         <Col span={4}>
-          <Card bordered={true}>
             <Statistic
               title="Product Count"
               value={proCounts}
               formatter={formatter}
               valueStyle={{ color: "#3f8600" }}
             />
-          </Card>
         </Col>{" "}
         <Col span={10} style={{ right: "1%" }}>
           {" "}
@@ -862,7 +850,7 @@ const PostRepair =async ()=>{
           />
         </Col>
 
-        <Col justify="flex-end" style={{ left: "0.5%" }}>
+        <Col justify="flex-end" style={{ right: "0.5%" }}>
           <Popconfirm
             title="Are you sure you want to transfer the data to Storage?"   //Transfer to Storage Button 
             open={popConfirmVisible}
@@ -942,7 +930,6 @@ const PostRepair =async ()=>{
         title="Add Product"
         open={modalOpen}
         onCancel={ModalClose}
-        //  onOk={addProduct}
         footer={[
           saveBtn === false ? (
             <Button onClick={addProduct}>Add</Button>
@@ -1043,7 +1030,6 @@ const PostRepair =async ()=>{
             />
           </Form.Item>
 
-          {/* Add more form fields as needed */}
         </Form>
       </Modal>
    
@@ -1075,7 +1061,7 @@ const PostRepair =async ()=>{
       style={{ width: "20%" }}
       placeholder="Select Office Location"
       options={officeOption}
-      value={system.officeLocationId}
+      value={system.officeName}
       onChange={officeNameDropdowninProduct}
     />
     </div>

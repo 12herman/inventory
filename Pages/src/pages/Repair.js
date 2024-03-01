@@ -457,7 +457,7 @@ const handleStorageCancel = () => {
     isAssigned: data.isAssigned,
     isStorage:data.isStorage,
     isRepair:data.isRepair,
-    officeLocationId:data.officeLocationId,
+    officeLocationId:data.officeName,
     comments:data.comments
   })) : [];
   console.log(TableDatas);
@@ -536,9 +536,7 @@ const handleStorageCancel = () => {
     <div>
       <Row justify='space-between' align='middle'>
         <Col span={4}>
-          <Card bordered={true}>
             <Statistic title="Product in Repair" value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
-          </Card>
         </Col>{" "}
         <Col span={10} style={{ right: "16%" }}>
           {" "}

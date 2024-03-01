@@ -180,27 +180,32 @@ const Storage = ({ officeData }) => {
       dataIndex: "serialNumber",
       key: "serialNumber",
     },
+    // {
+    //   title: "Employee Name",
+    //   dataIndex: "employeeId",
+    //   key: "employeeId",
+    // },
     {
       title: "Status",
       key: "tags",
       dataIndex: "tags",
-      render: (x, text) =>   
+      render: (x, text,record) =>     
       (
        <>{
          text.isRepair === true ? <Tag color="yellow">Repair</Tag> 
          : text.isAssigned === true 
          ?  <Tag color="green">Assigned</Tag> 
          :text.isStorage === true? <Tag color ="orange">Storage</Tag>
-         : text.isAssigned === false ? <Tag color="red">Not Assigned</Tag> :0
-         
+         : text.isAssigned === false ? <Tag color="red">Not Assigned</Tag> :0     
+       }
+       {
+        text.employeeId === null ? 
+        "": <Tag color="blue">
+        {text.employeeId }
+      </Tag> 
        }</>
       ),
-    },
-    // {
-    //   title: "Comments",
-    //   dataIndex: "comments",
-    //   key: "comments",
-    // },
+    },   
   ];
 
   //Columns that are appeared in the Repair modal 
@@ -262,53 +267,8 @@ const Storage = ({ officeData }) => {
     }
   ];
 
-  //Columns that are displayed in the Assign Modal
-
-  const AssignModalColumn =[
-      {
-        title: "Employee Name",
-        dataIndex: "employeename",
-        key: "employeename",
-      },
-      {
-        title: "Products Detail",
-        dataIndex: "productsdetail",
-        key: "productsdetail",
-      },
- ]
   const [comments, setComments] = useState('');
-
-  const handleSave = (row) => {
-    const newData = [...dataSource];
-    const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    });
-    setDataSource(newData);
-  };
-  const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
-  };
-  const columns = defaultColumns.map((col) => {
-    if (!col.editable) {
-      return col;
-    }
-    return {
-      ...col,
-      onCell: (record) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        title: col.title,
-        handleSave,
-      }),
-    };
-  });
+  
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 19);
 
@@ -348,10 +308,6 @@ console.log(DeletedData);
 
   const [AssignStatus,setAssignStatus] =useState(false);
 
-  const { TextArea } = Input;
-
-  const {employeeaccessories} = useSelector((state) => state.employeeaccessories);
-
   const {employee} = useSelector((state) => state.employee);
  
   const [RepairModal, setRepairModal] = useState(false);
@@ -361,7 +317,7 @@ console.log(DeletedData);
   const [AssignModal,setAssignModal] = useState(false);
   const OpenAssignModal =()=> setAssignModal(true);
   const CloseAssignModal =()=> setAssignModal(false);
-
+  const [loadTable,setLoadTable] = useState(false);
   //Input Field Value
   const [system, setSystem] = useState({
     id: null,
@@ -376,32 +332,23 @@ console.log(DeletedData);
     isRepair: false,
     isStorage:false,
     officeLocationId:null,
-    comments:""
+    comments:"",
+    employeeId:null
   });
-
-  //Input Storage Field Value
-  const [storage,setStorage]=useState({
-    id:null,
-    productsDetailsId:null,
-    employeeId:null,
-    isDeleted:false,
-  });
-
 
   const [popConfirmRepairVisible, setPopConfirmRepairVisible] = useState(false);
   const [popConfirmAssignVisible, setPopConfirmAssignVisible] = useState(false);
 
   useEffect(() => {
-    // dispatch(getProductStorageLocation());
     dispatch(getProductsDetail());
-  }, []);
+  }, [loadTable]);
 
   useEffect(() => {
-    // setProLocData(productstoragelocation);
     setProLocData(productsDetail);
     setTableData(productsDetail);
     DataLoading();
-  }, [ officeData,productsDetail]);
+    console.log(TableDatas);
+  }, [ officeData,productsDetail,loadTable]);
 
   //Filter Table Data Based on the Office in Dropdown 
   function DataLoading() {
@@ -413,51 +360,52 @@ console.log(DeletedData);
     });
 
     if (officeNames.length === 1) {
-      const filterOneOffice = storagelocData ? storagelocData.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isStorage ===true) : 0;
+      const filterOneOffice = productsDetail ? productsDetail.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isStorage ===true) : 0;
       console.log(filterOneOffice);
       setstorageLocationCount(filterOneOffice.length);
       setTableData(filterOneOffice);
     }
     else {
-      const filterAllOffice = storagelocData ? storagelocData.filter(system => system.isDeleted === false && system.isStorage ===true) : 0;
+      const filterAllOffice = productsDetail ? productsDetail.filter(system => system.isDeleted === false && system.isStorage ===true) : 0;
       setstorageLocationCount(filterAllOffice.length);
       setTableData(filterAllOffice);
 
     }
   }
-  // const sortedTableDatas=[...tableData]
-  // const sortedTableData = Array.isArray(sortedTableDatas) ? sortedTableDatas.sort((a, b) => a.id - b.id) : [];
 
   //Table Data 
   const [tableData, setTableData] = useState([]);
 
-  //sort 
-  const storageCopy = tableData && tableData.length>0 ? [...tableData]:[];
-  const SortedTableData =storageCopy.sort((a,b) => a.id - b.id);
+//Displayed table in UI
+const FilterDatas = tableData && tableData.length > 0 ? tableData .filter(data => data.isDeleted === false && data.isStorage === true && data.isRepair === false).sort((a,b) => a.id - b.id) :[]
+      
+const TableDatas = FilterDatas.map((data, i) => ({
+  SNo: i + 1,
+  key: data.id,
+  id: data.id,
+  officeLocationId: data.officeName,
+  productName: data.productName,
+  producttype: data.accessoryName,
+  brand: data.brandName,
+  modelNumber: data.modelNumber,
+  serialNumber: data.serialNumber,
+  isRepair: data.isRepair,
+  tags: data.isRepair,
+  isDeleted: false,
+  isAssigned: data.isAssigned,
+  isStorage: false,
+  comments: data.comments,
+  employeeId: data.employeeName
+}))
+ // Sort by `id` in ascending order;
 
-
-  const TableDatas = SortedTableData && SortedTableData.length > 0 ? SortedTableData.filter(data => data.isDeleted === false && data.isStorage===true &data.isRepair===false).map((data, i) => ({
-    SNo: i + 1,
-    key: data.id,
-    id: data.id,
-    officeLocationId: data.officeLocationId,
-    productName: data.productName,
-    producttype: data.accessoryName,
-    brand: data.brandName,
-    modelNumber: data.modelNumber,
-    serialNumber: data.serialNumber,
-    isRepair: data.isRepair,
-    tags:data.isRepair,
-    isDeleted: false,
-    isAssigned:data.isAssigned,
-    isStorage:false,
-    comments:data.comments
-  })) : [];
 
 console.log(TableDatas);
+
   //Row key selection
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const onSelectChange = async (newSelectedRowKeys, x) => {
+    console.log(newSelectedRowKeys,x);
     await setSelectedRowKeys(newSelectedRowKeys);
     await setIsButtonEnabled(newSelectedRowKeys.length > 0);
     await setSelectedIds(newSelectedRowKeys);
@@ -466,6 +414,9 @@ console.log(TableDatas);
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
+    getCheckboxProps: (record) => ({
+      disabled: record.isAssigned === true  
+    }),
     selections: [
       Table.SELECTION_ALL,
       Table.SELECTION_INVERT,
@@ -483,6 +434,7 @@ console.log(TableDatas);
           });
           setSelectedRowKeys(newSelectedRowKeys);
         },
+      
       },
       {
         key: 'even',
@@ -520,22 +472,16 @@ console.log(TableDatas);
       isStorage:false,
       isAssigned:false,
       officeLocationId:null,
-      comments:null
+      comments:null,
+      employeeId:null
     });
-    setStorage({
-      id:null,
-      productsDetailsId:null,
-      employeeId:null,
-      isDeleted:false
-    })
     OpenAssignModal();
     setPopConfirmAssignVisible(false);
     setSelectedRowKeys(temporaryCheckKey);
     setTemporaryCheckKey([]);
   };
 
-  //Repair Cancel Button
-
+  //Assign Cancel Button
   const handleAssignCancel = () => {
     setPopConfirmAssignVisible(false);
   };
@@ -559,7 +505,8 @@ console.log(TableDatas);
       isStorage:false,
       isAssigned:false,
       officeLocationId:null,
-      comments:null
+      comments:null,
+      employeeId:null
     })
     OpenRepairModal();
     setPopConfirmRepairVisible(false);
@@ -568,7 +515,6 @@ console.log(TableDatas);
   };
 
   //Repair Cancel Button
-
   const handleRepairCancel = () => {
     setPopConfirmRepairVisible(false);
   };
@@ -594,10 +540,9 @@ const PostRepair =async ()=>{
     modifiedBy: data.modifiedBy,
     isStorage:false,
     officeLocationId:data.officeLocationId,
-    comments:comments
+    comments:comments,
+    employeeId:data.employeeId
   }));
-  console.log(UpdateRepairedProductDetails);
-
   UpdateRepairedProductDetails.map(async data =>{
    await dispatch(putProductsDetail(data));
    await dispatch (getProductsDetail());
@@ -608,35 +553,45 @@ const PostRepair =async ()=>{
 
 }
 
+
+//Product Assign 
 const ProductAssign=async()=>{
-     if(storage.employeeId ===undefined){
+     if(system.employeeId ===undefined){
       message.error("Select an Employee")
      }else{
-      const ProductAssignation = await employeeaccessories.filter(data => SelectedIds.some(id => id ===data.id));
+      const ProductAssignation = await productsDetail.filter(data => SelectedIds.some(id => id ===data.id));
       console.log(ProductAssignation);
      
      const updateProductAssignation = await ProductAssignation.map(data => ({
       id:data.id,
-      productsDetailsId:data.productsDetailsId,
-      employeeId:data.employeeId,
-      isDeleted:false,
+      accessoriesId:data.accessoriesId,
+      brandId: data.brandId,
+      productName: data.productName,
+      modelNumber: data.modelNumber,
+      serialNumber: data.serialNumber,
+      isDeleted: false,      
+      isRepair: false,
+      isAssigned: true,
       createdDate: data.createdDate,
       createdBy: data.createdBy,
       modifiedDate: formattedDate,
-      modifiedBy: data.modifiedBy
+      modifiedBy: data.modifiedBy,
+      isStorage:data.isStorage,
+      officeLocationId:data.officeLocationId,
+      comments:comments,
+      employeeId:system.employeeId,
      }))
-     console.log(updateProductAssignation);
 
-     updateProductAssignation.map(async data =>{
-      await dispatch(putProductsDetail(data));
-      await dispatch(getEmployeeAccessories());
-     });
+     await Promise.all(updateProductAssignation.map(data => dispatch(putProductsDetail(data))));
+     await setLoadTable(!loadTable);
+      // await dispatch(getProductsDetail());
      CloseAssignModal();
      setIsButtonEnabled(false);
-     setStorage(pre => ({...pre,employeeId:null}))
+    //  setSystem(pre => ({...pre,employeeId:null}))
     };
 }
 
+//Employee Dropdown option
 const employeeOption=[
   {label:'Select an Employee',value:null},
   ...employee.filter(empacc => !empacc.isDeleted).map(emp =>({  
@@ -645,30 +600,28 @@ const employeeOption=[
   })),
 ];
 
+//Employee Dropdown
 const employeeNameDropdowninProduct=(data,value) => {
   console.log(value.value);
-  setStorage((pre) => ({...pre,employeeId:value.value}));
+  setSystem((pre) => ({...pre,employeeId:value.value}));
   if(value.value ===null){
     setAssignStatus(false);
   }else{
     setAssignStatus(true);
   }
 }
-  
 
   const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
   return (
     <div>
       <Row justify='space-between' align='middle'>
         <Col span={4}>
-          <Card bordered={true}>
             <Statistic
               title="Stored Products"
               value={storageLocationCount}
               formatter={formatter}
               valueStyle={{ color: "#3f8600" }}
             />
-          </Card>
         </Col>{" "}
         <Col span={10} style={{ right: "4.9%" }}>
           {" "}
@@ -697,7 +650,8 @@ const employeeNameDropdowninProduct=(data,value) => {
            open={AssignModal}
            onClick={() => {
              setPopConfirmAssignVisible(true);
-             setTemporaryCheckKey(selectedRowKeys); // Store the temporary selected row keys
+             setTemporaryCheckKey(selectedRowKeys);
+              // Store the temporary selected row keys
            }}
             disabled={!isButtonEnabled}
           >Assign to Employee</Button>
@@ -741,24 +695,23 @@ const employeeNameDropdowninProduct=(data,value) => {
 
             </Button>
           </Popconfirm>
-
         </Col>
 
       </Row>
       <Divider />
       <Table
         rowSelection={rowSelection}
-        rowClassName={() => 'editable-row'}
-        bordered
+        // rowClassName={() => 'editable-row'}
+        // bordered
         dataSource={TableDatas}
-        columns={columns}
+        columns={defaultColumns}
         pagination={{
           pageSize: 6,
         }}
       />
 
 <Modal                                //Assign to Employee Modal 
-        title="Add to Repair"
+        title="Assign to Employee"
         open={AssignModal}
         onCancel={CloseAssignModal}
         width={"1200px"}
@@ -779,7 +732,7 @@ const employeeNameDropdowninProduct=(data,value) => {
           </Button>
         ]}>
           <Form>
-          <Form.Item
+          {/* <Form.Item
            
             style={{ marginBottom: 0, marginTop: 10 }}
           >
@@ -787,11 +740,33 @@ const employeeNameDropdowninProduct=(data,value) => {
               style={{ float: "right", width: "380px" }}
               placeholder="Select Employee Name"
               options={employeeOption}
-              value={storage.employeeId || undefined}
+              value={system.employeeId || undefined}
               name="employeeId"
               onChange={employeeNameDropdowninProduct}
             />
-          </Form.Item>
+          </Form.Item> */}
+          <Form.Item
+    style={{ marginBottom: 0, marginTop: 10 }}
+>
+    <Select
+        showSearch
+        style={{ width: 380 ,float:"right"}}
+        placeholder="Select Employee Name"
+        optionFilterProp="children"
+        filterOption={(input, option) =>
+            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        }
+        value={system.employeeId || undefined}
+        onChange={employeeNameDropdowninProduct}
+    >
+        {employeeOption.map((employee) => (
+            <Select.Option key={employee.value} value={employee.value}>
+                {employee.label}
+            </Select.Option>
+        ))}
+    </Select>
+</Form.Item>
+
           </Form>
           <Divider />
       <Table 

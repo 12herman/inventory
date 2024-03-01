@@ -47,9 +47,15 @@ const App = () => {
 
     return(
         <>
+<<<<<<< HEAD
         {/* <Accessories />  */}
 {/* <User Id={164}/> */}
      <Loginpage/>
+=======
+        <Accessories /> 
+{/* <User/> */}
+     {/* <Loginpage/> */}
+>>>>>>> c25c04ca554b5c041940ee0ef9c1cae778980fd9
         </>
     // <Router>
     //     <Routes>
