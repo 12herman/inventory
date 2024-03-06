@@ -1,49 +1,30 @@
 import React from 'react';
 import { Descriptions,Row,Col } from 'antd';
 
-const items = [
-  {
-    key: '1',
-    label: 'Name',
-    children: 'Abu',
-  },
-  {
-    key: '2',
-    label: 'System',
-    children: 'Laptop',
-  },
-  {
-    key: '3',
-    label: 'Brand',
-    children: 'Dell',
-  },
-  {
-    key: '4',
-    label: 'Model',
-    children: 'DS5023M',
-  },
-  {
-    key: '5',
-    label: 'Keyboard',
-    children: 'W239',
-  },
-  {
-    key: '6',
-    label: 'Headset',
-    children: 'Logi',
-  },
-  {
-    key: '7',
-    label: 'Extra',
-    children: 'Dell Monitor 27"',
-  }
-]
 
-const System = () => {
+
+const System = ({products,Id}) => {
  
+  const ProductsFilter = products.length > 0 ? products.filter(pro => pro.employeeId === Id && pro.isRepair === false && pro.isStorage === true && pro.isDeleted ===false) : null;
+
+const items= ProductsFilter === null 
+? [] : ProductsFilter.map(data => ({
+  key: data.id,
+  label: data.accessoryName,
+  children: <ul className='flex flex-col gap-y-1'>
+<li>Name: &nbsp; { data.productName}</li>
+  <li>Model Number :&nbsp; { data.modelNumber} </li>
+  <li>Serial Number:&nbsp;{ data.serialNumber}</li>
+  </ul>
+}));
+
+console.log(products);
+
   return (
     <div>
-     <Row>
+    {
+      items === null? "Hi" :
+      <Row>
         <Col span={24}><Descriptions
           title="Accessories"
           bordered
@@ -51,6 +32,8 @@ const System = () => {
           items={items}
         /></Col>
       </Row>
+    }
+    
     </div>
   );
 };

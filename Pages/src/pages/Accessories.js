@@ -20,6 +20,7 @@ import { Spin } from 'antd';
 import Employee from './employee';
 import LoginPage from "../Loginpage"
 import LogoutPage from '../components/LogoutPage';
+import { getEmployees } from '../redux/slices/employeeSlice';
 // import { getEmployees } from '../redux/slices/employeeSlice';
 
 const { Header, Sider, Content } = Layout;
@@ -56,10 +57,16 @@ const Accessories = ({Id}) => {
   const [selectedOffice, setSelectedOffice] = useState("All Office");
   const [officeData, setOfficeData] = useState([]);
 
+  
+  const {employee} = useSelector(state => state.employee); 
 
   useEffect(() => {
     setOfficeData(office);
+    dispatch(getEmployees());
   }, [office]);
+
+  
+  const EmpFilter = employee.filter(emp => emp.id === Id) ? employee.filter(emp => emp.id === Id)[0] : undefined;
 
 
   const handleMenuClick = (item) => {
@@ -160,7 +167,7 @@ const Accessories = ({Id}) => {
       key: '6',
       icon: <FontAwesomeIcon icon={faSliders} />,
       label: 'Settings',
-      Content: <Settings />,
+      Content: <Settings user={EmpFilter}/>,
       Components: 'Settings'
     },
     

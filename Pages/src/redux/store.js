@@ -18,6 +18,8 @@ import loginSlice from './slices/loginSlice';
 import leaveTableSlice from './slices/leaveTableSlice';
 import otpApiSlice from './slices/otpApiSlice';
 import employeeaccessoriesSlice from './slices/employeeaccessoriesSlice';
+import EmployeeLeaveHistorySlice from './slices/EmployeeLeaveHistorySlice';
+import leaveConfirmationSlice from './slices/leaveConfirmationSlice';
 
 export const store = configureStore({
     devTools:true,
@@ -40,7 +42,9 @@ export const store = configureStore({
         login:loginSlice,
         leavetable:leaveTableSlice,
         otpapi:otpApiSlice,
-        employeeaccessories:employeeaccessoriesSlice
+        employeeaccessories:employeeaccessoriesSlice,
+        employeeleavehistory:EmployeeLeaveHistorySlice,
+        leaveconfirmation: leaveConfirmationSlice
     }
 });
 

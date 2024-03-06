@@ -31,6 +31,7 @@ import { getOffice } from './redux/slices/officeSlice';
 import Loginpage from './Loginpage';
 import { BrowserRouter as Router, Route, Link, Switch,Routes } from 'react-router-dom';
 import UserDashboard from './userpages/UserDashboard';
+import LeaveConfirmationPage from './pages/LeaveConfirmationPage';
 /* src/index.css */
 
 // Admin
@@ -47,17 +48,19 @@ const App = () => {
 
     return(
         <>
-
-        {/* <Accessories />  */}
-{/* <User Id={164}/> */}
-     <Loginpage/>
-
+        {/* <LeaveConfirmationPage id={164}/> */}
+        {/* <Accessories Id={166}/>  */}
+<User Id={164}/>
+    {/* <LeaveConfirmationPage id={21}/> */}
+     {/* <Loginpage/> */}
+     {/* <Router>
+        <Routes>
+            <Route exact path='/' Component={Loginpage}/>
+            <Route  path="/confirmation/:id" Component={LeaveConfirmationPage}/>
+        </Routes>
+    </Router> */}
         </>
-    // <Router>
-    //     <Routes>
-    //         <Route exact path='/' Component={Loginpage}/>
-    //     </Routes>
-    // </Router>
+    
     );
 };
 
