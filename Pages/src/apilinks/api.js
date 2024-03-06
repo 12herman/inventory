@@ -22,4 +22,3 @@ export const ApiLink = {
     employeeleavehistory:"https://localhost:7129/api/EmployeeLeaveHistory",
     leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail"
   };
-  

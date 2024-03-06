@@ -13,8 +13,7 @@ export const postProductsDetail = createAsyncThunk('productsDetail/postProductsD
         .then(res => { 
             // console.log(res.data);
             return res.data 
-        });
-        
+        });        
 });
 
 
