@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Popconfirm, Table } from 'antd';
-import { Col, Row, Statistic, Divider, Tag, Card,Modal,Select,message } from 'antd';
+import { Col, Row, Statistic, Divider, Tag, Card, Modal, Select, message, Timeline,Empty} from 'antd';
 import CountUp from 'react-countup';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash, faPen, faL } from "@fortawesome/free-solid-svg-icons";
+import {faHistory } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from 'react-redux'
 import { getEmployees } from '../redux/slices/employeeSlice';
 import { getProductsDetail, putProductsDetail } from '../redux/slices/productsDetailSlice';
+import { getProductsRepairHistory, putProductsRepairHistory, postProductsRepairHistory } from '../redux/slices/productsrepairhistorySlice';
+
 
 
 const formatter = (value) => <CountUp end={value} />;
@@ -90,7 +92,7 @@ const EditableCell = ({
 };
 
 
-const Repair = ({officeData}) => {
+const Repair = ({ officeData }) => {
 
   //Input Field Value
   const [system, setSystem] = useState({
@@ -103,9 +105,9 @@ const Repair = ({officeData}) => {
     isAssigned: false,
     isDeleted: false,
     isRepair: false,
-    isStorage:false,
-    officeLocationId:undefined,
-    comments:""
+    isStorage: false,
+    officeLocationId: undefined,
+    comments: ""
   });
   const [searchText, setSearchText] = useState("");
   const dispatch = useDispatch();
@@ -118,15 +120,15 @@ const Repair = ({officeData}) => {
 
   const [proCount, setProCount] = useState();
 
-  const[isButtonEnabled,setIsButtonEnabled] = useState(false);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 
-  const [SelectedIds,setSelectedIds]=useState([]);
+  const [SelectedIds, setSelectedIds] = useState([]);
 
-  const [StorageModal,setStorageModal] = useState(false);
+  const [StorageModal, setStorageModal] = useState(false);
 
-  const openStorageModal =()=> setStorageModal(true);
+  const openStorageModal = () => setStorageModal(true);
 
-  const closeStorageModal =()=> setStorageModal(false);
+  const closeStorageModal = () => setStorageModal(false);
 
   const [popConfirmRepairVisible, setPopConfirmRepairVisible] = useState(false);
 
@@ -134,17 +136,32 @@ const Repair = ({officeData}) => {
 
   const { office } = useSelector((state) => state.office);
 
-  const [LocationStatus,setLocationStatus] =useState(false);
+  const [LocationStatus, setLocationStatus] = useState(false);
 
   const [storagelocData, setProLocData] = useState();
+
+  const { productsrepairhistory } = useSelector((state) => state.productsrepairhistory);
+
+  const [repairHistoryModal, setRepairHistoryModal] = useState(false);
+
+  const OpenRepairHistoryModal = () => setRepairHistoryModal(true);
+
+  const CloseRepairHistoryModal = () => {
+    SetSendHistory({
+      key: null,
+      label: null,
+      children: null
+    });
+    setRepairHistoryModal(false);
+  };
+
 
   useEffect(() => {
     dispatch(getEmployees());
     dispatch(getProductsDetail());
+    dispatch(getProductsRepairHistory());
   }, []);
 
- 
-  
 
   const [dataSource, setDataSource] = useState([
     {
@@ -160,7 +177,7 @@ const Repair = ({officeData}) => {
       address: 'Bangalore',
     },
   ]);
-  
+
   // const defaultColumns = [
   //   {
   //     title: 'Name',
@@ -191,7 +208,7 @@ const Repair = ({officeData}) => {
   //       ) : null,
   //   },
   // ];
-  
+
   const defaultColumns = [
     {
       title: "S.No",
@@ -248,7 +265,23 @@ const Repair = ({officeData}) => {
       dataIndex: "comments",
       key: "comments",
     },
+    {
+      title: "View History",
+      dataIndex: "history",
+      key: "history",
+      render: (_, record) => (
+        <div className="flex gap-x-2">
+          <Button onClick={() => historyButton(record.id)} type='link'>
+            <FontAwesomeIcon icon={faHistory} />
+
+          </Button>
+        </div>
+      )
+
+
+    },
   ];
+
 
   //Columns that are appeared in the modal 
   const modalColumn = [
@@ -309,69 +342,84 @@ const Repair = ({officeData}) => {
     }
   ];
 
- const handleStorageConfirm = () => {
-  setSystem({
-    SNo: null,
-    key: null,
-    id: null,
-    producttype: null,
-    brand: null,
-    productName: null,
-    modelNumber: null,
-    serialNumber: null,
-    // tags: null,
-    isDeleted: false,
-    isRepair: false,
-    isStorage:false,
-    isAssigned:false,
-    officeLocationId:null,
-    comments:null
-  })
-  openStorageModal();
-  setPopConfirmRepairVisible(false);
-  setSelectedRowKeys(temporaryKey);
-  setTemporaryKey([]);
-};
-
-const handleStorageCancel = () => {
-  setPopConfirmRepairVisible(false);
-};
-
-  const PostStorage =async ()=>{
-    if(system.officeLocationId === undefined){
-      message.error("select office location");
-    }else{
-    const ProductStorage= await productsDetail.filter(data=> SelectedIds.some(id=>id===data.id));
-    console.log(ProductStorage);
-
-    const updatedStorageDetails=await ProductStorage.map(data=>({
-      id:data.id,
-      accessoriesId:data.accessoriesId,
-      brandId:data.brandId,
-      productName:data.productName,
-      modelNumber:data.modelNumber,
-      serialNumber:data.serialNumber,
-      createdDate:data.createdDate,
-      createdBy:data.createdBy,
-      modifiedDate:data.modifiedDate,
-      modifiedBy:data.modifiedBy,
-      isDeleted:data.isDeleted,
-      isRepair:false,
-      isAssigned:data.isAssigned,
-      comments:data.comments,
-      officeLocationId:system.officeLocationId,
-      isStorage:true
+  const handleStorageConfirm = () => {
+    setSystem({
+      SNo: null,
+      key: null,
+      id: null,
+      producttype: null,
+      brand: null,
+      productName: null,
+      modelNumber: null,
+      serialNumber: null,
+      // tags: null,
+      isDeleted: false,
+      isRepair: false,
+      isStorage: false,
+      isAssigned: false,
+      officeLocationId: null,
+      comments: null
     })
-    );
+    openStorageModal();
+    setPopConfirmRepairVisible(false);
+    setSelectedRowKeys(temporaryKey);
+    setTemporaryKey([]);
+  };
 
-    updatedStorageDetails.map(async data =>{
-      await dispatch(putProductsDetail(data));
-      await dispatch(getProductsDetail());
-    });
-    closeStorageModal();
-    setIsButtonEnabled(false);
-    setSystem(pre =>({...pre,officeLocationId:undefined}))
-  }
+  const handleStorageCancel = () => {
+    setPopConfirmRepairVisible(false);
+  };
+
+  const PostStorage = async () => {
+    if (system.officeLocationId === undefined) {
+      message.error("select office location");
+    } else {
+      const ProductStorage = await productsDetail.filter(data => SelectedIds.some(id => id === data.id));
+      console.log(ProductStorage);
+
+      const updatedStorageDetails = await ProductStorage.map(data => ({
+        id: data.id,
+        accessoriesId: data.accessoriesId,
+        brandId: data.brandId,
+        productName: data.productName,
+        modelNumber: data.modelNumber,
+        serialNumber: data.serialNumber,
+        createdDate: data.createdDate,
+        createdBy: data.createdBy,
+        modifiedDate: data.modifiedDate,
+        modifiedBy: data.modifiedBy,
+        isDeleted: data.isDeleted,
+        isRepair: false,
+        isAssigned: data.isAssigned,
+        comments: data.comments,
+        officeLocationId: system.officeLocationId,
+        isStorage: true
+      })
+      );
+
+      const UpdateProductRepairHistory = await ProductStorage.map(data2 => ({
+        productsDetailId: data2.id,
+        comments: " Product Returned",
+        createdDate: data2.createdDate,
+        createdBy: data2.createdBy,
+        modifiedDate: data2.modifiedDate,
+        modifiedBy: data2.modifiedBy,
+        isDeleted: data2.isDeleted,
+
+      }));
+
+      UpdateProductRepairHistory.map(async data2 => {
+        await dispatch(postProductsRepairHistory(data2));
+      })
+
+      updatedStorageDetails.map(async data => {
+        await dispatch(putProductsDetail(data));
+        await dispatch(getProductsDetail());
+      });
+      closeStorageModal();
+      setIsButtonEnabled(false);
+      setSystem(pre => ({ ...pre, officeLocationId: undefined }))
+    }
   };
   const handleSave = (row) => {
     const newData = [...dataSource];
@@ -404,7 +452,7 @@ const handleStorageCancel = () => {
       }),
     };
   });
- 
+
   const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
@@ -412,38 +460,37 @@ const handleStorageCancel = () => {
     setTableData(productsDetail);
     setProData(productsDetail);
     DataLoading();
-  }, [ productsDetail,officeData]);
+  }, [productsDetail, officeData]);
 
-   function DataLoading() {
+  function DataLoading() {
 
-    var numberOfOffice = officeData.filter((off) => off.isdeleted ===false);
+    var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
 
     var officeNames = numberOfOffice.map((off) => {
       return off.officename;
     })
 
-    if(officeNames.length ===1){
+    if (officeNames.length === 1) {
       // const filteredProducts = await productsDetail.filter((products) => products.isDeleted === false && products.isRepair === true);
       // console.log(filteredProducts);
       // setProCount(filteredProducts.length);
-      
-      const filterOneOffice = proData? proData.filter(system => system.isDeleted ===false && system.officeName ===officeNames[0] && system.isRepair ===true) : 0;
+
+      const filterOneOffice = proData ? proData.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isRepair === true) : 0;
       console.log(filterOneOffice);
       setProCount(filterOneOffice.length);
       setTableData(filterOneOffice);
-    }else{
-      const filterAllOffice = proData ? proData.filter(system =>system.isDeleted ===false && system.isRepair ===true):0;
+    } else {
+      const filterAllOffice = proData ? proData.filter(system => system.isDeleted === false && system.isRepair === true) : 0;
       setProCount(filterAllOffice.length);
       setTableData(filterAllOffice);
     }
-    
+
   }
 
-  const repairCopy = tableData && tableData.length>0 ? [...tableData]:[];
-  const SortedTableData =repairCopy.sort((a,b) => a.id - b.id);
+  // console.log(productsDetail);
 
-
-  const TableDatas = SortedTableData && SortedTableData.length > 0 ? SortedTableData.filter(data => data.isDeleted === false && data.isRepair === true).map((data, i) => ({
+  const FilterDatas = productsDetail && productsDetail.length > 0 ? productsDetail.filter(data => data.isDeleted === false && data.isRepair === true).sort((a, b) => a.id - b.id) : 0;
+  const TableDatas = FilterDatas.map((data, i) => ({
     SNo: i + 1,
     key: data.id,
     id: data.id,
@@ -455,15 +502,15 @@ const handleStorageCancel = () => {
     // tags: data.isAssigned,
     isDeleted: data.isDeleted,
     isAssigned: data.isAssigned,
-    isStorage:data.isStorage,
-    isRepair:data.isRepair,
-    officeLocationId:data.officeName,
-    comments:data.comments
-  })) : [];
-  console.log(TableDatas);
+    isStorage: data.isStorage,
+    isRepair: data.isRepair,
+    officeLocationId: data.officeName,
+    comments: data.comments,
+  }));
+  // console.log(TableDatas);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const onSelectChange =async (newSelectedRowKeys) => {
+  const onSelectChange = async (newSelectedRowKeys) => {
     console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     await setSelectedRowKeys(newSelectedRowKeys);
     await setIsButtonEnabled(newSelectedRowKeys.length > 0);
@@ -507,6 +554,7 @@ const handleStorageCancel = () => {
     ],
   };
 
+
   const officeOption = [
     { label: 'Not Assigned', value: null }, // Static option
     ...office.filter(ofc => !ofc.isdeleted).map(off => ({
@@ -514,29 +562,59 @@ const handleStorageCancel = () => {
       value: off.id, // Assuming 'id' is the unique identifier for each office
     })),
   ];
-  const [OptionClick,setOptionClick] = useState(false);
-  const dropdownOffice =()=>{
-    console.log("hi");
-  }
-  const officeNameDropdowninProduct = (data,value) =>{
-    
+  const [OptionClick, setOptionClick] = useState(false);
+
+  const officeNameDropdowninProduct = (data, value) => {
+
     setOptionClick(true)
-    setSystem((pre) =>({...pre,officeLocationId:value.value}));
+    setSystem((pre) => ({ ...pre, officeLocationId: value.value }));
     // setLocationStatus(true);
-    if(value.value === null){
+    if (value.value === null) {
       setLocationStatus(false);
     }
-    else{
+    else {
       setLocationStatus(true);
     }
   }
   const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
   // console.log(selectedrowrepairData);
+
+  const [sendHistory, SetSendHistory] = useState([]);
+  const historyButton = async (record) => {
+
+    const historyFilter = productsrepairhistory.filter(data => data.productsDetailId === record);
+    // historyFilter.map(data=>{
+    //   SetSendHistory(pre => ({...pre,key:data.id,label:data.createdDate,children:data.comments}));
+    // });
+    if (historyFilter.length > 0) {
+      // const historyItem = historyFilter[historyFilter.length-1]; // Assuming there's only one history item per product
+      console.log(historyFilter.length);
+      const historyItems = historyFilter.map(item => ({
+        key: item.id,
+        label: item.createdDate,
+        children: item.comments,
+      }));
+      SetSendHistory(historyItems);
+
+
+    } else {
+      SetSendHistory([]);
+    }
+    await getProductsRepairHistory();
+    OpenRepairHistoryModal();
+  }
+  const items = Array.isArray(sendHistory) ? sendHistory.map(historyItem => ({
+    key: historyItem.key,
+    label: historyItem.label,
+    children: historyItem.children
+  })) : [];
+
+  // console.log(items);
   return (
     <div>
       <Row justify='space-between' align='middle'>
         <Col span={4}>
-            <Statistic title="Product in Repair" value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
+          <Statistic title="Product in Repair" value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
         </Col>{" "}
         <Col span={10} style={{ right: "16%" }}>
           {" "}
@@ -552,24 +630,27 @@ const handleStorageCancel = () => {
           />
         </Col>
         <Col justify='flex-end' style={{ right: '1%' }} >
-        <Popconfirm
+          <Popconfirm
             title="Are you sure you want to transfer the Products to Storage?"
             open={popConfirmRepairVisible}
             onConfirm={handleStorageConfirm}
             onCancel={handleStorageCancel}
             okText="Yes"
             cancelText="No"
+            okButtonProps={{
+              style:{backgroundColor:"#4088ff"}
+            } }
           >
-          <Button
-          type="primary"  className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"   
-          open={StorageModal}
-          onClick={()=>{
-            setPopConfirmRepairVisible(true);
-            setTemporaryKey(selectedRowKeys);
-          }}
-          disabled={!isButtonEnabled}
+            <Button
+              type="primary" className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"
+              open={StorageModal}
+              onClick={() => {
+                setPopConfirmRepairVisible(true);
+                setTemporaryKey(selectedRowKeys);
+              }}
+              disabled={!isButtonEnabled}
             >Send to Storage</Button>
-           </Popconfirm>
+          </Popconfirm>
         </Col>
       </Row>
       <Divider />
@@ -581,14 +662,14 @@ const handleStorageCancel = () => {
         dataSource={TableDatas}
         columns={columns}
       />
-       <Modal                                //Add to Repair Modal 
+      <Modal                                //Add to Storage Modal 
         title="Send to Storage"
         open={StorageModal}
         onCancel={closeStorageModal}
         width={"1200px"}
         footer={[
-          <Button key="1" 
-          onClick={PostStorage}
+          <Button key="1"
+            onClick={PostStorage}
           >
             Send
           </Button>,
@@ -602,27 +683,49 @@ const handleStorageCancel = () => {
             Cancel
           </Button>
         ]}>
-        <div style={{ display: "flex", flexDirection: "column"}}>
-    <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
-    <Select
-      style={{ width: "20%" }}
-      placeholder="Change Office Location"
-      options={officeOption}
-      // value={system.officeLocationId}
-      onChange={officeNameDropdowninProduct}
-    />
-    </div>
-  </div>
-      <Table 
-      columns={modalColumn}
-      dataSource={selectedrowrepairData}
-      pagination={{
-        pageSize: 6,
-      }}  
-      >
-      </Table>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+            <Select
+              style={{ width: "20%" }}
+              placeholder="Change Office Location"
+              options={officeOption}
+              // value={system.officeLocationId}
+              onChange={officeNameDropdowninProduct}
+            />
+          </div>
+        </div>
+        <Table
+          columns={modalColumn}
+          dataSource={selectedrowrepairData}
+          pagination={{
+            pageSize: 6,
+          }}
+        >
+        </Table>
       </Modal>
 
+      <Modal
+        title="Products History"
+        open={repairHistoryModal}
+        onOk={CloseRepairHistoryModal}
+        okButtonProps={{
+          style:{backgroundColor:"#4088ff"}
+        } }
+        onCancel={CloseRepairHistoryModal}
+        width={1200}
+      >
+        {items.length > 0 ? (
+    <Timeline mode='left' style={{ margin: '10px' }}>
+      {items.map((item) => (
+        <Timeline.Item key={item.key} label={item.label}>
+          {item.children}
+        </Timeline.Item>
+      ))}
+    </Timeline>
+  ) : (
+   <Empty /> // Empty fragment
+  )}
+      </Modal>
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getProductStorageLocation, putProductStorageLocation } from '../redux/slices/productStorageLocationSlice';
 import { getProductsDetail, postProductsDetail, putProductsDetail } from '../redux/slices/productsDetailSlice';
 import { getEmployeeAccessories,putEmployeeAccessories,postEmployeeAccessories } from '../redux/slices/employeeaccessoriesSlice';
+import { postProductsRepairHistory } from '../redux/slices/productsrepairhistorySlice';
 
 const formatter = (value) => <CountUp end={value} />;
 
@@ -191,7 +192,9 @@ const Storage = ({ officeData }) => {
       dataIndex: "tags",
       render: (x, text,record) =>     
       (
-       <>{
+        
+       <>
+       <div className="flex gap-x-2">{
          text.isRepair === true ? <Tag color="yellow">Repair</Tag> 
          : text.isAssigned === true 
          ?  <Tag color="green">Assigned</Tag> 
@@ -203,7 +206,8 @@ const Storage = ({ officeData }) => {
         "": <Tag color="blue">
         {text.employeeId }
       </Tag> 
-       }</>
+       }
+       </div></>
       ),
     },   
   ];
@@ -400,7 +404,7 @@ const TableDatas = FilterDatas.map((data, i) => ({
  // Sort by `id` in ascending order;
 
 
-console.log(TableDatas);
+// console.log(TableDatas);
 
   //Row key selection
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -543,10 +547,27 @@ const PostRepair =async ()=>{
     comments:comments,
     employeeId:data.employeeId
   }));
+
+  const UpdateProductRepairHistory=await ProductRepair.map(data2 => ({
+      productsDetailId: data2.id,
+      comments:comments,
+      createdDate: data2.createdDate,
+      createdBy: data2.createdBy,
+      modifiedDate: data2.modifiedDate,
+      modifiedBy: data2.modifiedBy,
+      isDeleted: data2.isDeleted,
+    
+  }));
+
   UpdateRepairedProductDetails.map(async data =>{
    await dispatch(putProductsDetail(data));
    await dispatch (getProductsDetail());
+   
   });
+
+  UpdateProductRepairHistory.map(async data2 =>{
+  await dispatch(postProductsRepairHistory(data2));
+  })
 
   CloseRepairModal();
   setIsButtonEnabled(false);
@@ -587,6 +608,7 @@ const ProductAssign=async()=>{
       // await dispatch(getProductsDetail());
      CloseAssignModal();
      setIsButtonEnabled(false);
+     setSelectedRowKeys([]);
     //  setSystem(pre => ({...pre,employeeId:null}))
     };
 }
@@ -614,18 +636,20 @@ const employeeNameDropdowninProduct=(data,value) => {
   const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
   return (
     <div>
-      <Row justify='space-between' align='middle'>
-        <Col span={4}>
+      <Row justify='space-between' align='middle' gutter={12} className="flex justify-between items-center">
+        <Col span={4} className="grid grid-flow-col gap-x-10 items-center">
             <Statistic
+             className="block w-fit"
               title="Stored Products"
               value={storageLocationCount}
               formatter={formatter}
               valueStyle={{ color: "#3f8600" }}
             />
         </Col>{" "}
-        <Col span={10} style={{ right: "4.9%" }}>
+        <Col span={10} style={{ right: "14.50%", width:"100%"}}>
           {" "}
           <Input.Search
+           className="block w-fit"
             placeholder="Search here...."
             onSearch={(value) => {
               setSearchText(value);
@@ -633,11 +657,11 @@ const employeeNameDropdowninProduct=(data,value) => {
             onChange={(e) => {
               setSearchText(e.target.value);
             }}
-            style={{ width: `30%` }}
+            
           />
         </Col>
 
-        <Col justify='flex-end' style={{ left: '5%' }}>
+        <Col justify='flex-end' style={{ left: '8%', }}>
           <Popconfirm                                                              //Assign to Employee Button
           title="Are you sure you want to assign the Products to Employee?"
           open={popConfirmAssignVisible}
@@ -645,6 +669,9 @@ const employeeNameDropdowninProduct=(data,value) => {
           onCancel={handleAssignCancel}
           okText="Yes"
           cancelText="No"
+          okButtonProps={{
+            style:{backgroundColor:"#4088ff"}
+          } }
           >
           <Button type="primary" className='bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3'
            open={AssignModal}
@@ -658,7 +685,7 @@ const employeeNameDropdowninProduct=(data,value) => {
           </Popconfirm>  
         </Col>
 
-        <Col justify='flex-end' style={{ left: '2%' }}>
+        <Col justify='flex-end' style={{ left: '3.5%' }}>
           <Popconfirm
             title="Are you sure you want to transfer the Products to Repair?"
             open={popConfirmRepairVisible}
@@ -666,6 +693,9 @@ const employeeNameDropdowninProduct=(data,value) => {
             onCancel={handleRepairCancel}
             okText="Yes"
             cancelText="No"
+            okButtonProps={{
+              style:{backgroundColor:"#4088ff"}
+            } }
           >
             <Button type="primary" className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"    //Transfer to Repair Button
               open={RepairModal}

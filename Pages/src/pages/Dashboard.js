@@ -38,7 +38,7 @@ useEffect(()=>{
     dispatch(getEmployees());
     dispatch(getProductsDetail());
 },[]);
-console.log(productsDetail);
+// console.log(productsDetail);
 useEffect(()=>{
         setEmpData(employee);
         setProData(productsDetail);
