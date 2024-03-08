@@ -20,5 +20,6 @@ export const ApiLink = {
     otpapi:"https://localhost:7129/api/Otp",
     employeeaccessories:"https://localhost:7129/api/Employeeaccessory",
     employeeleavehistory:"https://localhost:7129/api/EmployeeLeaveHistory",
-    leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail"
+    leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail",
+    productsrepairhistory:"https://localhost:7129/api/ProductsRepairHistory"
   };

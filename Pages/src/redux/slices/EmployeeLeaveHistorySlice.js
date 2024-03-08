@@ -12,10 +12,16 @@ export const Getemployeeleavehistory = createAsyncThunk(`${apiName}/get${apiName
 });
 
 //Post
-export const Postemployeeleavehistory = createAsyncThunk(`${apiName}/post${apiName}`,async(data)=>{
-    return Axios.post(apilink,data)
-                .then(res => {return res.data});
-});
+export const Postemployeeleavehistory = createAsyncThunk(`${apiName}/post${apiName}`, async (data) => {
+    try {
+      const response = await Axios.post(apilink, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      throw error;
+    }
+  });
+  
 
 //Put
 export const Putemployeeleavehistory = createAsyncThunk(`${apiName}/put${apiName}`,async(putdata)=>{
