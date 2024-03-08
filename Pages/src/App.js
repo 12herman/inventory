@@ -48,19 +48,17 @@ const App = () => {
 
     return(
         <>
-        {/* <LeaveConfirmationPage id={91}/> */}
-        {/* <Accessories Id={166}/>  */}
-<User Id={156}/>
-    {/* <LeaveConfirmationPage id={21}/> */}
+
+        {/* <Accessories />  */}
+{/* <User Id={164}/> */}
      {/* <Loginpage/> */}
-     {/* <Router>
+    <Router>
         <Routes>
             <Route exact path='/' Component={Loginpage}/>
-            <Route  path="/confirmation/:id" Component={LeaveConfirmationPage}/>
         </Routes>
-    </Router> */}
+     </Router>
         </>
-    
+   
     );
 };
 

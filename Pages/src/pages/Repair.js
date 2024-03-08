@@ -1,96 +1,15 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Form, Input, Popconfirm, Table } from 'antd';
-import { Col, Row, Statistic, Divider, Tag, Card, Modal, Select, message, Timeline,Empty} from 'antd';
+import { Col, Row, Statistic, Divider, Tag, Card, Modal, Select, message, Timeline, Empty } from 'antd';
 import CountUp from 'react-countup';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faHistory } from "@fortawesome/free-solid-svg-icons";
+import { faHistory, faHouse, faWarehouse } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from 'react-redux'
 import { getEmployees } from '../redux/slices/employeeSlice';
 import { getProductsDetail, putProductsDetail } from '../redux/slices/productsDetailSlice';
 import { getProductsRepairHistory, putProductsRepairHistory, postProductsRepairHistory } from '../redux/slices/productsrepairhistorySlice';
 
-
-
 const formatter = (value) => <CountUp end={value} />;
-
-const EditableContext = React.createContext(null);
-const EditableRow = ({ index, ...props }) => {
-  const [form] = Form.useForm();
-  return (
-    <Form form={form} component={false}>
-      <EditableContext.Provider value={form}>
-        <tr {...props} />
-      </EditableContext.Provider>
-    </Form>
-  );
-};
-const EditableCell = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
-  const [editing, setEditing] = useState(false);
-  const inputRef = useRef(null);
-  const form = useContext(EditableContext);
-  useEffect(() => {
-    if (editing) {
-      inputRef.current.focus();
-    }
-  }, [editing]);
-  const toggleEdit = () => {
-    setEditing(!editing);
-    form.setFieldsValue({
-      [dataIndex]: record[dataIndex],
-    });
-  };
-  const save = async () => {
-    try {
-      const values = await form.validateFields();
-      toggleEdit();
-      handleSave({
-        ...record,
-        ...values,
-      });
-    } catch (errInfo) {
-      console.log('Save failed:', errInfo);
-    }
-  };
-  let childNode = children;
-  if (editable) {
-    childNode = editing ? (
-      <Form.Item
-        style={{
-          margin: 0,
-        }}
-        name={dataIndex}
-        rules={[
-          {
-            required: true,
-            message: `${title} is required.`,
-          },
-        ]}
-      >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-      </Form.Item>
-    ) : (
-      <div
-        className="editable-cell-value-wrap"
-        style={{
-          paddingRight: 24,
-        }}
-        onClick={toggleEdit}
-      >
-        {children}
-      </div>
-    );
-  }
-  return <td {...restProps}>{childNode}</td>;
-};
-
 
 const Repair = ({ officeData }) => {
 
@@ -110,9 +29,8 @@ const Repair = ({ officeData }) => {
     comments: ""
   });
   const [searchText, setSearchText] = useState("");
+
   const dispatch = useDispatch();
-  const { employee, loading } = useSelector(state => state.employee);
-  const [empData, setEmpData] = useState([]);
 
   const { productsDetail } = useSelector(state => state.productsDetail);
 
@@ -155,59 +73,11 @@ const Repair = ({ officeData }) => {
     setRepairHistoryModal(false);
   };
 
-
   useEffect(() => {
     dispatch(getEmployees());
     dispatch(getProductsDetail());
     dispatch(getProductsRepairHistory());
   }, []);
-
-
-  const [dataSource, setDataSource] = useState([
-    {
-      key: '0',
-      name: 'Laptop',
-      age: '2',
-      address: 'Chennai',
-    },
-    {
-      key: '1',
-      name: 'Mouse',
-      age: '1',
-      address: 'Bangalore',
-    },
-  ]);
-
-  // const defaultColumns = [
-  //   {
-  //     title: 'Name',
-  //     dataIndex: 'name',
-  //     width: '25%',
-  //     editable: true,
-  //   },
-  //   {
-  //     title: 'Count',
-  //     dataIndex: 'age',
-  //     width: '25%',
-  //     editable: true,
-  //   },
-  //   {
-  //     title: 'address',
-  //     dataIndex: 'address',
-  //     width: '25%',
-  //     editable: true,
-  //   },
-  //   {
-  //     title: 'operation',
-  //     dataIndex: 'operation',
-  //     render: (_, record) =>
-  //       dataSource.length >= 1 ? (
-  //         <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
-  //           <a>Delete</a>
-  //         </Popconfirm>
-  //       ) : null,
-  //   },
-  // ];
 
   const defaultColumns = [
     {
@@ -277,11 +147,8 @@ const Repair = ({ officeData }) => {
           </Button>
         </div>
       )
-
-
     },
   ];
-
 
   //Columns that are appeared in the modal 
   const modalColumn = [
@@ -421,37 +288,6 @@ const Repair = ({ officeData }) => {
       setSystem(pre => ({ ...pre, officeLocationId: undefined }))
     }
   };
-  const handleSave = (row) => {
-    const newData = [...dataSource];
-    const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    });
-    setDataSource(newData);
-  };
-  const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
-  };
-  const columns = defaultColumns.map((col) => {
-    if (!col.editable) {
-      return col;
-    }
-    return {
-      ...col,
-      onCell: (record) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        title: col.title,
-        handleSave,
-      }),
-    };
-  });
 
   const [tableData, setTableData] = useState([]);
 
@@ -471,25 +307,19 @@ const Repair = ({ officeData }) => {
     })
 
     if (officeNames.length === 1) {
-      // const filteredProducts = await productsDetail.filter((products) => products.isDeleted === false && products.isRepair === true);
-      // console.log(filteredProducts);
-      // setProCount(filteredProducts.length);
-
-      const filterOneOffice = proData ? proData.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isRepair === true) : 0;
+      const filterOneOffice = productsDetail ? productsDetail.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isRepair === true) : 0;
       console.log(filterOneOffice);
       setProCount(filterOneOffice.length);
       setTableData(filterOneOffice);
     } else {
-      const filterAllOffice = proData ? proData.filter(system => system.isDeleted === false && system.isRepair === true) : 0;
+      const filterAllOffice = productsDetail ? productsDetail.filter(system => system.isDeleted === false && system.isRepair === true) : 0;
       setProCount(filterAllOffice.length);
       setTableData(filterAllOffice);
     }
 
   }
 
-  // console.log(productsDetail);
-
-  const FilterDatas = productsDetail && productsDetail.length > 0 ? productsDetail.filter(data => data.isDeleted === false && data.isRepair === true).sort((a, b) => a.id - b.id) : 0;
+  const FilterDatas = tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted === false && data.isRepair === true).sort((a, b) => a.id - b.id) : [];
   const TableDatas = FilterDatas.map((data, i) => ({
     SNo: i + 1,
     key: data.id,
@@ -499,7 +329,6 @@ const Repair = ({ officeData }) => {
     brand: data.brandName,
     modelNumber: data.modelNumber,
     serialNumber: data.serialNumber,
-    // tags: data.isAssigned,
     isDeleted: data.isDeleted,
     isAssigned: data.isAssigned,
     isStorage: data.isStorage,
@@ -507,7 +336,6 @@ const Repair = ({ officeData }) => {
     officeLocationId: data.officeName,
     comments: data.comments,
   }));
-  // console.log(TableDatas);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const onSelectChange = async (newSelectedRowKeys) => {
@@ -577,17 +405,11 @@ const Repair = ({ officeData }) => {
     }
   }
   const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
-  // console.log(selectedrowrepairData);
-
   const [sendHistory, SetSendHistory] = useState([]);
   const historyButton = async (record) => {
 
     const historyFilter = productsrepairhistory.filter(data => data.productsDetailId === record);
-    // historyFilter.map(data=>{
-    //   SetSendHistory(pre => ({...pre,key:data.id,label:data.createdDate,children:data.comments}));
-    // });
     if (historyFilter.length > 0) {
-      // const historyItem = historyFilter[historyFilter.length-1]; // Assuming there's only one history item per product
       console.log(historyFilter.length);
       const historyItems = historyFilter.map(item => ({
         key: item.id,
@@ -609,16 +431,16 @@ const Repair = ({ officeData }) => {
     children: historyItem.children
   })) : [];
 
-  // console.log(items);
   return (
     <div>
-      <Row justify='space-between' align='middle'>
-        <Col span={4}>
-          <Statistic title="Product in Repair" value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
+      <Row justify='space-between' align='middle' gutter={12} className="flex justify-between items-center">
+        <Col span={4} className="grid grid-flow-col gap-x-10 items-center">
+          <Statistic  className="block w-fit" title="Repair Count " value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
         </Col>{" "}
-        <Col span={10} style={{ right: "16%" }}>
+        <Col span={10} style={{ right: "25.50%" ,width:"100%"}}>
           {" "}
           <Input.Search
+           className="block w-fit"
             placeholder="Search here...."
             onSearch={(value) => {
               setSearchText(value);
@@ -626,10 +448,10 @@ const Repair = ({ officeData }) => {
             onChange={(e) => {
               setSearchText(e.target.value);
             }}
-            style={{ width: `30%` }}
+           
           />
         </Col>
-        <Col justify='flex-end' style={{ right: '1%' }} >
+        <Col justify='flex-end' style={{ right: '0%' }} >
           <Popconfirm
             title="Are you sure you want to transfer the Products to Storage?"
             open={popConfirmRepairVisible}
@@ -638,8 +460,8 @@ const Repair = ({ officeData }) => {
             okText="Yes"
             cancelText="No"
             okButtonProps={{
-              style:{backgroundColor:"#4088ff"}
-            } }
+              style: { backgroundColor: "#4088ff" }
+            }}
           >
             <Button
               type="primary" className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"
@@ -649,18 +471,20 @@ const Repair = ({ officeData }) => {
                 setTemporaryKey(selectedRowKeys);
               }}
               disabled={!isButtonEnabled}
-            >Send to Storage</Button>
+            >
+              <FontAwesomeIcon icon={faWarehouse} className="icon" style={{ marginRight: '5px' }} /> {"  "}
+              <span>Send to Storage</span></Button>
           </Popconfirm>
         </Col>
       </Row>
       <Divider />
       <Table
         rowSelection={rowSelection}
-        components={components}
-        rowClassName={() => 'editable-row'}
-        bordered
         dataSource={TableDatas}
-        columns={columns}
+        columns={defaultColumns}
+        pagination={{
+          pageSize: 6,
+        }}
       />
       <Modal                                //Add to Storage Modal 
         title="Send to Storage"
@@ -709,22 +533,22 @@ const Repair = ({ officeData }) => {
         open={repairHistoryModal}
         onOk={CloseRepairHistoryModal}
         okButtonProps={{
-          style:{backgroundColor:"#4088ff"}
-        } }
+          style: { backgroundColor: "#4088ff" }
+        }}
         onCancel={CloseRepairHistoryModal}
         width={1200}
       >
         {items.length > 0 ? (
-    <Timeline mode='left' style={{ margin: '10px' }}>
-      {items.map((item) => (
-        <Timeline.Item key={item.key} label={item.label}>
-          {item.children}
-        </Timeline.Item>
-      ))}
-    </Timeline>
-  ) : (
-   <Empty /> // Empty fragment
-  )}
+          <Timeline mode='left' style={{ margin: '10px' }}>
+            {items.map((item) => (
+              <Timeline.Item key={item.key} label={item.label}>
+                {item.children}
+              </Timeline.Item>
+            ))}
+          </Timeline>
+        ) : (
+          <Empty />
+        )}
       </Modal>
     </div>
   );

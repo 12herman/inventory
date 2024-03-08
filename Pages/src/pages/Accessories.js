@@ -307,7 +307,6 @@ const Accessories = ({Id}) => {
 
         </Content>
       </Layout>
-      
     </Layout>
   );
 };

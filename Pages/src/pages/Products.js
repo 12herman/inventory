@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Table, Tag, Modal, Form, Input, message, Timeline, Button,
   Col, Row,Statistic,Divider,Select,Popconfirm, Empty} from "antd";
-import { faPlus, faTrash, faPen,faHistory } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash, faPen,faHistory,faWarehouse,faScrewdriverWrench } from "@fortawesome/free-solid-svg-icons";
 import CountUp from "react-countup";
 import { useDispatch, useSelector } from "react-redux";
 import { getEmployees } from "../redux/slices/employeeSlice";
@@ -17,6 +17,7 @@ const formatter = (value) => <CountUp end={value} />;
 const Products = ({ officeData }) => {
   const [form] = Form.useForm();
 
+  //Validation for comment in Add to Repair Button
   const onFinish = () => {
     form.validateFields().then((values) => {
       PostRepair();
@@ -234,6 +235,7 @@ const Products = ({ officeData }) => {
 
 
   const [notAssign, setNotAssign] = useState(false);
+
   //Add New Field
   const AddNewBtn = () => {
     setNotAssign(!notAssign)
@@ -262,17 +264,6 @@ const Products = ({ officeData }) => {
     isStorage: false,
     employeeId: null
   });
-
-
-  //Storage
-  const [storage, setStorage] = useState({
-    productDetailsId: null,
-    officeLocationId: null,
-    isDeleted: false,
-    isAssigned: false,
-    isStorage: false,
-    isRepair: false
-  })
 
   //Table data and Column
   const TableDatas = productsDetail.map((cnsl, i) => ({
@@ -477,7 +468,7 @@ const Products = ({ officeData }) => {
   };
 
   // Map the sorted productsDetail array to TableDATA
-  const FilterData = productsDetail && productsDetail.length > 0 ? productsDetail.filter((consoleItem) => !consoleItem.isDeleted).sort((a, b) => a.id - b.id) : [];
+  const FilterData = tableDATA && tableDATA.length > 0 ? tableDATA.filter((consoleItem) => !consoleItem.isDeleted).sort((a, b) => a.id - b.id) : [];
 
   const TableDATA = FilterData.map((cnsl, i) => ({
     SNo: i + 1,
@@ -507,30 +498,29 @@ const Products = ({ officeData }) => {
 
   //Filter Table Data Based on the Office in Dropdown 
   function DataLoading() {
-
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
-
     var officeNames = numberOfOffice.map((off) => {
       return off.officename;
     });
-
     if (officeNames.length === 1) {
-      const filterOneOffice = proData ? proData.filter(products => products.isDeleted === false && products.officeName === officeNames[0]) : 0;
+      const filterOneOffice = productsDetail ? productsDetail.filter(products => products.isDeleted === false && products.officeName === officeNames[0]) : 0;
+      console.log(filterOneOffice);
       setProCounts(filterOneOffice.length);
       setTableDATA(filterOneOffice);
     }
     else {
-      const filterAllOffice = proData ? proData.filter(products => products.isDeleted === false) : 0;
+      const filterAllOffice = productsDetail ? productsDetail.filter(products => products.isDeleted === false) : 0;
       setProCounts(filterAllOffice.length);
       setTableDATA(filterAllOffice);
-
     }
   }
+
   useEffect(() => {
     setProData(productsDetail);
     DataLoading();
   }, [productsDetail, officeData]);
 
+  //Product Option
   const productFilter = accessories.filter((acc) => acc.isdeleted === false);
   const productOption = productFilter.map((pr, i) => ({
     label: pr.name,
@@ -610,14 +600,23 @@ const Products = ({ officeData }) => {
   const [comments, setComments] = useState('');
 
   const handleTransferConfirm = () => {
-    setStorage(productsDetail);
-    setStorage({
-      productDetailsId: null,
-      officeLocationId: null,
+    setSystem(productsDetail);
+    setSystem({
+      SNo: null,
+      key: null,
+      id: null,
+      producttype: null,
+      brand: null,
+      productName: null,
+      modelNumber: null,
+      serialNumber: null,
+      tags: null,
       isDeleted: false,
-      isAssigned: false,
-      isStorage: false,
-      isRepair: false
+      isRepair: false,
+      isAssigned:false,
+      isStorage:false,
+      comments:null,
+      officeLocationId:null
     })
     OpenTransferModal();
     setPopConfirmVisible(false);
@@ -866,13 +865,13 @@ const Products = ({ officeData }) => {
         <Col span={4} className="grid grid-flow-col gap-x-10 items-center">
           <Statistic
             className="block w-fit"
-            title="Product Count"
+            title="Products Count"
             value={proCounts}
             formatter={formatter}
             valueStyle={{ color: "#3f8600" }}
           />
         </Col>
-        <Col span={10} style={{ right: "10.80%", width:"100%"}}>
+        <Col span={10} style={{ right: "10%", width:"100%"}}>
          
           <Input.Search
 
@@ -887,7 +886,7 @@ const Products = ({ officeData }) => {
           />
         </Col>
 
-        <Col justify="flex-end" style={{ right: "0.5%" }}>
+        <Col justify="flex-end" style={{ right: "1%" }} >
           <Popconfirm
             title="Are you sure you want to transfer the data to Storage?"   //Transfer to Storage Button 
             open={popConfirmVisible}
@@ -901,24 +900,20 @@ const Products = ({ officeData }) => {
           >
             <Button
               type="primary"
-              className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"
+              className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
               open={TransferModal}
               onClick={() => {
                 setPopConfirmVisible(true);
                 setTemporarySelectedRowKeys(selectedRowKeys); // Store the temporary selected row keys
               }}
               disabled={!isButtonEnabled}>
-              <span>Move Products to Other Storage</span>
-
+                <FontAwesomeIcon icon={faWarehouse} className="icon"/>{" "}
+              <span >Move Products to Other Storage</span>
             </Button>
-
-
           </Popconfirm>
-
-
         </Col>
 
-        <Col justify="flex-end" style={{ right: "1%" }}>
+        <Col justify="flex-end" style={{ right: "0.5%" }}>
           <Popconfirm
             title="Are you sure you want to transfer the Products to Repair?"
             open={popConfirmRepairVisible}
@@ -932,7 +927,7 @@ const Products = ({ officeData }) => {
           >
             <Button
               type="primary"
-              className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"    //Transfer to Repair Button
+              className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"    //Transfer to Repair Button
               open={RepairModal}
               onClick={() => {
                 setPopConfirmRepairVisible(true);
@@ -940,26 +935,27 @@ const Products = ({ officeData }) => {
               }}
               disabled={!isButtonEnabled}
             >
-              <span>Transfer Products to Repair</span>
-
+              <FontAwesomeIcon icon={faScrewdriverWrench} className="icon" />{" "}
+              <span >Transfer Products to Repair</span>
             </Button>
           </Popconfirm>
         </Col>
 
-        <Col justify="flex-end" style={{ right: "1.5%" }}>
-
+        <Col justify="flex-end" style={{ right: "0%" }} >
           <Button
             disabled={isButtonEnabled}
             onClick={() => AddNewBtn()}
             type="primary"
             className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
           >
-            <span>Add Product</span>
-            <FontAwesomeIcon icon={faPlus} className="icon" />
+             <FontAwesomeIcon icon={faPlus} className="icon" />{" "}
+            <span >Add Product</span>        
           </Button>
         </Col>
       </Row>
+
       <Divider />
+
       <Table
         rowSelection={rowSelection}
         columns={columns}
@@ -967,7 +963,7 @@ const Products = ({ officeData }) => {
         pagination={{
           pageSize: 6,
         }}
-      />
+        xs={20} xl={4}/>
 
       <Modal                             //Add Product Modal
         title="Add Product"
@@ -990,7 +986,7 @@ const Products = ({ officeData }) => {
           >
             Close
           </Button>,
-        ]}
+        ]}xs={20} xl={4}
       >
         <Form form={form}>
           <Form.Item
@@ -1072,10 +1068,8 @@ const Products = ({ officeData }) => {
               onChange={officeNameDropdowninProduct}
             />
           </Form.Item>
-
         </Form>
       </Modal>
-
 
       <Modal                                  //Add to Storage Modal 
         title="Add to Storage"
@@ -1097,7 +1091,7 @@ const Products = ({ officeData }) => {
           >
             Cancel
           </Button>
-        ]}>
+        ]}xs={20} xl={4}>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
             <Select
@@ -1114,7 +1108,7 @@ const Products = ({ officeData }) => {
           pagination={{
             pageSize: 6,
           }}
-        >
+          xs={20} xl={4}>
         </Table>
       </Modal>
 
@@ -1138,7 +1132,7 @@ const Products = ({ officeData }) => {
           >
             Cancel
           </Button>
-        ]}>
+        ]}xs={20} xl={4}>
         <Form form={form}>
           <Form.Item
             name="comments"
@@ -1158,7 +1152,7 @@ const Products = ({ officeData }) => {
         </Table>
       </Modal>
 
-      <Modal
+      <Modal                                             //Hstory Button Modal
         title="Products History"
         open={repairHistoryModal}
         onOk={CloseRepairHistoryModal}
@@ -1167,16 +1161,7 @@ const Products = ({ officeData }) => {
         } }
         onCancel={CloseRepairHistoryModal}
         width={1200}
-      >
-        {/* <Timeline
-          mode='left'
-          style={{ margin: '10px' }}>
-            {items.map((item) => (
-            <Timeline.Item key={item.key} label={item.label}>
-              {item.children}
-            </Timeline.Item>
-          ))}
-        </Timeline> */}
+        xs={20} xl={4}>
         {items.length > 0 ? (
     <Timeline mode='left' style={{ margin: '10px' }}>
       {items.map((item) => (
