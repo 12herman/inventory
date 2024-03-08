@@ -87,23 +87,22 @@ function DataLoading() {
 
     return (
         <div>
-            <Row gutter={16}>
-                <Col span={6}>
-                    <Card bordered={false}>
-                        <Statistic
-                            title="Employee"
+            <Row gutter={[16,16]}>
+                <Col span={6} xs={24} sm={12} md={12} lg={6}>
+                    <Card bordered={false}  >
+                        <Statistic 
+                            title="Employee" 
                             value={empCounts === undefined ? 1 : empCounts}
                             formatter={formatter} 
                             valueStyle={{
                                 color: '#1677ff',
-                            }}
-                            prefix={<FontAwesomeIcon icon ={faUser} style={{ marginRight: '8px' }}/>}
-                           
+                            }}                          
+                            prefix={<FontAwesomeIcon icon ={faUser} style={{ marginRight: '8px' }}/>}                         
                         />
 
                     </Card>
                 </Col>
-                <Col span={6}>
+                <Col span={6} xs={24} sm={12} md={12} lg={6}>
                     <Card bordered={false}>
                         <Statistic
                             title="Products"
@@ -117,7 +116,7 @@ function DataLoading() {
 
                     </Card>
                 </Col>
-                <Col span={6}>
+                <Col span={6} xs={24} sm={12} md={12} lg={6}>
                     <Card bordered={false}>
                         <Statistic
                             title="Storage"
@@ -131,7 +130,7 @@ function DataLoading() {
 
                     </Card>
                 </Col>
-                <Col span={6}>
+                <Col span={6} xs={24} sm={12} md={12} lg={6}>
                     <Card bordered={false}>
                         <Statistic
                             title="Repair"
@@ -142,7 +141,6 @@ function DataLoading() {
                             }}
                             prefix={<FontAwesomeIcon icon ={faScrewdriverWrench} style={{ marginRight: '8px' }}/>}
                         />
-
                     </Card>
                 </Col>
             </Row>

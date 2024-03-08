@@ -50,14 +50,14 @@ const App = () => {
 
         {/* <Accessories />  */}
 {/* <User Id={164}/> */}
-     <Loginpage/>
-
+     {/* <Loginpage/> */}
+    <Router>
+        <Routes>
+            <Route exact path='/' Component={Loginpage}/>
+        </Routes>
+     </Router>
         </>
-    // <Router>
-    //     <Routes>
-    //         <Route exact path='/' Component={Loginpage}/>
-    //     </Routes>
-    // </Router>
+   
     );
 };
 

@@ -27,7 +27,6 @@ export const postProductsDetail = createAsyncThunk('productsDetail/postProductsD
 
 export const putProductsDetail = createAsyncThunk('productsDetail/putProductsDetail', async (updatedProductData) => {
     const { id, ...restData } = updatedProductData;
-
     try {
         const response = await Axios.put(`${ApiLink.productsDetail}/${id}`, { id, ...restData });
         console.log(response.data); // Log the response data
