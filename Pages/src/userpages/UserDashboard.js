@@ -248,8 +248,10 @@ const UserDashboard = ({
         "todate": new Date(LeaveHistory.todate).toISOString(),
         "numberOfDays": LeaveHistory.numberOfDays,
         "comments": LeaveHistory.Comments,
-        "isApproved": false,
-        "isRejected": false,
+        "hrIsApproved": false,
+        "hrIsRejected": false,
+        "leaderIsApproved": false,
+        "leaderIsRejected": false,
         "isDeleted": false,
         "createdBy": employeeName,
         "modifiedBy": employeeName,
@@ -416,19 +418,20 @@ const UserDashboard = ({
         ? await leaveDataApi.payload.filter(( leave) =>
                 leave.employeeId === LeaveDatas.employeeId &&
                 leave.isDeleted === LeaveDatas.isDeleted &&
-                leave.isApproved === LeaveDatas.isApproved &&
-                leave.isRejected === LeaveDatas.isRejected &&
+                leave.hrIsApproved === LeaveDatas.hrIsApproved &&
+                leave.hrIsRejected === LeaveDatas.hrIsRejected &&
+                leave.leaderIsApproved=== LeaveDatas.leaderIsApproved &&
+                leave.leaderIsRejected === LeaveDatas.leaderIsRejected &&
                 leave.comments === LeaveDatas.comments
           )
         : null;
 
-      
       if(filterLeave === null){
         message.error('The mail not send Hr and Leader please contact the admin')
       }
       else{
         const emailDatas = {
-          id:filterLeave[0].id,
+          id:await filterLeave[0].id,
           employeeId:LeaveDatas.employeeId,
           employeeName:employeeName,
           leaveType:LeaveDatas.leaveType,
