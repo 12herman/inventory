@@ -438,10 +438,14 @@ const UserDashboard = ({
           date:(LeaveDatas.fromdate).split('T')[0] +' ,'+ (LeaveDatas.todate).split('T')[0],
           numberOfDays:LeaveDatas.numberOfDays,
           comments:LeaveDatas.comments,
-          hrEmail:Emails.hrEmail,
-          leaderEmail:Emails.leaderEmail
+          // hrEmail:Emails.hrEmail,
+          // leaderEmail:Emails.leaderEmail
         }
-        console.log(emailDatas);
+
+        // await dispatch(Postleaveconfirmation({...emailDatas,email:Emails.hrEmail,id:await filterLeave[0].id + "hr"}));
+        // await dispatch(Postleaveconfirmation({...emailDatas,email:Emails.leaderEmail,id:await filterLeave[0].id + "leader"}));
+        console.log({...emailDatas,email:Emails.hrEmail,id:await filterLeave[0].id + "+hr"});
+        console.log({...emailDatas,email:Emails.leaderEmail,id:await filterLeave[0].id + "+leader"});
       }
     // const PutDatas =
     //   filterLeave.length > 0
