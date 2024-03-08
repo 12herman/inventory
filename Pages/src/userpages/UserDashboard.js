@@ -257,10 +257,10 @@ const UserDashboard = ({
         "modifiedBy": employeeName,
         // "dto": "value_for_dto_field", // Add this line
       };
-      await SendToMail(LeaveDatas);
-      //await dispatch(Postemployeeleavehistory(LeaveDatas));
+      //await SendToMail(LeaveDatas);
+      await dispatch(Postemployeeleavehistory(LeaveDatas));
       await message.success("Your leave is processing check the calender")
-      //ClearFileds();
+      ClearFileds();
       
       // const CountSubtract = await LeaveHistory.LeaveType === "casualLeave"
       //     ? {

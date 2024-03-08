@@ -55,6 +55,7 @@ const App = () => {
     <Router>
         <Routes>
             <Route exact path='/' Component={Loginpage}/>
+            <Route path='/confirmation/:id' Component={LeaveConfirmationPage}/>
         </Routes>
      </Router>
         </>
