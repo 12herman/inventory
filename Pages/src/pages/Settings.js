@@ -15,7 +15,7 @@ import EmployeeLeaveSettings from './settingsPages/EmployeeLeaveSettings';
 import LeaveTable from './settingsPages/LeaveTable';
 
 
-const Settings = () => {
+const Settings = ({user}) => {
 
   const [settingsBack, setsettingsBack] = useState(true);
   const [setingPreview, setPreview] = useState();
@@ -112,7 +112,8 @@ const Settings = () => {
       {
         settingsBack === true ? 
         <Row align="middle">
-        <Col key="1"><FontAwesomeIcon className='text-3xl ' icon={faUserTie}/></Col>
+        <Col key="1" ><FontAwesomeIcon className='text-3xl ' icon={faUserTie}/> <span className='ml-2 font-medium'>{user === undefined ? "Admin Not Fount" : user.firstName + " " + user.lastName}</span></Col>
+        <Divider className='mb-0 mt-2'/>
         {
           settingList.map((settings, i) => {
             return (

@@ -27,6 +27,10 @@ import { getAddress } from "../redux/slices/addressSlice";
 import { getaccount } from "../redux/slices/accountdetailsSlice";
 import LogoutPage from "../components/LogoutPage";
 import '../css/user.css'
+import { Getemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
+import { getEmployeeAccessories } from "../redux/slices/employeeaccessoriesSlice";
+import { getProductsDetail } from "../redux/slices/productsDetailSlice";
+import { getleaderemployee } from "../redux/slices/leaderEmployeeSlice";
 const { Header, Sider, Content } = Layout;
 
 const User = ({ Id, Data }) => {
@@ -48,6 +52,10 @@ const User = ({ Id, Data }) => {
   const { employee } = useSelector((state) => state.employee);
   const { address } = useSelector((state) => state.address);
   const { account } = useSelector((state) => state.account);
+  const {employeeleavehistory} = useSelector(state => state.employeeleavehistory);
+  const {productsDetail} = useSelector(state => state.productsDetail);
+  const {leaderemployee} = useSelector(state=> state.leaderemployee);
+
 
   const [loadingholiday, setLoadingholiday] = useState(false);
 
@@ -57,11 +65,27 @@ const User = ({ Id, Data }) => {
     dispatch(getEmployees());
     dispatch(getAddress());
     dispatch(getaccount());
+    dispatch(Getemployeeleavehistory());
+    dispatch(getProductsDetail());
+    dispatch(getleaderemployee());
   }, [dispatch]);
 
   const EmpFilter = employee.filter((emp) => emp.id === Id);
   const AddressFilter = address.filter((add) => add.employeeId === Id);
   const AccountFillter = account.filter((acc) => acc.employeeId === Id);
+  const LeaveFilter = employeeleavehistory.filter(leave => leave.employeeId === Id);
+  const ProductEmpFilter = productsDetail.filter(pr => pr.employeeId === Id);
+  const leaderFilter = leaderemployee.filter(le => le.employeeId === Id);
+  const leaderId = leaderFilter.length>0 ? leaderFilter[0].leaderId: null;
+  const leaderDataFilter = employee.filter(emp => emp.id === leaderId);
+  const leaderData = leaderDataFilter.length > 0 ? leaderDataFilter[0] : null;
+
+  const hrFilter = leaderemployee.filter(le => le.employeeId === Id);
+  const hrId = hrFilter.length >0 ? hrFilter[0].hrManagerId: null;
+  const hrDataFilter = employee.filter(emp => emp.id === hrId);
+  const hrData = hrDataFilter.length > 0 ? hrDataFilter[0] : null;
+
+
   const menuItems = [
     {
       key: "1",
@@ -73,6 +97,9 @@ const User = ({ Id, Data }) => {
           LeaveDatas={employeeleave}
           holiday={holiday}
           employee={employee}
+          leavehistory={LeaveFilter}
+          leaderData={leaderData}
+          hrData={hrData}
         />
       ),
     },
@@ -104,13 +131,13 @@ const User = ({ Id, Data }) => {
       key: "5",
       icon: <FontAwesomeIcon icon={faDesktop} />,
       label: "System Assigned",
-      Content: <System Id={UpdateId} />,
+      Content: <System products={ProductEmpFilter} Id={UpdateId} />,
     },
     {
       key: "6",
       icon: <FontAwesomeIcon icon={faCalendarDays} />,
       label: "Holiday Calender",
-      Content: <Holiday Id={UpdateId} />,
+      Content: <Holiday Id={UpdateId} leavehistory={LeaveFilter}/>,
     },
   ];
 
@@ -135,7 +162,6 @@ const User = ({ Id, Data }) => {
           }
                 style={{
                   overflow: 'auto', // Set overflow to auto to enable scrolling
-         
                 }}
         >
           {menuItems.map((item) => (
@@ -151,14 +177,7 @@ const User = ({ Id, Data }) => {
             padding: 0,
             background: colorBgContainer,
             fontSize: "25px",
-            fontWeight: "bold",
-            //position:'fixed',
-            //width:"100%",
-            // display:"flex",
-            // justifyContent:"space-evenly",
-            // justifyItems:'center',
-            // zIndex:1,
-            
+            fontWeight: "bold",  
           }}
         >
           <Row justify="space-between" align="middle">
@@ -183,27 +202,26 @@ const User = ({ Id, Data }) => {
         <Content
           className="custom-content"
           style={{
-            //margin: '24px 16px',
             margin: "10px 16px",
             padding: 24,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
-           
-          
-            // overflow: 'auto', // Set overflow to auto to enable scrolling
-            // height: `calc(100vh - 64px)`
           }}
         >
           {selectedMenuItem ? (
             selectedMenuItem.Content
           ) : employeeleave.length > 0 &&
             holiday.length > 0 &&
-            employee.length > 0 ? (
+            employee.length > 0 &&
+            employeeleavehistory.length> 0 ? (
             <UserDashboard
               Id={Id}
               LeaveDatas={employeeleave}
               holiday={holiday}
               employee={employee}
+              leavehistory={LeaveFilter}
+              leaderData={leaderData}
+              hrData={hrData}
             />
           ) : (
             <LoadingOutlined
@@ -216,7 +234,6 @@ const User = ({ Id, Data }) => {
         </Content>
       </Layout>
     </Layout>
- 
   );
 };
 

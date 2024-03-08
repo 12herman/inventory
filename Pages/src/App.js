@@ -31,6 +31,7 @@ import { getOffice } from './redux/slices/officeSlice';
 import Loginpage from './Loginpage';
 import { BrowserRouter as Router, Route, Link, Switch,Routes } from 'react-router-dom';
 import UserDashboard from './userpages/UserDashboard';
+import LeaveConfirmationPage from './pages/LeaveConfirmationPage';
 /* src/index.css */
 
 // Admin

@@ -19,5 +19,7 @@ export const ApiLink = {
     leavetable:"https://localhost:7129/api/LeaveTable",
     otpapi:"https://localhost:7129/api/Otp",
     employeeaccessories:"https://localhost:7129/api/Employeeaccessory",
+    employeeleavehistory:"https://localhost:7129/api/EmployeeLeaveHistory",
+    leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail",
     productsrepairhistory:"https://localhost:7129/api/ProductsRepairHistory"
   };

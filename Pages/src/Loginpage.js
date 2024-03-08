@@ -55,7 +55,7 @@ const Loginpage = () => {
         emp.roleDetails[0].roleName === "Admin"
     );
 
-    console.log(employee);
+   
     const admin = filterEmployee.length > 0 ? true : false;
     
     if (isPasswordValid === true && admin === true) {

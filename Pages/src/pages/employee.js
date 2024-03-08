@@ -1162,9 +1162,9 @@ const Employee = ({ officeData }) => {
     InitialFormEdit();
   }, [modelOpen]);
    
+
   //skip
   const [SkipAccount,setSkipAccount] = useState(false);
-  
   const skipAccount = async ()=>{
     await setSkipAccount(true);
     if (accFormRef.current) {
