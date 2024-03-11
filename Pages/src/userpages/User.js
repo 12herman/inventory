@@ -75,6 +75,7 @@ const User = ({ Id, Data }) => {
   const AccountFillter = account.filter((acc) => acc.employeeId === Id);
   const LeaveFilter = employeeleavehistory.filter(leave => leave.employeeId === Id);
   const ProductEmpFilter = productsDetail.filter(pr => pr.employeeId === Id);
+  
   const leaderFilter = leaderemployee.filter(le => le.employeeId === Id);
   const leaderId = leaderFilter.length>0 ? leaderFilter[0].leaderId: null;
   const leaderDataFilter = employee.filter(emp => emp.id === leaderId);
@@ -85,6 +86,7 @@ const User = ({ Id, Data }) => {
   const hrDataFilter = employee.filter(emp => emp.id === hrId);
   const hrData = hrDataFilter.length > 0 ? hrDataFilter[0] : null;
 
+  //console.log(hrData);
 
   const menuItems = [
     {
@@ -213,7 +215,9 @@ const User = ({ Id, Data }) => {
           ) : employeeleave.length > 0 &&
             holiday.length > 0 &&
             employee.length > 0 &&
-            employeeleavehistory.length> 0 ? (
+            employeeleavehistory.length > 0 &&
+            hrData !== null && 
+            leaderData !== null ? (
             <UserDashboard
               Id={Id}
               LeaveDatas={employeeleave}

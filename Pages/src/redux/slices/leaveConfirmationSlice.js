@@ -8,7 +8,6 @@ const apilink = ApiLink.leaveconfirmationemail;
 
 //Post
 export const Postleaveconfirmation = createAsyncThunk(`${apiName}/post${apiName}`,async(data)=>{
-    console.log(data);
     return Axios.post(apilink,data)
                 .then(res => {return res.data});
 });

@@ -11,6 +11,7 @@ import {
   Input,
   DatePicker,
   Checkbox,
+  Spin,
   Switch,
   Radio,
   Dropdown,
@@ -25,7 +26,10 @@ import { DownOutlined } from "@ant-design/icons";
 import { SmileOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { GetHoliday } from "../redux/slices/holidaySlice";
-import { Getemployeeleave, Putemployeeleave } from "../redux/slices/employeeLeaveSlice";
+import {
+  Getemployeeleave,
+  Putemployeeleave,
+} from "../redux/slices/employeeLeaveSlice";
 import { getEmployees } from "../redux/slices/employeeSlice";
 import { faL } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -61,31 +65,48 @@ const UserDashboard = ({
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
-  const { employeeleavehistory } = useSelector((state) => state.employeeleavehistory);
+  const { employeeleavehistory } = useSelector(
+    (state) => state.employeeleavehistory
+  );
   const { employeeleave } = useSelector((state) => state.employeeleave);
-
+  const { leaderemployee } = useSelector((state) => state.leaderemployee);
 
   //const leaderAndHr = employeeleave.filter((data) => data.employeeId === Id);
- // const filterLeaders = leaderAndHr.length > 0  ? leaderAndHr[0]: null;
-//   const leadersIds = filterLeaders.length>0 ? filterLeaders.hrManagerId : null;
-// console.log(leaderAndHr);
-
+  // const filterLeaders = leaderAndHr.length > 0  ? leaderAndHr[0]: null;
+  //   const leadersIds = filterLeaders.length>0 ? filterLeaders.hrManagerId : null;
+  // console.log(leaderAndHr);
 
   useEffect(() => {
     dispatch(Getemployeeleavehistory());
     dispatch(Getemployeeleave());
+    dispatch(getleaderemployee());
+    setEmails({});
   }, []);
 
   // change normal date without time
-  const convertDate = employeeleavehistory.map(entry => {
-    const fromdate = entry.fromdate ? new Date(entry.fromdate).toISOString().split('T')[0] : null;
-    const todate = entry.todate ? new Date(entry.todate).toISOString().split('T')[0] : null;
+  const convertDate = employeeleavehistory.map((entry) => {
+    const fromdate = entry.fromdate
+      ? new Date(entry.fromdate).toISOString().split("T")[0]
+      : null;
+    const todate = entry.todate
+      ? new Date(entry.todate).toISOString().split("T")[0]
+      : null;
     return {
       ...entry,
       fromdate: fromdate,
       todate: todate,
     };
   });
+
+  const hrFilters = leaderemployee.filter((le) => le.employeeId === Id);
+  const hrIds = hrFilters.length > 0 ? hrFilters[0].hrManagerId : null;
+  const hrDataFilters = employee.filter((emp) => emp.id === hrIds);
+  const hrDatas = hrDataFilters.length > 0 ? hrDataFilters[0] : null;
+
+  const leaderFilters = leaderemployee.filter((le) => le.employeeId === Id);
+  const leaderIds = leaderFilters.length > 0 ? leaderFilters[0].leaderId : null;
+  const leaderDataFilter = employee.filter((emp) => emp.id === leaderIds);
+  const leaderDatas = leaderDataFilter.length > 0 ? leaderDataFilter[0] : null;
 
   const LeaveData = LeaveDatas.filter((x) => x.employeeId === Id)
     ? LeaveDatas.filter((x) => x.employeeId === Id)[0]
@@ -109,12 +130,10 @@ const UserDashboard = ({
   );
 
   const employeeFilter = employee.filter((x) => x.id === Id)[0];
-  const employeeName =employeeFilter === null || employeeFilter === undefined
+  const employeeName =
+    employeeFilter === null || employeeFilter === undefined
       ? null
       : employeeFilter.firstName + " " + employeeFilter.lastName;
-
-      
-
 
   const filterEmpLocation = employee.filter((x) => x.id === Id)[0]
     .officeLocationId.id;
@@ -180,7 +199,8 @@ const UserDashboard = ({
   // pop up modal && apply,cancle btn
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState("Content of the modal");
+  const [postLeaveLoading, setpostLeaveLoading] = useState(false);
+
   const showModal = () => {
     setOpen(true);
   };
@@ -219,11 +239,16 @@ const UserDashboard = ({
       }
     );
     await datesInRange.push(enddate);
-    const newDatesArray =await datesInRange.slice(1);
-    const checkDates =await convertDate.filter( data => newDatesArray.some( x =>  data.fromdate ===  x ||  data.todate ===  x));
-    const outPut =await checkDates.length > 0 ? true : false;
-     return outPut;
+    const UserCheckLeave = await convertDate.filter(
+      (data) => data.employeeId === Id
+    );
+    const newDatesArray = await datesInRange.slice(1);
+    const convertedDates =await newDatesArray.map(date => date.replace(/\//g, '-'));
+    const checkDates = await UserCheckLeave.filter(data =>  convertedDates.some(date => data.fromdate === date || data.todate === date));
+    const outPut = (await checkDates.length) > 0 ? true : false;  
+    return outPut;
   };
+
 
 
   //apply leave
@@ -236,94 +261,45 @@ const UserDashboard = ({
       message.error("Fill the Date");
     } else if (LeaveHistory.Comments === null || LeaveHistory.Comments === "") {
       message.error("Fill the reson");
-    } 
-    // else if (await CheckApplyDate(LeaveHistory.fromdate, LeaveHistory.todate) === true) {
-    //   message.error("Already you was applied leave for this date");
-    // } 
-    else {
+    } else if (
+      (await CheckApplyDate(LeaveHistory.fromdate, LeaveHistory.todate)) ===true
+    ) {
+      message.error("Already you was applied leave for this date");
+    } else {
+      const fromdate = new Date(LeaveHistory.fromdate);
+      const todate = new Date(LeaveHistory.todate);
+      // Adding 1 day to both fromdate and todate
+      fromdate.setDate(fromdate.getDate() + 1);
+      todate.setDate(todate.getDate() + 1);
       const LeaveDatas = {
-        "employeeId": Id,
-        "leaveType": LeaveHistory.LeaveType,
-        "fromdate": new Date(LeaveHistory.fromdate).toISOString(),
-        "todate": new Date(LeaveHistory.todate).toISOString(),
-        "numberOfDays": LeaveHistory.numberOfDays,
-        "comments": LeaveHistory.Comments,
-        "hrIsApproved": false,
-        "hrIsRejected": false,
-        "leaderIsApproved": false,
-        "leaderIsRejected": false,
-        "isDeleted": false,
-        "createdBy": employeeName,
-        "modifiedBy": employeeName,
+        employeeId: Id,
+        leaveType: LeaveHistory.LeaveType,
+        fromdate: fromdate.toISOString(),
+        todate: todate.toISOString(),
+        numberOfDays: LeaveHistory.numberOfDays,
+        comments: LeaveHistory.Comments,
+        hrIsApproved: false,
+        hrIsRejected: false,
+        leaderIsApproved: false,
+        leaderIsRejected: false,
+        isDeleted: false,
+        createdBy: employeeName,
+        modifiedBy: employeeName,
         // "dto": "value_for_dto_field", // Add this line
       };
-      //await SendToMail(LeaveDatas);
+      console.log(LeaveDatas);
+      await setpostLeaveLoading(true);
+      await SendToMail(LeaveDatas);
       await dispatch(Postemployeeleavehistory(LeaveDatas));
+      await ClearFileds();
+      await setpostLeaveLoading(false);
       await message.success("Your leave is processing check the calender")
-      ClearFileds();
-      
-      // const CountSubtract = await LeaveHistory.LeaveType === "casualLeave"
-      //     ? {
-      //         casualLeave: filterEmpLeave[0].casualLeave - LeaveHistory.numberOfDays,
-      //       }
-      //     : {
-      //         sickLeave:filterEmpLeave[0].sickLeave - LeaveHistory.numberOfDays,
-      //       };
-      // const EmployeeLeaveData = await {
-      //   id: filterEmpLeave[0].id,
-      //   employeeId: Id,
-      //   sickLeave: filterEmpLeave[0].sickLeave,
-      //   casualLeave: filterEmpLeave[0].casualLeave,
-      //   total: filterEmpLeave[0].total - LeaveHistory.numberOfDays,
-      //   leaveAvailed:filterEmpLeave[0].leaveAvailed + LeaveHistory.numberOfDays,
-      //   createdDate: filterEmpLeave[0].createdDate,
-      //   createdBy: employeeName,
-      //   modifiedDate: formattedDate,
-      //   modifiedBy: employeeName,
-      //   isDeleted: false,
-      //   ...CountSubtract,
-      // };
-      //  console.log(EmployeeLeaveData);
-      // await dispatch(Putemployeeleave(EmployeeLeaveData));
-      // await dispatch(Getemployeeleave());
-      // await dispatch(Getemployeeleavehistory());
-      // ClearFileds();
     }
-
-    //else if (DatePick === null) {
-    //   message.error("Fill the Date");
-    // } else if (LeaveHistory.Comments === null) {
-    //   message.error("Fill the reson");
-    // } else if (CheckApplyDate(LeaveHistory.Date) === true) {
-    //   message.error("Already you was applied leave for this date");
-    // } else {
-    //   //check array and multiple leave method
-    //   if (Array.isArray(LeaveHistory.Date)) {
-    //     const MultiDates = await LeaveHistory.Date.map((date) => ({
-    //       employeeId: Id,
-    //       leaveType: LeaveHistory.LeaveType,
-    //       date: date,
-    //       comments: LeaveHistory.Comments,
-    //       isApproved: false,
-    //       isRejected: false,
-    //       isDeleted: false,
-    //       createdBy: employeeName,
-    //       modifiedBy: employeeName,
-    //     }));
-    //     // await MultiDates.map(async (data) => {
-    //     //   await dispatch(Postemployeeleavehistory(data));
-    //     // });
-    //     // await SendToMail(MultiDates);
-    //     // await message.success("Apllied leave successfully. Check the holiday calender")
-    //     //await ClearFileds();
-    //   }
-    // }
   };
 
   //cancel leave
   const handleCancel = () => {
     setOpen(false);
-
     ClearFileds();
   };
 
@@ -335,6 +311,10 @@ const UserDashboard = ({
     SetDatePick([]);
   };
   const MultiDatePicking = (date, dateString) => {
+    SetCheckBox({
+      disablecheck: true,
+      checkvalue: false,
+    })
     // set ui changes
     if (dateString.length > 0) {
       SetDatePick([
@@ -410,80 +390,60 @@ const UserDashboard = ({
 
   // Send to
   const SendToMail = async (LeaveDatas) => {
-    
     const leaveDataApi = await dispatch(Getemployeeleavehistory());
-    
+
     const filterLeave =
-     await leaveDataApi.payload.length > 0
-        ? await leaveDataApi.payload.filter(( leave) =>
-                leave.employeeId === LeaveDatas.employeeId &&
-                leave.isDeleted === LeaveDatas.isDeleted &&
-                leave.hrIsApproved === LeaveDatas.hrIsApproved &&
-                leave.hrIsRejected === LeaveDatas.hrIsRejected &&
-                leave.leaderIsApproved=== LeaveDatas.leaderIsApproved &&
-                leave.leaderIsRejected === LeaveDatas.leaderIsRejected &&
-                leave.comments === LeaveDatas.comments
+      (await leaveDataApi.payload.length) > 0
+        ? await leaveDataApi.payload.filter(
+            (leave) =>
+              leave.employeeId === LeaveDatas.employeeId &&
+              leave.isDeleted === LeaveDatas.isDeleted &&
+              leave.hrIsApproved === LeaveDatas.hrIsApproved &&
+              leave.hrIsRejected === LeaveDatas.hrIsRejected &&
+              leave.leaderIsApproved === LeaveDatas.leaderIsApproved &&
+              leave.leaderIsRejected === LeaveDatas.leaderIsRejected &&
+              leave.comments === LeaveDatas.comments
           )
         : null;
+    await filterLeave;
 
-      if(filterLeave === null){
-        message.error('The mail not send Hr and Leader please contact the admin')
-      }
-      else{
-        const emailDatas = {
-          id:await filterLeave[0].id,
-          employeeId:LeaveDatas.employeeId,
-          employeeName:employeeName,
-          leaveType:LeaveDatas.leaveType,
-          date:(LeaveDatas.fromdate).split('T')[0] +' ,'+ (LeaveDatas.todate).split('T')[0],
-          numberOfDays:LeaveDatas.numberOfDays,
-          comments:LeaveDatas.comments,
-          // hrEmail:Emails.hrEmail,
-          // leaderEmail:Emails.leaderEmail
-        }
+    if ((await filterLeave) && filterLeave.length > 0) {
+      const emailDatas = {
+        id: filterLeave[0].id,
+        employeeId: LeaveDatas.employeeId,
+        employeeName: employeeName,
+        leaveType: LeaveDatas.leaveType,
+        date:
+          LeaveDatas.fromdate.split("T")[0] +
+          " ," +
+          LeaveDatas.todate.split("T")[0],
+        numberOfDays: LeaveDatas.numberOfDays,
+        comments: LeaveDatas.comments,
+      };
 
-        // await dispatch(Postleaveconfirmation({...emailDatas,email:Emails.hrEmail,id:await filterLeave[0].id + "hr"}));
-        // await dispatch(Postleaveconfirmation({...emailDatas,email:Emails.leaderEmail,id:await filterLeave[0].id + "leader"}));
-        console.log({...emailDatas,email:Emails.hrEmail,id:await filterLeave[0].id + "+hr"});
-        console.log({...emailDatas,email:Emails.leaderEmail,id:await filterLeave[0].id + "+leader"});
-      }
-    // const PutDatas =
-    //   filterLeave.length > 0
-    //     ? filterLeave.map((data) => ({
-    //         id: data.id,
-    //         employeeId: data.employeeId,
-    //         leaveType: data.leaveType,
-    //         date: data.date,
-    //         comments: data.comments,
-    //         isApproved: false,
-    //         isRejected: false,
-    //         isDeleted: false,
-    //         createdDate: data.createdDate,
-    //         createdBy: null,
-    //         modifiedDate: ModifiedDate,
-    //         modifiedBy: null,
-    //         email:
-    //           Emails.leaderEmail === null ? Emails.hrEmail : Emails.leaderEmail,
-    //       }))
-    //     : null;
-
-    // console.log({
-    //   ...PutDatas[0],
-    //   ids: PutDatas.map((id) => id.id).join("-"),
-    //   date: PutDatas.map((date) => date.date.split("T")[0]).join(","),
-    // });
-    // //send mail api
-    // dispatch(
-    //   Postleaveconfirmation({
-    //     ...PutDatas[0],
-    //     ids: PutDatas.map((id) => id.id).join("-"),
-    //     date: PutDatas.map((date) => date.date.split("T")[0]).join(","),
-    //   })
-    // );
+      await dispatch(
+        Postleaveconfirmation({
+          ...emailDatas,
+          email: "yenoklesin@gmail.com",
+          id: filterLeave[0].id + "+hr",
+        })
+      );
+      await dispatch(
+        Postleaveconfirmation({
+          ...emailDatas,
+          email: "yenoklesin@gmail.com",
+          id: filterLeave[0].id + "+leader",
+        })
+      );
+    } else if ((await filterLeave) === null) {
+      message.error("The mail not send Hr and Leader please contact the admin");
+    }
   };
 
   return (
-    <div>
+    
+      postLeaveLoading === false ?
+      <div>
       <Row gutter={16}>
         <Col span={6}>
           <Card>
@@ -593,52 +553,44 @@ const UserDashboard = ({
         onCancel={handleCancel}
         confirmLoading={confirmLoading}
         footer={[
-          <Button key={1} onClick={handleCancel}>Cancel</Button>,
-          <Button key={2} onClick={handleOk} type="primary" className="bg-blue-500">
+          <Button key={1} onClick={handleCancel}>
+            Cancel
+          </Button>,
+          <Button
+            key={2}
+            onClick={handleOk}
+            type="primary"
+            className="bg-blue-500"
+          >
             Apply
           </Button>,
         ]}
       >
-        <ul className="flex flex-col gap-y-3">
+          <ul className="flex flex-col gap-y-3">
           <li>
             <p className="pb-2">Should you have what type of Leave?</p>
             <Select
               className="w-full"
               placeholder="Select Leave Type"
               options={[
-                {key:1, label: "Casual Leave", value: "casualLeave" },
-                {key:2, label: "Sick Leave", value: "sickLeave" },
+                { key: 1, label: "Casual Leave", value: "casualLeave" },
+                { key: 2, label: "Sick Leave", value: "sickLeave" },
               ]}
               value={select}
               onChange={handleChange}
             />
           </li>
 
-          {/* <li>
-              <p className="pb-2">Select one or multiply days?</p>
-              <DatePicker
-                multiple
-                onChange={MultiDatePicking}
-                // maxTagCount="responsive"
-                value={
-                  LeaveHistory.Date === undefined
-                    ? undefined
-                    : LeaveHistory.Date.map((x) => dayjs(x))
-                }
-                size="middle"
-              />
-            </li> */}
-
           <li>
             <p className="">Pick start date and End date </p>
             <span className="text-[10px] pb-2 block text-red-500">
               *Don't leave apply for holidays{" "}
             </span>
-              <RangePicker
-                format={dateFormat}
-                value={DatePick}
-                onChange={MultiDatePicking}
-              />
+            <RangePicker
+              format={dateFormat}
+              value={DatePick}
+              onChange={MultiDatePicking}
+            />
           </li>
 
           <li>
@@ -668,6 +620,22 @@ const UserDashboard = ({
         </ul>
       </Modal>
     </div>
+
+    : <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <Spin
+      indicator={
+        <LoadingOutlined
+          style={{
+            fontSize: 24,
+          }}
+          spin
+        />
+      }
+    />
+   </div>
+
+    
+   
   );
 };
 
