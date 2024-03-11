@@ -3,11 +3,14 @@ import { Badge, Calendar, Spin, Tooltip } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Getemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
+import { logDOM } from "@testing-library/react";
 
 const Holiday = ({ Id }) => {
+
   const { employeeleavehistory } = useSelector(
     (state) => state.employeeleavehistory
   );
+
   const filterLeave = employeeleavehistory.filter(
     (data) => data.employeeId === Id
   );
@@ -24,40 +27,40 @@ const Holiday = ({ Id }) => {
     const formattedDate = value.format("YYYY-MM-DD");
 
     const filteredData = filterLeave.filter((data) => {
-      const dataDay = parseInt(data.date.split("-")[2].split("T")[0], 10);
-      return (
-        dayOfMonth === dataDay && formattedDate === data.date.split("T")[0]
-      );
-    });
+      if (data.fromdate && data.todate) {
+          const fromDateDay = parseInt(data.fromdate.split("-")[2].split("T")[0], 10);
+          const toDateDay = parseInt(data.todate.split("-")[2].split("T")[0], 10);
+          return (
+              dayOfMonth >= fromDateDay && dayOfMonth <= toDateDay &&
+              formattedDate >= data.fromdate.split("T")[0] && formattedDate <= data.todate.split("T")[0]
+          );
+      }
+      return false;
+  });
 
     const listData = filteredData.map((data) => ({
       type:
-        data.isRejected === false && data.isApproved === false
+        data.leaderIsRejected === false && data.leaderIsApproved === false &&  data.hrIsApproved === false && data.hrIsRejected === false
           ? "warning"
-          : data.isApproved === true && data.isRejected === false
+          : data.leaderIsApproved === true || data.hrIsApproved === true
           ? "success"
-          : data.isApproved === false && data.isRejected === true
+          : data.hrIsRejected === true || data.leaderIsRejected === true
           ? "error"
           : "warning",
       content:
-        data.isRejected === false && data.isApproved === false
+        data.leaderIsRejected === false && data.leaderIsApproved === false && data.hrIsApproved ===false && data.hrIsRejected ===false
           ? "Waiting"
-          : data.isApproved === true && data.isRejected === false
+          : data.leaderIsApproved === true || data.hrIsApproved === true
           ? "Approved"
-          : data.isApproved === false && data.isRejected === true
+          : data.hrIsRejected === true || data.leaderIsRejected === true
           ? "Rejected"
           : "Waiting",
       comments: data.comments,
     }));
-
-
-
     return listData || [];
   };
-
+ 
   const getMonthData = (value) => {
-    // Logic for month data, adjust as needed
-    // For example, return a specific value if the month matches a condition
     if (value.month() === 0) {
       return 1394;
     }
@@ -94,9 +97,9 @@ const Holiday = ({ Id }) => {
     if (info.type === "month") return monthCellRender(current);
     return info.originNode;
   };
+  
   return employeeleavehistory.length > 0 ? (
-    // <Calendar cellRender={cellRender}/>
-    <Calendar />
+    <Calendar  cellRender={cellRender}/>
   ) : (
     <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
   );
