@@ -49,15 +49,15 @@ const App = () => {
     return(
         <>
 
-        {/* <Accessories />  */}
+        <Accessories /> 
 {/* <User Id={164}/> */}
      {/* <Loginpage/> */}
-    <Router>
+    {/* <Router>
         <Routes>
             <Route exact path='/' Component={Loginpage}/>
             <Route path='/confirmation/:id' Component={LeaveConfirmationPage}/>
         </Routes>
-     </Router>
+     </Router> */}
         </>
    
     );

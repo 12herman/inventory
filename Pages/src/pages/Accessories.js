@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MenuFoldOutlined, MenuUnfoldOutlined, DownOutlined } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, Modal, Dropdown, Space, Col, Row, Form, Input, message,Popconfirm } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSliders, faHouse, faUser, faDesktop, faWarehouse, faScrewdriverWrench, faPlus, faRightFromBracket, faQuoteLeftAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSliders, faHouse, faUser, faDesktop, faWarehouse, faScrewdriverWrench, faPlus, faRightFromBracket, faQuoteLeftAlt,faDollar } from '@fortawesome/free-solid-svg-icons';
 import { PlusOutlined } from '@ant-design/icons';
 
 import Dashboard from './Dashboard';
@@ -10,6 +10,7 @@ import Users from './Users';
 import Products from './Products';
 import Storage from './Storage';
 import Repair from './Repair';
+import Salary from './Salary';
 import Settings from './Settings';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,8 +25,6 @@ import { getEmployees } from '../redux/slices/employeeSlice';
 // import { getEmployees } from '../redux/slices/employeeSlice';
 
 const { Header, Sider, Content } = Layout;
-
-
 
 const Accessories = ({Id}) => {
   
@@ -165,13 +164,18 @@ const Accessories = ({Id}) => {
     },
     {
       key: '6',
+      icon: <FontAwesomeIcon icon={faDollar} />,
+      label: 'Salary',
+      Content: <Salary />,
+      Components: 'Salary'
+    },
+    {
+      key: '7',
       icon: <FontAwesomeIcon icon={faSliders} />,
       label: 'Settings',
       Content: <Settings user={EmpFilter}/>,
       Components: 'Settings'
-    },
-    
-    
+    },  
   ];
 
 

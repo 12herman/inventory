@@ -44,8 +44,7 @@ const columns = [
   }
 ];
 
-const Pay = () => {
- 
+const Pay = ({Id}) => {
   return (
     <div>
       <Table dataSource={dataSource} columns={columns} />   

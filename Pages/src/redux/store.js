@@ -20,7 +20,8 @@ import otpApiSlice from './slices/otpApiSlice';
 import employeeaccessoriesSlice from './slices/employeeaccessoriesSlice';
 import EmployeeLeaveHistorySlice from './slices/EmployeeLeaveHistorySlice';
 import leaveConfirmationSlice from './slices/leaveConfirmationSlice';
-import productsrepairhistorySlice from "./slices/productsrepairhistorySlice"
+import productsrepairhistorySlice from "./slices/productsrepairhistorySlice";
+import salarySlice from './slices/salarySlice';
 
 export const store = configureStore({
     devTools:true,
@@ -46,7 +47,8 @@ export const store = configureStore({
         employeeaccessories:employeeaccessoriesSlice,
         employeeleavehistory:EmployeeLeaveHistorySlice,
         leaveconfirmation: leaveConfirmationSlice,
-        productsrepairhistory:productsrepairhistorySlice
+        productsrepairhistory:productsrepairhistorySlice,
+        salary:salarySlice
     }
 });
 
