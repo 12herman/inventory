@@ -24,7 +24,7 @@ import {
   postEmployees,
   putEmployees,
 } from "../redux/slices/employeeSlice";
-import { getrole } from "../redux/slices/roleSlice";
+import { getrole, putrole } from "../redux/slices/roleSlice";
 // import "../css/user.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -65,17 +65,22 @@ import {
 import moment from "moment";
 import "../css/employee.css";
 import bcrpt from "bcryptjs";
-import { GetLogin, PostLogin } from "../redux/slices/loginSlice";
+import { GetLogin, PostLogin, PutLogin } from "../redux/slices/loginSlice";
 import { Getleavetable } from "../redux/slices/leaveTableSlice";
-import { Postemployeeleave } from "../redux/slices/employeeLeaveSlice";
-
+import { Getemployeeleave, Postemployeeleave, Putemployeeleave } from "../redux/slices/employeeLeaveSlice";
+import { getProductsDetail, putProductsDetail } from "../redux/slices/productsDetailSlice";
+import { Getemployeeleavehistory, Putemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
 const dateFormat = "YYYY-MM-DD";
+
 const formatter = (value) => <CountUp end={value} />;
 const headingValue = "Employee";
 const currentDate = new Date();
 const formattedDate = currentDate.toISOString().slice(0, 19);
 
-const Employee = ({ officeData }) => {
+const Employee = ({ officeData,LoginUser }) => {
+
+ 
+
   const [form] = Form.useForm();
 
   const [DisplayLogin, setDisplayLogin] = useState({
@@ -93,8 +98,8 @@ const Employee = ({ officeData }) => {
       password += charset.charAt(randomIndex);
     }
     const HashedPassword = bcrpt.hashSync(password, 10);
-    console.log(password);
-    console.log(HashedPassword);
+    // console.log(password);
+    // console.log(HashedPassword);
     return { password, HashedPassword };
   }
 
@@ -206,11 +211,10 @@ const Employee = ({ officeData }) => {
       dataIndex: "position",
       render: (_, { position }) => (
         //console.log(position)
-        <>
+        <section className="flex items-center gap-x-2">
           {Array.isArray(position) ? (
             position.map((tag) => {
               let color;
-
               switch (tag) {
                 case "IT":
                   color = "green";
@@ -221,8 +225,8 @@ const Employee = ({ officeData }) => {
                 case "Not Assigned":
                   color = "red";
                   break;
-                case "hr":
-                  color = "green";
+                case "HR":
+                  color = "cyan";
                   break;
                 case "ceo":
                   color = "purple";
@@ -233,12 +237,16 @@ const Employee = ({ officeData }) => {
                 case "BIM":
                   color = "yellow";
                   break;
+                  case "Admin":
+                  color = "magenta";
+                  break;
                 default:
                   color = "blue";
                   break;
               }
 
               return (
+               
                 <Tag color={color} key={tag}>
                   {tag}
                 </Tag>
@@ -247,7 +255,7 @@ const Employee = ({ officeData }) => {
           ) : (
             <Tag color="red">Not Assigned</Tag>
           )}
-        </>
+        </section>
       ),
     },
     {
@@ -296,11 +304,17 @@ const Employee = ({ officeData }) => {
   const { account } = useSelector((state) => state.account);
   const { login } = useSelector((state) => state.login);
   const { leavetable } = useSelector((state) => state.leavetable);
+  const {productsDetail} = useSelector(state => state.productsDetail);
+  const {employeeleave} = useSelector(state => state.employeeleave);
+  const {employeeleavehistory} = useSelector(state => state.employeeleavehistory);
+
+
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
   const [empCounts, setEmpCounts] = useState();
   const [tableData, setTableData] = useState([]);
 
+  // const LoginUserName = employee.filter(data => data.id = );
   //reset table data initial state
   function DataLoading() {
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
@@ -311,13 +325,14 @@ const Employee = ({ officeData }) => {
       var filterOneOffice = empData.filter(
         (off) => off.officeLocationId.officename === officeNames[0]
       );
-      const counts = filterOneOffice.filter(
-        (data) => data.isDeleted === false
-      ).length;
+      console.log(filterOneOffice);
+      const counts = filterOneOffice.filter((data) => data.isDeleted === false).length;
+      
       setEmpCounts(counts);
       setTableData(filterOneOffice);
     } else {
-      setEmpCounts(empData.length);
+      const filterWithoutDeletedData = empData.filter(data => data.isDeleted === false);
+      setEmpCounts(filterWithoutDeletedData.length);
       setTableData(empData);
     }
   }
@@ -351,17 +366,13 @@ const Employee = ({ officeData }) => {
             lastname: el.lastName || "",
             age: calculateAge(el.dateOfBirth),
             position: [
-              el.departmentId && el.departmentId.departmentName,
+              el.departmentId && el.departmentId.departmentName, 
               roleName,
             ],
             mobilenumber: el.mobileNumber || "",
           };
         })
       : [];
-
-
-
-
 
   // popup-window
   const [modelOpen, setModelOpen] = useState(false);
@@ -470,12 +481,222 @@ const Employee = ({ officeData }) => {
     //infoPostProcessBar();
     // setNewempId(3);
   };
-
+  const currentDate = new Date();
+const formattedDate = currentDate.toISOString(); // "2024-03-12T11:14:02.946Z"
+const TodayDate = currentDate.toISOString().substring(0, 10);
   // Table Delete Icon
   const DeleteIcon = async (data) => {
-    console.log(data.key);
-    await dispatch(deleteEmployee(data.key));
+    // await dispatch(deleteEmployee(data.key));
+    //filter
+    const employeeData = employee.filter(emp => emp.id === data.key );
+    const cAddress = address.filter(cadd => cadd.employeeId === data.key && cadd.type === 1);
+    const pAddress = address.filter(padd => padd.employeeId === data.key && padd.type === 2);
+    const ProductsFilter = productsDetail.filter(pro => pro.employeeId === data.key && pro.isDeleted === false);
+    const empLeave = employeeleave.filter(leave => leave.employeeId === data.key && leave.isdeleted === false);
+    const empLeaveHistory = employeeleavehistory.filter(leaveHis => leaveHis.employeeId === data.key && leaveHis.isDeleted === false);
+     const leaderEmployeeFilter = leaderemployee.filter(leaderEmployee => leaderEmployee.employeeId === data.key && leaderEmployee.isdeleted === false);
+    const roleFilter = roledetail.filter(role => role.employeeId === data.key && role.isdeleted === false);
+    const loginFilter = login.filter(login => login.employeeId === data.key && login.isDeleted === false);
+    const accountFilter = account.filter(acc => acc.employeeId === data.key && acc.isDeleted ===false);
+
+    const EmpData = employeeData.map(emp => ({
+  "id": emp.id,
+  "firstName": emp.firstName,
+  "lastName": emp.lastName,
+  "gender": emp.gender,
+  "personalEmail": emp.personalEmail,
+  "officeEmail": emp.officeEmail,
+  "mobileNumber": emp.mobileNumber,
+  "dateOfBirth": emp.dateOfBirth,
+  "dateOfJoin": emp.dateOfJoin,
+  "bloodGroup": emp.bloodGroup,
+  "alternateContactNo": emp.alternateContactNo,
+  "contactPersonName": emp.contactPersonName,
+  "relationship": emp.relationship,
+  "maritalStatus": emp.maritalStatus,
+  "officeLocationId": emp.officeLocationId ? emp.officeLocationId.id : null,
+  "departmentId": emp.departmentId ? emp.departmentId.id :null,
+  "lastWorkDate": TodayDate,
+  "isDeleted": true,
+  "createdDate": emp.createdDate,
+  "createdBy": emp.createdDate,
+  "modifiedDate": formattedDate,
+  "modifiedBy": LoginUser
+    }));
+
+    const CAddressData = cAddress.map(data => ({
+      "id": data.id,
+      "employeeId": data.employeeId,
+      "address1": data.address1,
+      "city": data.city,
+      "state": data.state,
+      "country": data.country,
+      "postalCode": data.postalCode,
+      "type": data.type,
+      "createdDate": data.createdDate,
+      "createdBy": data.createdBy,
+      "modifiedDate": formattedDate,
+      "modifiedBy": LoginUser,
+      "isdeleted": true
+    }));
+
+    const PAddressData = pAddress.map(data => ({
+      "id": data.id,
+      "employeeId": data.employeeId,
+      "address1": data.address1,
+      "city": data.city,
+      "state": data.state,
+      "country": data.country,
+      "postalCode": data.postalCode,
+      "type": data.type,
+      "createdDate": data.createdDate,
+      "createdBy": data.createdBy,
+      "modifiedDate": formattedDate,
+      "modifiedBy": LoginUser,
+      "isdeleted": true
+    }));
+    
+  const ProductData = ProductsFilter.map(pro =>({
+      "id":  pro.id,
+      "accessoriesId": pro.accessoriesId,
+      "brandId":  pro.brandId,
+      "productName":  pro.productName,
+      "modelNumber":  pro.modelNumber,
+      "serialNumber":  pro.serialNumber,
+      "createdDate":  pro.createdDate,
+      "createdBy":  pro.createdBy,
+      "modifiedDate":formattedDate,
+      "modifiedBy": LoginUser,
+      "isDeleted": false,
+      "isRepair":  pro.isRepair,
+      "isAssigned": false,
+      "comments":  pro.comments,
+      "officeLocationId":  pro.officeLocationId,
+      "isStorage":  pro.isStorage,
+      "employeeId": null
+  }));
+
+  const LeaveData = empLeave.map(leave => ({
+      "id": leave.id,
+      "employeeId": leave.employeeId,
+      "sickLeave": leave.sickLeave,
+      "casualLeave": leave.casualLeave,
+      "total": leave.total,
+      "leaveAvailed": leave.leaveAvailed,
+      "createdDate": leave.createdDate,
+      "createdBy": leave.createdBy,
+      "modifiedDate": formattedDate,
+      "modifiedBy": LoginUser,
+      "isDeleted": true
+  }));
+
+  const LeaveHistoryData = empLeaveHistory.map(leave => ({
+    "id": leave.id,
+    "employeeId": leave.employeeId,
+    "leaveType": leave.leaveType,
+    "fromdate": leave.fromdate,
+    "todate": leave.todate,
+    "numberOfDays": leave.numberOfDays,
+    "comments": leave.comments,
+    "hrIsApproved": leave.hrIsApproved,
+    "hrIsRejected": leave.hrIsApproved,
+    "rejectedComments": leave.rejectedComments,
+    "isDeleted": true,
+    "createdDate": leave.createdDate,
+    "createdBy": leave.createdBy,
+    "modifiedDate": formattedDate,
+    "modifiedBy": LoginUser,
+    "leaderIsApproved": leave.leaderIsApproved,
+    "leaderIsRejected": leave.leaderIsRejected
+  }));
+
+ 
+  const LeaderEmployeeData = leaderEmployeeFilter.map(le => ({
+      "id": le.id,
+      "employeeId": le.employeeId,
+      "leaderId": le.leaderId,
+      "hrManagerId": le.hrManagerId,
+      "createdDate": le.createdDate,
+      "createdBy": le.createdBy,
+      "modifiedDate": formattedDate,
+      "modifiedBy": LoginUser,
+      "isDeleted": true
+  }));
+
+  const roleDetailData  = roleFilter.map(role => ({
+    "id": role.id,
+  "roleId": role.roleId,
+  "employeeId": role.employeeId,
+  "createdDate": role.createdDate,
+  "createdBy": role.createdBy,
+  "modifiedDate": formattedDate,
+  "modifiedBy": LoginUser,
+  "isDeleted": true
+  }));
+ 
+const loginData = loginFilter.map(login => ({
+  "id": login.id,
+  "employeeId": login.employeeId,
+  "userName": login.userName,
+  "password": login.password,
+  "isDeleted": true,
+  "createdDate": login.createdDate,
+  "createdBy": login.createdBy,
+  "modifiedDate": formattedDate,
+  "modifiedBy": LoginUser,
+  "otp": login.otp
+}));
+
+const accountData = accountFilter.map( acc => ({
+  "id": acc.accountId,
+  "employeeId": acc.employeeId,
+  "bankName": acc.bankName,
+  "branchName": acc.branchName,
+  "bankLocation": acc.bankLocation,
+  "accountNumber": acc.accountNumber,
+  "ifsc": acc.ifsc,
+  "isdeleted": true,
+  "createdDate": acc.createdDate,
+  "createdBy": acc.createdBy,
+  "modifiedDate": formattedDate,
+  "modifiedBy": LoginUser
+}));
+
+
+    await dispatch(putEmployees(...EmpData));
+
+    if(CAddressData.length > 0)  await CAddressData.map(data => dispatch(putAddress(data))) ;
+   
+    if(PAddressData.length > 0) await PAddressData.map(data => dispatch(putAddress(data)));
+    
+    if(ProductData.length > 0) await ProductData.map(data => dispatch(putProductsDetail(data)));
+    
+    if(LeaveData.length > 0) await LeaveData.map(leave => dispatch(Putemployeeleave(leave)));
+
+    if(LeaveHistoryData.length > 0) await LeaveHistoryData.map(leave => dispatch(Putemployeeleavehistory(leave)));  
+
+    if(LeaderEmployeeData.length > 0) await LeaderEmployeeData.map(le => dispatch(putleaderemployee(le)));
+   
+    if(roleDetailData.length > 0 ) await roleDetailData.map(role => dispatch(putRoleDetail(role)));
+
+    if(loginData.length > 0) await loginData.map(login => dispatch(PutLogin(login)));
+
+    if(accountData.length > 0) await accountData.map(acc => dispatch(putaccount(acc)));
+
     await setFullComponentLoading(!FullComponentLoading);
+
+   await dispatch(getEmployees());
+   await dispatch(getrole());
+   await dispatch(getDepartment());
+   await dispatch(getleaderemployee());
+   await dispatch(getRoleDetail());
+   await dispatch(getAddress());
+   await dispatch(getaccount());
+   await dispatch(GetLogin());
+   await dispatch(Getleavetable());
+   await dispatch(getProductsDetail());
+   await dispatch(Getemployeeleave());
+   await dispatch(Getemployeeleavehistory());
   };
 
   // Table Edit Icon
@@ -487,12 +708,13 @@ const Employee = ({ officeData }) => {
     await ModelOpen();
     await setAddressCheck(false);
     await setEditPencilState(true);
+
     //employee
-    const EmpFilter = await employee.filter((emp) => emp.id === data.key);
+    const EmpFilter = await employee.filter((emp) => emp.id ===  data.key);
     const EData = (await EmpFilter) && EmpFilter[0] ? EmpFilter[0] : [];
     //role
     const RoleDetailsFilter = await roledetail.filter(
-      (roleDetails) => roleDetails.employeeId === data.key
+      (roleDetails) => roleDetails.employeeId ===  data.key
     );
     const RoleDetailsData =
       (await RoleDetailsFilter.length) === 0 ? null : RoleDetailsFilter[0];
@@ -501,27 +723,27 @@ const Employee = ({ officeData }) => {
       (leader) => leader.employeeId === data.key
     );
     const TeamData = (await TeamFilter.length) === 0 ? null : TeamFilter[0];
+    
     // address
-    const AddressFilter = await address.filter(
-      (add) => add.employeeId === data.key
-    );
-    const AddressData =
-      (await AddressFilter.length) === 0 ? null : AddressFilter;
-    const PermanetFilter =
-      (await AddressData) === null
-        ? null
-        : await AddressData.filter((per) => per.type === 2);
-    const PermanetData =
-      (await PermanetFilter) === null ? null : PermanetFilter[0];
-    const CurrentFilter =
-      (await AddressData) === null
+    const AddressFilter = await address.filter((add) => add.employeeId === data.key);
+    
+    const AddressData = await AddressFilter.length > 0 ?  AddressFilter : null;
+    
+    const PermanetFilter = AddressData.length > 0
+        ?  await AddressData.filter((per) => per.type === 2)
+        : null;
+    const PermanetData =await PermanetFilter.length > 0 ?  PermanetFilter[0] :null;
+
+    const CurrentFilter =(await AddressData) === null
         ? null
         : await AddressData.filter((per) => per.type === 1);
     const CurrentData =
       (await CurrentFilter) === null ? null : CurrentFilter[0];
+
+
     //account
     const AccountFilter = await account.filter(
-      (acc) => acc.employeeId === data.key
+      (acc) => acc.employeeId ===  data.key
     );
     const AccountData =
       (await AccountFilter.length) === 0 ? null : AccountFilter[0];
@@ -574,7 +796,7 @@ const Employee = ({ officeData }) => {
       isDeleted: false,
       Role: RoleDetailsData === null ? null : RoleDetailsData.roleId,
     });
-    console.log();
+   
     //role details
     setRoleValue({
       id: RoleDetailsData === null ? null : RoleDetailsData.id,
@@ -600,6 +822,7 @@ const Employee = ({ officeData }) => {
       modifiedDate: formattedDate,
       modifiedBy: TeamData === null ? null : TeamData.modifiedBy,
     });
+
 
     //address
     await setPermanetFAdd({
@@ -648,6 +871,8 @@ const Employee = ({ officeData }) => {
       modifiedDate: formattedDate,
       modifiedBy: AccountData === null ? null : AccountData.modifiedBy,
     });
+  
+ 
   };
 
   // Employee Inputs
@@ -1084,10 +1309,10 @@ const Employee = ({ officeData }) => {
         );
         // address creation
         await dispatch(
-          postAddress({ employeeId: employeeDatas.payload.id, ...CureentFAdd })
+          postAddress({ employeeId: employeeDatas.payload.id, ...CureentFAdd,type:1 })
         );
         await dispatch(
-          postAddress({ employeeId: employeeDatas.payload.id, ...PermanetFAdd })
+          postAddress({ employeeId: employeeDatas.payload.id, ...PermanetFAdd,type:2 })
         );
         //account creation
         await dispatch(
@@ -1116,6 +1341,7 @@ const Employee = ({ officeData }) => {
 
   //put employee
   const [FullComponentLoading, setFullComponentLoading] = useState(false);
+  
   const PutEmployee = async () => {
     await dispatch(putEmployees(EmployeeInput)); //employee
     await dispatch(putRoleDetail(RoleValue)); //role
@@ -1138,7 +1364,9 @@ const Employee = ({ officeData }) => {
     dispatch(getaccount());
     dispatch(GetLogin());
     dispatch(Getleavetable());
-    // console.log("loading all");
+    dispatch(getProductsDetail());
+    dispatch(Getemployeeleave());
+    dispatch(Getemployeeleavehistory());
   }, [dispatch, loadings, FullComponentLoading]);
 
   //table loading

@@ -26,12 +26,13 @@
 import React, { useEffect } from 'react';
 import User from './userpages/User';
 import Accessories from './pages/Accessories';
-import {useDispatch, useSelector} from 'react-redux';
+import {Provider, useDispatch, useSelector} from 'react-redux';
 import { getOffice } from './redux/slices/officeSlice';
 import Loginpage from './Loginpage';
 import { BrowserRouter as Router, Route, Link, Switch,Routes } from 'react-router-dom';
 import UserDashboard from './userpages/UserDashboard';
 import LeaveConfirmationPage from './pages/LeaveConfirmationPage';
+import store from './redux/store'
 /* src/index.css */
 
 // Admin
@@ -52,15 +53,31 @@ const App = () => {
         {/* <Accessories />  */}
 {/* <User Id={164}/> */}
      {/* <Loginpage/> */}
+     <Provider store={store}>
     <Router>
         <Routes>
             <Route exact path='/' Component={Loginpage}/>
             <Route path='/confirmation/:id' Component={LeaveConfirmationPage}/>
         </Routes>
      </Router>
+     </Provider>
         </>
    
     );
 };
 
 export default App;
+
+// Admin602
+// B85q
+
+// User927
+// TyI!
+
+// hr
+// Test183
+// CH8E
+
+//leader
+// Leader397
+// 2ziH

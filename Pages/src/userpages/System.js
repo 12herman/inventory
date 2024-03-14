@@ -18,7 +18,6 @@ const items= ProductsFilter === null
   </ul>
 }));
 
-console.log(products);
 
   return (
     <div>

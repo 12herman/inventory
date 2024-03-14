@@ -12,6 +12,7 @@ import {
   DatePicker,
   Checkbox,
   Spin,
+  notification,
   Switch,
   Radio,
   Dropdown,
@@ -56,11 +57,22 @@ const UserDashboard = ({
   leavehistory,
   leaderData,
   hrData,
+  leavetable
 }) => {
   const [Emails, setEmails] = useState({
     leaderEmail: leaderData === null ? null : leaderData.officeEmail,
     hrEmail: hrData === null ? null : hrData.officeEmail,
   });
+
+// console.log(Id);
+// console.log(LeaveDatas);
+// console.log(holiday);
+// console.log(employee);
+// console.log(leavehistory);
+// console.log(leaderData);
+// console.log(hrData);
+// console.log(leavetable);
+// console.log(Emails);
 
   const [form] = Form.useForm();
   const dispatch = useDispatch();
@@ -98,6 +110,10 @@ const UserDashboard = ({
     };
   });
 
+
+
+  
+
   const hrFilters = leaderemployee.filter((le) => le.employeeId === Id);
   const hrIds = hrFilters.length > 0 ? hrFilters[0].hrManagerId : null;
   const hrDataFilters = employee.filter((emp) => emp.id === hrIds);
@@ -108,26 +124,37 @@ const UserDashboard = ({
   const leaderDataFilter = employee.filter((emp) => emp.id === leaderIds);
   const leaderDatas = leaderDataFilter.length > 0 ? leaderDataFilter[0] : null;
 
+ 
+
   const LeaveData = LeaveDatas.filter((x) => x.employeeId === Id)
     ? LeaveDatas.filter((x) => x.employeeId === Id)[0]
     : undefined;
-  function calculatePercentage(value, total) {
+ 
+ 
+    function calculatePercentage(value, total) {
     if (total === 0) {
       // Avoid division by zero
       return 0;
     }
     return (value / total) * 100;
-  }
-  const TotalCircle = calculatePercentage(LeaveData.total, LeaveData.total);
+  };
+
+
+  const TotalCircle = calculatePercentage(LeaveData.total, leavetable.total);
+  
+  
   const casualCircle = calculatePercentage(
     LeaveData.casualLeave,
-    LeaveData.total
+    leavetable.casualLeave
   );
-  const SickCircle = calculatePercentage(LeaveData.sickLeave, LeaveData.total);
+
+
+  const SickCircle = calculatePercentage(LeaveData.sickLeave, leavetable.sickLeave);
   const LeaveAvailedCircle = calculatePercentage(
     LeaveData.leaveAvailed,
-    LeaveData.total
+    leavetable.total
   );
+
 
   const employeeFilter = employee.filter((x) => x.id === Id)[0];
   const employeeName =
@@ -287,10 +314,10 @@ const UserDashboard = ({
         modifiedBy: employeeName,
         // "dto": "value_for_dto_field", // Add this line
       };
-      console.log(LeaveDatas);
       await setpostLeaveLoading(true);
+   
+       await dispatch(Postemployeeleavehistory(LeaveDatas));
       await SendToMail(LeaveDatas);
-      await dispatch(Postemployeeleavehistory(LeaveDatas));
       await ClearFileds();
       await setpostLeaveLoading(false);
       await message.success("Your leave is processing check the calender")
@@ -391,7 +418,6 @@ const UserDashboard = ({
   // Send to
   const SendToMail = async (LeaveDatas) => {
     const leaveDataApi = await dispatch(Getemployeeleavehistory());
-
     const filterLeave =
       (await leaveDataApi.payload.length) > 0
         ? await leaveDataApi.payload.filter(
@@ -424,14 +450,14 @@ const UserDashboard = ({
       await dispatch(
         Postleaveconfirmation({
           ...emailDatas,
-          email: "yenoklesin@gmail.com",
+          email: hrDatas.officeEmail,
           id: filterLeave[0].id + "+hr",
         })
       );
       await dispatch(
         Postleaveconfirmation({
           ...emailDatas,
-          email: "yenoklesin@gmail.com",
+          email: leaderDatas.officeEmail,
           id: filterLeave[0].id + "+leader",
         })
       );
@@ -440,18 +466,41 @@ const UserDashboard = ({
     }
   };
 
+  const [api, contextHolder] = notification.useNotification();
+  const openNotification = () => {
+    api.open({
+      message: 'Please Contact HR',
+      description:
+        'Your leave balance is now exhausted.\n Please contact HR for further assistance.',
+      duration: 0,
+    });
+  };
+
+  const ApplyLeaveBtn = ()=>{
+     if(LeaveData.sickLeave <= 0 &&  LeaveData.casualLeave <= 0){
+      openNotification()
+      //message.warning('Your leave balance is now exhausted.\n Please contact HR for further assistance.');
+    }
+    else if(LeaveData.casualLeave > 0 || LeaveData.sickLeave > 0){
+      showModal();
+    }
+  };
+
+
   return (
     
       postLeaveLoading === false ?
       <div>
+       {contextHolder}
       <Row gutter={16}>
-        <Col span={6}>
+        {/* <Col span={6}>
           <Card>
             <Flex justify="space-between" align="center">
               <Statistic
-                title="Total Working Days"
-                value={LeaveData.total}
-                formatter={formatter}
+               
+                title="Total Leave"
+                value={leavetable.total}
+                // formatter={formatter}
                 valueStyle={{
                   color: "#3f8600",
                   fontWeight: "bold",
@@ -465,14 +514,14 @@ const UserDashboard = ({
               />
             </Flex>
           </Card>
-        </Col>
-        <Col span={6}>
+        </Col> */}
+        <Col span={8}>
           <Card>
             <Flex justify="space-between" align="center">
               <Statistic
                 title="Casual Leave"
-                value={LeaveData.casualLeave}
-                formatter={formatter}
+                value={leavetable.casualLeave}
+                //formatter={formatter}
                 valueStyle={{
                   color: "#3f8600",
                   fontWeight: "bold",
@@ -487,13 +536,13 @@ const UserDashboard = ({
             </Flex>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Card>
             <Flex justify="space-between" align="center">
               <Statistic
                 title="Sick Leave"
-                value={LeaveData.sickLeave}
-                formatter={formatter}
+                value={leavetable.sickLeave }
+                // formatter={formatter}
                 valueStyle={{
                   color: "#3f8600",
                   fontWeight: "bold",
@@ -508,13 +557,13 @@ const UserDashboard = ({
             </Flex>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={8}>
           <Card>
             <Flex justify="space-between" align="center">
               <Statistic
                 title="Leave Availed"
-                value={LeaveData.leaveAvailed}
-                formatter={formatter}
+                value={leavetable.total}
+                // formatter={formatter}
                 valueStyle={{
                   color: "#3f8600",
                   fontWeight: "bold",
@@ -531,7 +580,7 @@ const UserDashboard = ({
         </Col>
       </Row>
       <Button
-        onClick={showModal}
+        onClick={ApplyLeaveBtn}
         className="bg-blue-500"
         type="primary"
         style={{ marginTop: "20px" }}
@@ -573,8 +622,8 @@ const UserDashboard = ({
               className="w-full"
               placeholder="Select Leave Type"
               options={[
-                { key: 1, label: "Casual Leave", value: "casualLeave" },
-                { key: 2, label: "Sick Leave", value: "sickLeave" },
+                { key: 1, label: "Casual Leave", value: "casualLeave",disabled:LeaveData.casualLeave <= 0 ? true : false},
+                { key: 2, label: "Sick Leave", value: "sickLeave",disabled:LeaveData.sickLeave <= 0 ? true : false},
               ]}
               value={select}
               onChange={handleChange}
@@ -633,9 +682,6 @@ const UserDashboard = ({
       }
     />
    </div>
-
-    
-   
   );
 };
 

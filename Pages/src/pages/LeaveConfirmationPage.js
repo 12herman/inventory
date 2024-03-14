@@ -1,134 +1,15 @@
-// import { Button } from "antd";
-// import React, { useEffect, useState } from "react";
-// import QosteqLogo from "../Assets/qosteqlogo.webp";
-// import { useParams } from "react-router-dom";
-// import { useDispatch, useSelector } from "react-redux";
-// import { Getemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
-// import { getEmployees } from "../redux/slices/employeeSlice";
-// import { Spin } from "antd";
-// import { LoadingOutlined } from "@ant-design/icons";
-// import ApprovePng from "../Assets/approve_png.png";
-// const LeaveConfirmationPage = () => {
-//   const { id } = useParams();
-
-//   const IdArray = id.split('-');
-//   const IdsConvertNo =  IdArray.map(id => parseInt(id,10));
-
-//   const dispatch = useDispatch();
-//   const { employeeleavehistory } = useSelector(
-//     (state) => state.employeeleavehistory
-//   );
-//   const { employee } = useSelector((state) => state.employee);
-
-//   useEffect(() => {
-//     dispatch(Getemployeeleavehistory());
-//     dispatch(getEmployees());
-//   }, []);
-
-//   const DashboardScreen = employeeleavehistory.filter(leave => IdsConvertNo.some(id => id  === leave.id));
-
-//   const filterLeave = [{...DashboardScreen[0],"dates": DashboardScreen.map(data => data.date.split('T')[0]).join(', ')}]
-
-//   const checkFilterLeave = filterLeave.map(data => data.dates === '')[0];
-
-//   console.log(DashboardScreen);
-//   // const filterLeave = employeeleavehistory.filter(
-//   //   (data) =>
-//   //     data.id === parseInt(id, 10) &&
-//   //     data.isApproved === false &&
-//   //     data.isDeleted === false &&
-//   //     data.isRejected === false
-//   // );
-//   // const CheckFilterLeave = filterLeave.length > 0 ? filterLeave : null;
-
-//   const filterEmp = employee.filter((emp) =>
-//     filterLeave.some((data) => data.employeeId === emp.id)
-//   );
-
-//   const EmpName =
-//     filterEmp.length > 0
-//       ? filterEmp[0].firstName + " " + filterEmp[0].lastName
-//       : null;
-
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       setLoading(false);
-//     }, 5000);
-
-//     return () => clearTimeout(timer);
-//   }, []);
-
-// // const Approve = ()=>{
-// //   let filterData =employeeleavehistory.filter(leave => IdsConvertNo.some(id => leave.id === id));
-// //   console.log(filterData);
-// // }
-// // Approve();
-
-//   return (
-//     <>
-//       {checkFilterLeave === true ? (
-//         <>
-//           {loading === true ? (
-//             <div className="flex justify-center items-center w-full h-screen">
-//             <Spin
-//               indicator={
-//                 <LoadingOutlined
-//                   style={{
-//                     fontSize: 24,
-//                   }}
-//                   spin
-//                 />
-//               }
-//             />
-//             </div>
-//           ) : (
-//             <div className="w-full h-screen flex flex-col justify-center items-center">
-//               <img className="w-[20%]" src={ApprovePng} />
-//               <span className="sm:text-sm lg:text-lg pt-2 font-bold">
-//                 This page is already Validate
-//               </span>
-//             </div>
-//           )}
-//         </>
-//       ) : (
-//         filterLeave.map((data,i) => {
-//           return (
-//             <section key={i} className="flex flex-col justify-center items-center w-full h-screen ">
-//               <img className="w-[10%]" src={QosteqLogo} />
-//               <h3 className="text-2xl font-bold pb-5">Leave Approval Form</h3>
-//               <ul className="flex flex-col gap-y-2">
-//                 <li>Employee ID: &nbsp; {data.employeeId}</li>
-//                 <li>Employee Name: &nbsp; {EmpName}</li>
-//                 <li>Leave Type: &nbsp; {data.leaveType}</li>
-//                 <li>Date:&nbsp; {data.dates}</li>
-//                 <li>Reson:&nbsp; {data.comments}</li>
-//                 <li className="flex gap-x-2 mt-3">
-//                   <Button>Approve</Button>
-//                   <Button danger>Rejected</Button>
-//                 </li>
-//               </ul>
-//             </section>
-//           );
-//         })
-//       )}
-//     </>
-//   );
-// };
-// export default LeaveConfirmationPage;
-
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import React, { useEffect, useState } from "react";
 import QosteqLogo from "../Assets/qosteqlogo.webp";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  Deletedemployeeleavehistory,
   Getemployeeleavehistory,
   Putemployeeleavehistory,
 } from "../redux/slices/EmployeeLeaveHistorySlice";
 import { getEmployees } from "../redux/slices/employeeSlice";
-import { Spin } from "antd";
+import { Spin, Input, Popconfirm, message } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import ApprovePng from "../Assets/approve_png.png";
 import { getleaderemployee } from "../redux/slices/leaderEmployeeSlice";
@@ -136,6 +17,9 @@ import {
   Getemployeeleave,
   Putemployeeleave,
 } from "../redux/slices/employeeLeaveSlice";
+
+const { TextArea } = Input;
+
 const LeaveConfirmationPage = () => {
   let { id } = useParams();
   const IdArray = id.split("+");
@@ -157,13 +41,29 @@ const LeaveConfirmationPage = () => {
     dispatch(getleaderemployee());
   }, []);
 
+  //   const ExistApproveOrReject = employeeleavehistory.filter( data =>data.id === id );
+  //   const CheckExit = ExistApproveOrReject.length > 0 ? [ExistApproveOrReject[0].hrIsApproved,
+  //                                                         ExistApproveOrReject[0].hrIsRejected,
+  //                                                         ExistApproveOrReject[0].leaderIsApproved,
+  //                                                         ExistApproveOrReject[0].leaderIsRejected,
+  //                                                         ExistApproveOrReject[0].isDeleted] : null;
+  // const Active = CheckExit&& CheckExit.length > 0 ? CheckExit.filter(data => data === true) : null;
+  // console.log(Active);
+  // const Contidation =  typeof(CheckExit) === Object &&
+  //                                 (CheckExit.hrIsApproved === true ||
+  //                                 CheckExit.hrIsRejected === true ||
+  //                                 CheckExit.leaderIsApproved === true ||
+  //                                 CheckExit.leaderIsRejected === true ||
+  //                                 CheckExit.isDeleted === true) ? true : null ;
+
   const LHistory = employeeleavehistory.filter(
     (data) =>
       data.id === id &&
       data.hrIsApproved === false &&
       data.hrIsRejected === false &&
       data.leaderIsApproved === false &&
-      data.leaderIsRejected === false
+      data.leaderIsRejected === false &&
+      data.isDeleted === false
   );
   const EmpId = LHistory.length > 0 ? LHistory[0].employeeId : null;
   const EmpDetails =
@@ -240,17 +140,28 @@ const LeaveConfirmationPage = () => {
         }))
       : null;
 
-  const hrApproved = () => {
-    console.log({ ...LHistory[0], hrIsApproved: true, modifiedBy: leaderName });
-    console.log({
-      ...leaveDatas[0],
-      total: leaveDatas[0].total - LHistory[0].numberOfDays,
-      leaveAvailed: leaveDatas[0].leaveAvailed + LHistory[0].numberOfDays,
-      ...LeaveType(type),
-      modifiedBy: hrName,
-    });
+  //hr approved
+  const hrApproved = async () => {
+    await dispatch(
+      Putemployeeleavehistory({
+        ...LHistory[0],
+        hrIsApproved: true,
+        modifiedBy: hrName,
+      })
+    );
+    await dispatch(
+      Putemployeeleave({
+        ...leaveDatas[0],
+        total: leaveDatas[0].total - LHistory[0].numberOfDays,
+        leaveAvailed: leaveDatas[0].leaveAvailed + LHistory[0].numberOfDays,
+        ...LeaveType(type),
+        modifiedBy: hrName,
+      })
+    );
+    setFinished(true);
   };
 
+  //leader approved
   const LeaderApproved = async () => {
     await dispatch(
       Putemployeeleavehistory({
@@ -268,17 +179,7 @@ const LeaveConfirmationPage = () => {
         modifiedBy: leaderName,
       })
     );
-    await dispatch(Getemployeeleavehistory());
-    await dispatch(getEmployees());
-    await dispatch(Getemployeeleave());
-    await dispatch(getleaderemployee());
-    //console.log({...LHistory[0],"leaderIsApproved":true,"modifiedBy":leaderName});
-    // console.log({...leaveDatas[0],
-    //               "total":leaveDatas[0].total - LHistory[0].numberOfDays,
-    //               "leaveAvailed": leaveDatas[0].leaveAvailed + LHistory[0].numberOfDays,
-    //               ...LeaveType(type),
-    //               "modifiedBy":leaderName
-    //              });
+    setFinished(true);
   };
 
   const LeaveType = (type) => {
@@ -291,11 +192,71 @@ const LeaveConfirmationPage = () => {
     }
   };
 
+  const [OpenModal, setOpenModal] = useState(false);
+  const [LeaveHistory, setLeaveHistory] = useState({
+    Comments: null,
+  });
+
+  //leader rejection
+  const leaderRejection = async () => {
+    await dispatch(
+      Putemployeeleavehistory({
+        ...LHistory[0],
+        leaderIsRejected: true,
+        modifiedBy: leaderName,
+        rejectedComments: LeaveHistory.Comments,
+      })
+    );
+    await setFinished(true);
+    setOpenModal(false);
+  };
+
+  //hr rejection
+  const hrRejection = async () => {
+    await dispatch(
+      Putemployeeleavehistory({
+        ...LHistory[0],
+        hrIsRejected: true,
+        modifiedBy: hrName,
+        rejectedComments: LeaveHistory.Comments,
+      })
+    );
+    await setFinished(true);
+    setOpenModal(false);
+  };
+
+  const [Finished, setFinished] = useState(false);
+
+  const DelectRequset = async () => {
+    await dispatch(Deletedemployeeleavehistory(id));
+    await setFinished(true);
+  };
+
+  const confirm = (e) => {
+    DelectRequset()
+  };
+  const cancel = (e) => {
+    
+  };
+
   return (
     <>
-      {employeeleavehistory.length > 0 &&
-      LHistory.length > 0 &&
-      employee.length > 0 ? (
+      {loading === true ? (
+        <div className="flex justify-center items-center w-full h-screen">
+          <Spin
+            indicator={
+              <LoadingOutlined
+                style={{
+                  fontSize: 24,
+                }}
+                spin
+              />
+            }
+          />
+        </div>
+      ) : employeeleavehistory.length > 0 &&
+        LHistory.length > 0 &&
+        employee.length > 0 ? (
         LHistory.map((data, i) => {
           return (
             <section className="relative" key={i}>
@@ -327,7 +288,7 @@ const LeaveConfirmationPage = () => {
                   <li className="text-xs sm:text-sm md:text-base">
                     Reson:&nbsp; {data.comments}
                   </li>
-                  <li className="flex gap-x-2 mt-3">
+                  <li className="grid grid-cols-2 gap-x-2 gap-y-2 mt-3">
                     {leaderBtn === "leader" ? (
                       <>
                         <Button
@@ -339,24 +300,65 @@ const LeaveConfirmationPage = () => {
                         <Button
                           className="text-xs sm:text-sm md:text-base"
                           danger
+                          onClick={() => setOpenModal(true)}
                         >
                           Rejected
                         </Button>
+                        <Popconfirm
+                          className="text-xs sm:text-sm md:text-base col-span-2"
+                          title="Delete the task"
+                          description="Are you sure to remove this request?"
+                          onConfirm={confirm}
+                          onCancel={cancel}
+                          okText="Yes"
+                          cancelText="No"
+                          okButtonProps={{ className: 'bg-red-500 hover:bg-red-500' , style:{background:'red'}}}
+
+                        >
+                          <Button type="primary" danger>
+                            Delete Request
+                          </Button>
+                        </Popconfirm>
                       </>
                     ) : (
                       <>
                         <Button
                           onClick={hrApproved}
-                          className="text-xs sm:text-sm md:text-base"
+                          className="text-xs sm:text-sm md:text-base "
                         >
                           Approve
                         </Button>
                         <Button
                           className="text-xs sm:text-sm md:text-base"
                           danger
+                          onClick={() => setOpenModal(true)}
                         >
                           Rejected
                         </Button>
+                        {/* <Button
+                          className="text-xs sm:text-sm md:text-base col-span-2"
+                          type="primary"
+                          danger
+                          onClick={() => DelectRequset()}
+                        >
+                          Delete Request
+                        </Button> */}
+
+                        <Popconfirm
+                          className="text-xs sm:text-sm md:text-base col-span-2"
+                          title="Delete the task"
+                          description="Are you sure to remove this request?"
+                          onConfirm={confirm}
+                          onCancel={cancel}
+                          okText="Yes"
+                          cancelText="No"
+                          okButtonProps={{ className: 'bg-red-500 hover:bg-red-500' , style:{background:'red'}}}
+
+                        >
+                          <Button type="primary" danger>
+                            Delete Request
+                          </Button>
+                        </Popconfirm>
                       </>
                     )}
                   </li>
@@ -365,27 +367,75 @@ const LeaveConfirmationPage = () => {
             </section>
           );
         })
-      ) : loading === true ? (
-        <div className="flex justify-center items-center w-full h-screen">
-          <Spin
-            indicator={
-              <LoadingOutlined
-                style={{
-                  fontSize: 24,
-                }}
-                spin
-              />
-            }
-          />
+      ) : Finished === true ? (
+        <div className="w-full h-screen flex flex-col justify-center items-center">
+          <img className="w-[20%]" src={ApprovePng} />
+          <span className="sm:text-sm lg:text-lg pt-2 font-bold">
+            This page is Validate successfully
+          </span>
         </div>
-      ) : (
+      ) : (Finished === false && LHistory && LHistory.length <= 0) ||
+        LHistory === null ||
+        LHistory === undefined ? (
         <div className="w-full h-screen flex flex-col justify-center items-center">
           <img className="w-[20%]" src={ApprovePng} />
           <span className="sm:text-sm lg:text-lg pt-2 font-bold">
             This page is already Validate
           </span>
         </div>
+      ) : (
+        <></>
       )}
+
+      {/* comment box */}
+      <Modal
+        open={OpenModal}
+        onCancel={() => {
+          setOpenModal(false);
+          setLeaveHistory((pre) => ({ ...pre, Comments: null }));
+        }}
+        footer={[
+          leaderBtn === "leader" ? (
+            <>
+              {" "}
+              <Button onClick={leaderRejection}>Ok</Button>,
+              <Button
+                onClick={() => {
+                  setOpenModal(false);
+                  setLeaveHistory((pre) => ({ ...pre, Comments: null }));
+                }}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button onClick={hrRejection}>Ok</Button>,
+              <Button
+                onClick={() => {
+                  setOpenModal(false);
+                  setLeaveHistory((pre) => ({ ...pre, Comments: null }));
+                }}
+              >
+                Cancel
+              </Button>
+            </>
+          ),
+        ]}
+      >
+        <span>
+          why you are rejecting this leave?{" "}
+          <span className="text-gray-400">(optional)</span>
+        </span>
+        <TextArea
+          value={LeaveHistory.Comments}
+          className="mt-3"
+          onChange={(data) =>
+            setLeaveHistory((pre) => ({ ...pre, Comments: data.target.value }))
+          }
+          rows={3}
+        />
+      </Modal>
     </>
   );
 };

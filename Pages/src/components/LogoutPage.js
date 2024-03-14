@@ -20,7 +20,7 @@ export default function LogoutPage() {
         <Button key="cancel" onClick={() => setOpen(false)} >
           Cancel
         </Button>,
-        <Button key="ok" className='bg-blue-500' onClick={() => { setOpen(false); window.location.href = '/'; }} style={{ borderColor: '#52c41a', color: '#fff' }}>
+        <Button key="ok" danger onClick={() => { setOpen(false); window.location.href = '/'; }} >
           OK
         </Button>,
       ]}>

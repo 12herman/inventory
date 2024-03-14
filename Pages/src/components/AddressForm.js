@@ -51,6 +51,7 @@ const AddressForm = forwardRef((props, ref) => {
         Addstate: FormCAdd.state,
         Addcountry: FormCAdd.country,
         AddpostalCode: FormCAdd.postalCode,
+        type: 2,
       });
 
       UpdatePAdd({
@@ -70,6 +71,7 @@ const AddressForm = forwardRef((props, ref) => {
         Addstate: null,
         Addcountry: null,
         AddpostalCode: null,
+        type: 2,
       });
       UpdatePAdd({
         address1: "",
