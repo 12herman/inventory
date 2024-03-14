@@ -31,9 +31,10 @@ import { Getemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySli
 import { getEmployeeAccessories } from "../redux/slices/employeeaccessoriesSlice";
 import { getProductsDetail } from "../redux/slices/productsDetailSlice";
 import { getleaderemployee } from "../redux/slices/leaderEmployeeSlice";
+import { Getleavetable } from "../redux/slices/leaveTableSlice";
 const { Header, Sider, Content } = Layout;
 
-const User = ({ Id, Data }) => {
+const User =  ({ Id, Data }) => {
   const [UpdateId] = useState(Id);
   const [collapsed, setCollapsed] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
@@ -55,11 +56,10 @@ const User = ({ Id, Data }) => {
   const {employeeleavehistory} = useSelector(state => state.employeeleavehistory);
   const {productsDetail} = useSelector(state => state.productsDetail);
   const {leaderemployee} = useSelector(state=> state.leaderemployee);
+  const {leavetable} = useSelector(state =>state.leavetable);
 
 
-  const [loadingholiday, setLoadingholiday] = useState(false);
-
-  useEffect(() => {
+  useEffect( () => {
     dispatch(GetHoliday());
     dispatch(Getemployeeleave());
     dispatch(getEmployees());
@@ -68,7 +68,10 @@ const User = ({ Id, Data }) => {
     dispatch(Getemployeeleavehistory());
     dispatch(getProductsDetail());
     dispatch(getleaderemployee());
-  }, [dispatch]);
+    dispatch(Getleavetable());   
+  }, []);
+
+
 
   const EmpFilter = employee.filter((emp) => emp.id === Id);
   const AddressFilter = address.filter((add) => add.employeeId === Id);
@@ -79,14 +82,17 @@ const User = ({ Id, Data }) => {
   const leaderFilter = leaderemployee.filter(le => le.employeeId === Id);
   const leaderId = leaderFilter.length>0 ? leaderFilter[0].leaderId: null;
   const leaderDataFilter = employee.filter(emp => emp.id === leaderId);
-  const leaderData = leaderDataFilter.length > 0 ? leaderDataFilter[0] : null;
+  const leaderData = leaderDataFilter.length > 0 ? leaderDataFilter : null;
 
   const hrFilter = leaderemployee.filter(le => le.employeeId === Id);
   const hrId = hrFilter.length >0 ? hrFilter[0].hrManagerId: null;
   const hrDataFilter = employee.filter(emp => emp.id === hrId);
-  const hrData = hrDataFilter.length > 0 ? hrDataFilter[0] : null;
+  const hrData = hrDataFilter.length > 0 ? hrDataFilter : null;
 
-  //console.log(hrData);
+  const EmployeeLeaves = employeeleave.length > 0 ? employeeleave.filter(data => data.employeeId === Id) : null
+  const EmployeeLeavesFilter = EmployeeLeaves === null ? null: EmployeeLeaves[0] ;
+
+
 
   const menuItems = [
     {
@@ -102,6 +108,7 @@ const User = ({ Id, Data }) => {
           leavehistory={LeaveFilter}
           leaderData={leaderData}
           hrData={hrData}
+          leavetable={leavetable[0]}
         />
       ),
     },
@@ -143,6 +150,8 @@ const User = ({ Id, Data }) => {
     },
   ];
 
+
+
   return (
     
     <Layout style={{
@@ -152,7 +161,7 @@ const User = ({ Id, Data }) => {
         trigger={null}
         collapsible
         collapsed={collapsed}
-        style={{ height: "100vh" }}
+        //style={{ height: "100vh" }}
       >
         <div className="demo-logo-vertical" />
         <Menu
@@ -160,7 +169,9 @@ const User = ({ Id, Data }) => {
           mode="inline"
           defaultSelectedKeys={["1"]}
           onClick={({ key }) =>
-            handleMenuClick(menuItems.find((item) => item.key === key))
+            {
+              handleMenuClick(menuItems.find((item) => item.key === key))
+            }
           }
                 style={{
                   overflow: 'auto', // Set overflow to auto to enable scrolling
@@ -210,31 +221,77 @@ const User = ({ Id, Data }) => {
             borderRadius: borderRadiusLG,
           }}
         >
-          {selectedMenuItem ? (
-            selectedMenuItem.Content
-          ) : employeeleave.length > 0 &&
-            holiday.length > 0 &&
-            employee.length > 0 &&
-            employeeleavehistory.length > 0 &&
-            hrData !== null && 
-            leaderData !== null ? (
+          {/* {
+            employeeleave&& employeeleave.length > 0 &&
+            holiday&& holiday.length > 0 &&
+            employee&& employee.length > 0 &&
+            employeeleavehistory&& employeeleavehistory.length > 0 &&
+            leavetable&& leavetable.length > 0 &&
+            hrData&& hrData.length > 0 && 
+            leaderData&& leaderData.length > 0 
+            ? (
             <UserDashboard
-              Id={Id}
-              LeaveDatas={employeeleave}
-              holiday={holiday}
-              employee={employee}
-              leavehistory={LeaveFilter}
-              leaderData={leaderData}
-              hrData={hrData}
+          Id={UpdateId}
+          LeaveDatas={employeeleave}
+          holiday={holiday}
+          employee={employee}
+          leavehistory={LeaveFilter}
+          leaderData={leaderData}
+          hrData={hrData[0]}
+          leavetable={leavetable[0]}
             />
-          ) : (
+          ) :  
+          selectedMenuItem != null?
+            selectedMenuItem.Content
+            :
+            (
             <LoadingOutlined
               style={{
                 fontSize: 24,
               }}
               spin
             />
-          )}
+          )
+          } */}
+          {
+            selectedMenuItem != null?
+            selectedMenuItem.Content
+            :
+            employeeleave &&
+            holiday &&
+            employee &&
+            employeeleavehistory &&
+            leavetable &&
+            hrData &&
+            leaderData &&
+            employeeleave.length > 0 &&
+            holiday.length > 0 &&
+            employee.length > 0 &&
+            employeeleavehistory.length > 0 &&
+            leavetable.length > 0 &&
+            hrData.length > 0 &&
+            leaderData.length > 0 ?
+          <UserDashboard
+          Id={UpdateId}
+          LeaveDatas={employeeleave}
+          holiday={holiday}
+          employee={employee}
+          leavehistory={LeaveFilter}
+          leaderData={leaderData}
+          hrData={hrData[0]}
+          leavetable={leavetable[0]}
+            />
+          : (
+           <div className="w-full h-screen flex justify-center items-center">
+           <LoadingOutlined
+              style={{
+                fontSize: 24,
+              }}
+              spin
+            />
+           </div>
+          )
+          }
         </Content>
       </Layout>
     </Layout>

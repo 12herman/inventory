@@ -28,9 +28,11 @@ const { Header, Sider, Content } = Layout;
 
 const Accessories = ({Id}) => {
   
+  
   // Apis
   const dispatch = useDispatch();
   const { office, loading } = useSelector(state => state.office);
+
 
   const isDeleteOffice = office.filter(off => off.isdeleted === false);
   //console.log(isDeleteOffice);
@@ -40,6 +42,7 @@ const Accessories = ({Id}) => {
     dispatch(getOffice());
   }, []);
 
+  // const EmployeeFiltering = 
   const officeList = [
     {
       label: 'All Office',
@@ -66,7 +69,7 @@ const Accessories = ({Id}) => {
 
   
   const EmpFilter = employee.filter(emp => emp.id === Id) ? employee.filter(emp => emp.id === Id)[0] : undefined;
-
+ const LoginUser = EmpFilter && EmpFilter !== undefined ? EmpFilter.firstName +" "+ EmpFilter.lastName : null;
 
   const handleMenuClick = (item) => {
     setSelectedMenuItem(item);
@@ -124,7 +127,7 @@ const Accessories = ({Id}) => {
       key: '1',
       icon: <FontAwesomeIcon icon={faHouse} />,
       label: 'Dashboard',
-      Content: <Dashboard />,
+      Content: <Dashboard LoginUser={LoginUser}/>,
       Components: 'Dashboard'
     },
     // {
@@ -138,28 +141,28 @@ const Accessories = ({Id}) => {
       key: '2',
       icon: <FontAwesomeIcon icon={faUser} />,
       label: 'User',
-      Content: <Employee />,
+      Content: <Employee LoginUser={LoginUser}/>,
       Components: 'Employee'
     },
     {
       key: '3',
       icon: <FontAwesomeIcon icon={faDesktop} />,
       label: 'Products',
-      Content: <Products />,
+      Content: <Products LoginUser={LoginUser}/>,
       Components: 'Products'
     },
     {
       key: '4',
       icon: <FontAwesomeIcon icon={faWarehouse} />,
       label: 'Storage',
-      Content: <Storage />,
+      Content: <Storage LoginUser={LoginUser}/>,
       Components: 'Storage'
     },
     {
       key: '5',
       icon: <FontAwesomeIcon icon={faScrewdriverWrench} />,
       label: 'Repair',
-      Content: <Repair />,
+      Content: <Repair LoginUser={LoginUser}/>,
       Components: 'Repair'
     },
     {
@@ -173,7 +176,7 @@ const Accessories = ({Id}) => {
       key: '7',
       icon: <FontAwesomeIcon icon={faSliders} />,
       label: 'Settings',
-      Content: <Settings user={EmpFilter}/>,
+      Content: <Settings user={EmpFilter} LoginUser={LoginUser}/>,
       Components: 'Settings'
     },  
   ];
@@ -306,6 +309,7 @@ const Accessories = ({Id}) => {
             React.cloneElement(selectedMenuItem.Content, {
               key: selectedMenuItem.Components, // Ensure a unique key for each component
               officeData: officeData,
+              LoginUser:LoginUser,
             })
           ) : <Dashboard officeData={officeData} />}
 
