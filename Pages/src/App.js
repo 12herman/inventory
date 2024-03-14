@@ -50,15 +50,17 @@ const App = () => {
     return(
         <>
 
-        <Accessories /> 
+        {/* <Accessories />  */}
 {/* <User Id={164}/> */}
      {/* <Loginpage/> */}
+     <Provider store={store}>
     <Router>
         <Routes>
             <Route exact path='/' Component={Loginpage}/>
             <Route path='/confirmation/:id' Component={LeaveConfirmationPage}/>
         </Routes>
      </Router>
+     </Provider>
         </>
    
     );
