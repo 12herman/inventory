@@ -192,31 +192,20 @@ const Personal = ({ employee, addressData }) => {
   ]);
 
   return (
-    <div>
-      <Row>
-        <Col span={24}>
-          <Descriptions title="Details" bordered items={EmployeeDetails[0]} />
-        </Col>
-      </Row>
-
-      <Row className="mt-5">
-        <Col span={24}>
-          <Descriptions
+    <ul className="grid grid-cols-1 gap-y-10">
+      <li><Descriptions layout="vertical" title="Personal Details" bordered items={EmployeeDetails[0]} /></li>
+      <li><Descriptions
+      layout="vertical"
             title="Current Address"
              bordered
-            items={CAddFilter[0]}
-          />
-        </Col>
-
-        <Col span={24} className="mt-5">
-          <Descriptions
+            items={CAddFilter[0]}/></li>
+      <li><Descriptions
+      layout="vertical"
             title="Permanent Address"
              bordered
             items={PAddFilter[0]}
-          />
-        </Col>
-      </Row>
-    </div>
+          /></li>
+    </ul>
   );
 };
 

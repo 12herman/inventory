@@ -334,6 +334,12 @@ const UserDashboard = ({
   const dateFormat = "YYYY/MM/DD";
   const [DatePick, SetDatePick] = useState([]);
   const [CheckDates, setCheckDates] = useState(["", ""]);
+  
+  const [EmailDatas,setEmailDatas] = useState({
+    numberOfDays: null,
+    days:null
+  });
+
   const ClearDates = () => {
     SetDatePick([]);
   };
@@ -490,9 +496,9 @@ const UserDashboard = ({
   return (
     
       postLeaveLoading === false ?
-      <div>
+      <div >
        {contextHolder}
-      <Row gutter={16}>
+      {/* <Row gutter={16}> */}
         {/* <Col span={6}>
           <Card>
             <Flex justify="space-between" align="center">
@@ -515,28 +521,15 @@ const UserDashboard = ({
             </Flex>
           </Card>
         </Col> */}
-        <Col span={8}>
+        {/* <Col span={8}>
           <Card>
             <Flex justify="space-between" align="center">
-              <Statistic
-                title="Casual Leave"
-                value={leavetable.casualLeave}
-                //formatter={formatter}
-                valueStyle={{
-                  color: "#3f8600",
-                  fontWeight: "bold",
-                }}
-              />
-              <Progress
-                type="circle"
-                percent={casualCircle}
-                status="active"
-                format={() => `${LeaveData.casualLeave} Days`}
-              />
+             
             </Flex>
           </Card>
-        </Col>
-        <Col span={8}>
+        </Col> */}
+
+        {/* <Col span={8}>
           <Card>
             <Flex justify="space-between" align="center">
               <Statistic
@@ -556,8 +549,8 @@ const UserDashboard = ({
               />
             </Flex>
           </Card>
-        </Col>
-        <Col span={8}>
+        </Col> */}
+        {/* <Col span={8}>
           <Card>
             <Flex justify="space-between" align="center">
               <Statistic
@@ -577,16 +570,79 @@ const UserDashboard = ({
               />
             </Flex>
           </Card>
-        </Col>
-      </Row>
-      <Button
+        </Col> */}
+      {/* </Row> */}
+
+      <ul className="list-none grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 md:justify-normal gap-x-0 gap-y-5 lg:gap-y-6  md:gap-x-[10%]">
+      <li className="flex flex-col shadow-lg xs:flex-row justify-center   items-center border rounded-md gap-x-5 gap-y-3 px-10 py-5 w-full md:w-full h-fit">
+        <Statistic
+        className="order-last xs:order-none text-center"
+                title="Casual Leave"
+                value={leavetable.casualLeave}
+                //formatter={formatter}
+                valueStyle={{
+                  color: "#3f8600",
+                  fontWeight: "bold",
+                }}
+              />
+              <Progress
+                type="circle"
+                percent={casualCircle}
+                status="active"
+                format={() => <> {LeaveData.casualLeave}<span className="text-[10px] block pt-1">Days</span></> }
+              />
+        </li>
+
+        <li className="flex flex-col shadow-lg xs:flex-row justify-center  items-center border rounded-md gap-x-5 px-10 gap-y-3 py-5 w-full md:w-full h-fit ">
+        <Statistic
+                 className="order-last xs:order-none text-center"
+                title="Sick Leave"
+                value={leavetable.sickLeave }
+                // formatter={formatter}
+                valueStyle={{
+                  color: "#3f8600",
+                  fontWeight: "bold",
+                }}
+              />
+              <Progress
+                type="circle"
+                percent={SickCircle}
+                status="active"
+                format={() =><>{LeaveData.sickLeave} <span className="text-[10px] block pt-1">Days</span></> }
+              />
+        </li>
+
+        <li className="flex flex-col shadow-lg xs:flex-row justify-center  items-center border rounded-md gap-x-5 px-10 gap-y-3 py-5  h-fit md:col-span-2 w-full lg:w-fit lg:col-span-1">
+        <Statistic
+         className="order-last xs:order-none text-center"
+                title="Leave Availed"
+                value={leavetable.total}
+                // formatter={formatter}
+                valueStyle={{
+                  color: "#3f8600",
+                  fontWeight: "bold",
+                }}
+              />
+              <Progress
+                type="circle"
+                percent={LeaveAvailedCircle}
+                status="active"
+                format={() => <>{LeaveData.leaveAvailed}<span className="text-[10px] block pt-1">Days</span></>}
+              />
+        </li>
+
+        <li className="flex justify-center xs:justify-start items-center">
+        <Button
         onClick={ApplyLeaveBtn}
         className="bg-blue-500"
         type="primary"
-        style={{ marginTop: "20px" }}
+        // style={{ marginTop: "20px" }}
       >
         Apply for Leave
       </Button>
+        </li>
+      </ul>
+      
 
       <Divider />
       <h2 style={{ textAlign: "center", marginBottom: "30px" }}>
@@ -670,7 +726,7 @@ const UserDashboard = ({
       </Modal>
     </div>
 
-    : <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    : <div className=" w-full h-[80vh] flex justify-center items-center">
     <Spin
       indicator={
         <LoadingOutlined

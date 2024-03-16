@@ -4,8 +4,11 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Getemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
 import { logDOM } from "@testing-library/react";
+import { useMediaQuery } from 'react-responsive';
 
 const Holiday = ({ Id }) => {
+
+  
 
   const { employeeleavehistory } = useSelector(
     (state) => state.employeeleavehistory
@@ -77,6 +80,7 @@ const Holiday = ({ Id }) => {
     ) : null;
   };
 
+  const isMobile = useMediaQuery({ maxWidth: 767 });
   const dateCellRender = (value) => {
     const listData = getListData(value);
     return (
@@ -84,7 +88,7 @@ const Holiday = ({ Id }) => {
         {listData.map((item) => (
           <li key={item.content}>
             <Tooltip title={item.comments}>
-              <Badge status={item.type} text={item.content} />
+              <Badge size="10px" status={item.type} text={<span className="text-xs"> {isMobile ===false ? item.content : null}</span>} />
             </Tooltip>
           </li>
         ))}
@@ -98,11 +102,13 @@ const Holiday = ({ Id }) => {
     return info.originNode;
   };
   
+ 
   return employeeleavehistory.length > 0 ? (
     <Calendar  cellRender={cellRender}/>
   ) : (
     // <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-    <Calendar  cellRender={cellRender}/>
+    <Calendar cellRender={cellRender}/>
+    
   );
 };
 

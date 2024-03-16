@@ -17,6 +17,11 @@ import {
   Getemployeeleave,
   Putemployeeleave,
 } from "../redux/slices/employeeLeaveSlice";
+import Approved from '../Assets/checked.png';
+import Deleted from '../Assets/delete.png';
+import Rejected from '../Assets/decline.png';
+
+
 
 const { TextArea } = Input;
 
@@ -105,6 +110,7 @@ const LeaveConfirmationPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [leaderBtn, setLeaderBtn] = useState(IdArray[1]);
+  const [requestMesssage,setRequestMessage] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -158,7 +164,8 @@ const LeaveConfirmationPage = () => {
         modifiedBy: hrName,
       })
     );
-    setFinished(true);
+   await setRequestMessage("Approved");
+   await setFinished(true);
   };
 
   //leader approved
@@ -179,7 +186,8 @@ const LeaveConfirmationPage = () => {
         modifiedBy: leaderName,
       })
     );
-    setFinished(true);
+    await setRequestMessage("Approved");
+    await setFinished(true);
   };
 
   const LeaveType = (type) => {
@@ -208,7 +216,8 @@ const LeaveConfirmationPage = () => {
       })
     );
     await setFinished(true);
-    setOpenModal(false);
+    await setRequestMessage("Rejected");
+    await setOpenModal(false);
   };
 
   //hr rejection
@@ -222,7 +231,8 @@ const LeaveConfirmationPage = () => {
       })
     );
     await setFinished(true);
-    setOpenModal(false);
+    await setRequestMessage("Rejected");
+   await setOpenModal(false);
   };
 
   const [Finished, setFinished] = useState(false);
@@ -234,6 +244,7 @@ const LeaveConfirmationPage = () => {
 
   const confirm = (e) => {
     DelectRequset()
+     setRequestMessage("Deleted");
   };
   const cancel = (e) => {
     
@@ -367,11 +378,15 @@ const LeaveConfirmationPage = () => {
             </section>
           );
         })
+        
       ) : Finished === true ? (
         <div className="w-full h-screen flex flex-col justify-center items-center">
-          <img className="w-[20%]" src={ApprovePng} />
-          <span className="sm:text-sm lg:text-lg pt-2 font-bold">
-            This page is Validate successfully
+          <img className="w-[20%]" src={requestMesssage==="Approved" ?  Approved 
+                                        : requestMesssage ==="Rejected" ? Rejected
+                                        :Deleted } />
+          <span className="sm:text-sm lg:text-lg pt-5 font-bold">
+            {/* This page is Validate successfully */}
+            This requset {requestMesssage} successfully
           </span>
         </div>
       ) : (Finished === false && LHistory && LHistory.length <= 0) ||
@@ -386,7 +401,8 @@ const LeaveConfirmationPage = () => {
       ) : (
         <></>
       )}
-
+      {/* Herman652 */}
+      {/* WXRf */}
       {/* comment box */}
       <Modal
         open={OpenModal}
