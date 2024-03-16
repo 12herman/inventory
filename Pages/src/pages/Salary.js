@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getSalary, postSalary } from '../redux/slices/salarySlice';
 import * as FileSaver from 'file-saver';
 import XLSX from 'sheetjs-style';
+import Axios from 'axios';
 
 const { Dragger } = Upload;
 const props = {
@@ -17,7 +18,9 @@ const props = {
   onChange(info) {
     const { status } = info.file;
     if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
+      console.log(info.file);
+      // console.log(info.file, info.fileList);
+
     }
     if (status === 'done') {
       message.success(`${info.file.name} file uploaded successfully.`);
@@ -30,22 +33,7 @@ const props = {
   },
 };
 
-
-
 const Salary = ({excelData,fileName}) => {
-  // const dateFormat = "YYYY-MM-DD";
-
-  
-
-  // const ExporttoExcel = async ()=>{
-  //   const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-  //   const fileExtension ='.xlsx';
-  //   const ws = XLSX.utils.json_to_sheet(excelData);
-  //   const wb ={sheets:{'data':ws},sheetNames:['data']};
-  //   const excelBuffer = XLSX.write(wb,{bookType:'xlsx',type:'array'});
-  //   const data = new Blob([excelBuffer],{type:fileType});
-  //   FileSaver.saveAs(data,fileName + fileExtension);
-  // }
 
   const onChange = (pagination, filters, sorter, extra) => {
     console.log('params', pagination, filters, sorter, extra);
@@ -168,72 +156,6 @@ const Salary = ({excelData,fileName}) => {
     },
   ];
 
-  //Table Row Selection Check box
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-  const [SelectedIds, setSelectedIds] = useState([]);
-  const [TypeCounts, setTypeCounsts] = useState([]);
-
-  const onSelectChange = async (newSelectedRowKeys, x) => {
-    console.log(newSelectedRowKeys);
-    await setSelectedRowKeys(newSelectedRowKeys);
-    await setIsButtonEnabled(newSelectedRowKeys.length > 0);
-    await setSelectedIds(newSelectedRowKeys);
-    const types = await x.map(obj => (
-      obj.producttype
-    ));
-    const counts = await {};
-    await types.forEach(item => {
-      counts[item] = counts[item] ? counts[item] + 1 : 1;
-    });
-    const filteredCounts = [];
-    for (const key in counts) {
-      if (counts[key] >= 1) {
-        filteredCounts[key] = counts[key];
-      }
-    }
-    await setTypeCounsts(filteredCounts);
-  };
-
-  //Row Selection
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-    selections: [
-      Table.SELECTION_ALL,
-      Table.SELECTION_INVERT,
-      Table.SELECTION_NONE,
-      {
-        id: 'odd',
-        text: 'Select Odd Row',
-        onSelect: (changeableRowKeys) => {
-          let newSelectedRowKeys = [];
-          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-            if (index % 2 !== 0) {
-              return false;
-            }
-            return true;
-          });
-          setSelectedRowKeys(newSelectedRowKeys);
-        },
-      },
-      {
-        id: 'even',
-        text: 'Select Even Row',
-        onSelect: (changeableRowKeys) => {
-          let newSelectedRowKeys = [];
-          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
-            if (index % 2 !== 0) {
-              return true;
-            }
-            return false;
-          });
-          setSelectedRowKeys(newSelectedRowKeys);
-        },
-      },
-    ],
-
-  };
 
   const replaceDate = (date) => {
     const parts = date === null ? null : date.split("/");
@@ -244,7 +166,7 @@ const Salary = ({excelData,fileName}) => {
   const replaceTime = (date) => {
     const DateAndTime = date === null ? null : date.split('T');
     return DateAndTime && DateAndTime.length > 0 ? DateAndTime[0] : null
-  }
+  };
 
   const FilterData = tableDATA && tableDATA.length > 0 ? tableDATA.filter(item => item.isDeleted === false) : [];
 
@@ -263,7 +185,42 @@ const Salary = ({excelData,fileName}) => {
 
   }, [dispatch])
 
-  
+  // In your frontend component
+
+const ImportExcel = async (excelData) => {
+  try {
+    console.log(excelData); 
+    // Send the Excel data to the backend server
+    const response = await Axios.post('https://localhost:7129/api/Salary', {excelData});
+    // {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ excelData }),
+    // },);
+    console.log(response);
+
+    if (response.ok) {
+      // Data successfully imported into MySQL database
+      message.success('Excel data imported successfully.');
+      CloseExcelModal(); // Close the Excel import modal
+    } else {
+      // Handle server errors or other issues
+      message.error('Failed to import Excel data. Please try again later.');
+    }
+  } catch (error) {
+    // Handle network errors or other exceptions
+    console.error('Error importing Excel data:', error);
+    message.error('An error occurred while importing Excel data.');
+  }
+};
+
+const handleImportExcel = (data) => {
+  ImportExcel(data);
+};
+
+
   const ExporttoExcel = () => {
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const fileExtension = '.xlsx';
@@ -361,14 +318,14 @@ const Salary = ({excelData,fileName}) => {
         </Col>
 
         <Col justify="flex-end" style={{ left: "20%" }} >
-        <Button disabled={!isButtonEnabled}  onClick={(e) => ExporttoExcel(fileName)} type="primary"  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<DownloadOutlined />} >
-            Download Excel
+        <Button   onClick={(e) => ExporttoExcel(fileName)} type="primary"  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<UploadOutlined />} >
+            Export Excel
           </Button>
         </Col>
-
+        
         <Col justify="flex-end" style={{ left: "10%" }} >
-        <Button onClick={OpenExcelModal} type="primary"  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<UploadOutlined />} >
-            Upload Excel
+        <Button onClick={OpenExcelModal} type="primary"  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<DownloadOutlined />} >
+            Import Excel
           </Button>                   
         </Col>
 
@@ -386,7 +343,7 @@ const Salary = ({excelData,fileName}) => {
       </Row>
       <Divider />
       <div>
-        <Table rowSelection={rowSelection} dataSource={TableData} columns={columns} pagination={{pageSize:6,}} onChange={onChange}/>
+        <Table  dataSource={TableData} columns={columns} pagination={{pageSize:6,}} onChange={onChange}/>
       </div>
 
       <Modal
@@ -423,7 +380,6 @@ const Salary = ({excelData,fileName}) => {
               }
               value={employeeSalary.employeeId || undefined}
               onChange={employeeNameDropdowninProduct}
-              disabled={selectedRowKeys.length>1}
             >
               {employeeOption.map((employee) => (
                 <Select.Option key={employee.value} value={employee.value}>
@@ -476,7 +432,7 @@ const Salary = ({excelData,fileName}) => {
       width={"550px"}
       footer={[
         <Button key="1"
-          onClick={CloseExcelModal}
+          onClick={() => handleImportExcel(excelData)}
         >
           Ok
         </Button>,

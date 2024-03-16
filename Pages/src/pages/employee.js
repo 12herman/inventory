@@ -34,7 +34,7 @@ import {
   faLocationDot,
   faLandmark,
   faCircleCheck,
-  faPeopleGroup,
+  faPeopleGroup,faPlus, faDollar, faUser
 } from "@fortawesome/free-solid-svg-icons";
 import { LoadingOutlined } from "@ant-design/icons";
 import { getDepartment } from "../redux/slices/departmentSlice";
@@ -70,6 +70,7 @@ import { Getleavetable } from "../redux/slices/leaveTableSlice";
 import { Getemployeeleave, Postemployeeleave, Putemployeeleave } from "../redux/slices/employeeLeaveSlice";
 import { getProductsDetail, putProductsDetail } from "../redux/slices/productsDetailSlice";
 import { Getemployeeleavehistory, Putemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
+import { getSalary,postSalary } from "../redux/slices/salarySlice";
 const dateFormat = "YYYY-MM-DD";
 
 const formatter = (value) => <CountUp end={value} />;
@@ -396,8 +397,105 @@ const Employee = ({ officeData,LoginUser }) => {
     });
   };
 
+  //Salary API
+  const { salary } = useSelector(state => state.salary);
+
+ 
+  const [employeeSalary, setEmployeeSalary] = useState({
+    id: null,
+    employeeId: null,
+    employeeName: "",
+    ctc: "",
+    grossSalary: "",
+    netSalary: "",
+    salaryDate: null,
+    isRevised: true,
+    createdDate: "",
+    createdBy: "",
+    modifiedDate: "",
+    modifiedBy: "",
+    isDeleted: false
+  });
+  useEffect(() => {
+    dispatch(getSalary());
+
+  }, []);
+
+  const clearFields = () => {
+    setEmployeeSalary(pre => ({
+      ...pre,
+      id: "",
+      employeeId: "",
+      gross: "",
+      net: "",
+      salaryDate: "",
+      isRevised: true,
+      isDeleted: false,
+    }));
+  };
 
 
+//Salary Modal
+  const [SalaryModal, setSalaryModal] = useState(false);
+  const SalaryModalOpen = () => {
+    setSalaryModal(true);
+    clearFields();
+  };
+  const SalaryModalClose = () => { setSalaryModal(false) };
+  
+  const handleSelectedRows = async (selectedRowKeys) => {
+    // Check if selectedRowKeys is not empty
+    if (!selectedRowKeys.length) {
+      console.log("No rows selected.");
+      return;
+    }
+  
+    // Dynamically loop through each selected key
+    for (let key of selectedRowKeys) {
+      // Perform your operation with the current key
+      console.log("Current key:", key); // Example operation
+  
+      // Example: If you need to fetch data for each key
+      // const responseData = await fetchDataForKey(key);
+      // console.log(responseData);
+  
+      // Insert more operations as needed
+    }
+  
+    // After looping through all keys
+    console.log("Finished processing all selected rows.");
+  };
+//Post Salary
+  const PostSalary = async () => {
+    if (
+      !employeeSalary.grossSalary ||
+      !employeeSalary.netSalary ||
+      !employeeSalary.salaryDate
+    ) {
+      message.error("Please Fill all the Fields!");
+      return;
+    } for (const employeeId of selectedRowKeys) {
+      const addSalary = {
+        employeeId: employeeId,
+        // ctc:employeeSalary.ctc,
+        grossSalary: employeeSalary.grossSalary,
+        netSalary: employeeSalary.netSalary,
+        salaryDate: replaceDate(employeeSalary.salaryDate),
+        isRevised: employeeSalary.isRevised,
+        // createdDate:employeeSalary.createdDate,
+        // createdBy:employeeSalary.createdBy,
+        // modifiedDate:employeeSalary.modifiedDate,
+        // modifiedBy:employeeSalary.modifiedBy,
+        isDeleted: employeeSalary.isDeleted
+      };
+      console.log(addSalary);
+      await dispatch(postSalary(addSalary));
+      dispatch(getSalary());
+      SalaryModalClose();
+      message.success("Payment Successfull!");
+      setSelectedRowKeys([]);
+    }
+  };
 
 
   //new emp id
@@ -1402,6 +1500,113 @@ const accountData = accountFilter.map( acc => ({
     await setSkipAccount(false);
   };
 
+
+  //Table Row Selection Check box
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [SelectedIds, setSelectedIds] = useState([]);
+  const [TypeCounts, setTypeCounsts] = useState([]);
+
+  const onSelectChange = async (newSelectedRowKeys, x) => {
+    console.log(newSelectedRowKeys);
+    await setSelectedRowKeys(newSelectedRowKeys);
+    await setIsButtonEnabled(newSelectedRowKeys.length > 0);
+    await setSelectedIds(newSelectedRowKeys);
+    const types = await x.map(obj => (
+      obj.producttype
+    ));
+    const counts = await {};
+    await types.forEach(item => {
+      counts[item] = counts[item] ? counts[item] + 1 : 1;
+    });
+    const filteredCounts = [];
+    for (const key in counts) {
+      if (counts[key] >= 1) {
+        filteredCounts[key] = counts[key];
+      }
+    }
+    await setTypeCounsts(filteredCounts);
+  };
+
+  //Row Selection
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        id: 'odd',
+        text: 'Select Odd Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        id: 'even',
+        text: 'Select Even Row',
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+
+  };
+
+  const replaceDate = (date) => {
+    const parts = date === null ? null : date.split("/");
+    const convertedDate = parts === null ? null : parts.join("-");
+    return convertedDate;
+  };
+
+   //Gross Salary Input
+   const grossSalaryChange = (e) => {
+    setEmployeeSalary((pre) => ({ ...pre, grossSalary: e.target.value }));
+  };
+
+  //Net Salary Input
+  const netSalaryChange = (e) => {
+    setEmployeeSalary((pre) => ({ ...pre, netSalary: e.target.value }));
+  };
+
+  // //Employee Dropdown option
+  // const employeeOption = [
+  //   { label: 'Select an Employee', value: null },
+  //   ...employee.filter(empacc => !empacc.isDeleted).map(emp => ({
+  //     label: emp.firstName,
+  //     value: emp.id
+  //   })),
+  // ];
+
+  // //Employee Dropdown
+  // const employeeNameDropdowninProduct = (data, value) => {
+  //   console.log(value.value);
+  //   setEmployeeSalary((pre) => ({ ...pre, employeeId: value.value }));
+  // }
+
+  //salary
+  const salaryDateChange = (date) => {
+    setEmployeeSalary((pre) => ({
+      ...pre,
+      salaryDate: date ? date.format('YYYY/MM/DD') : null,
+    }));
+  };
+
   return (
     <div>
       {/* <Row align="middle">
@@ -1457,14 +1662,28 @@ const accountData = accountFilter.map( acc => ({
           />
           </li>
 
+          
         
-          <li >
-         
+          <li className="flex gap-x-6">
+
+          <Button    
+            disabled={!isButtonEnabled}       
+            onClick={SalaryModalOpen}
+            type="primary"
+            className="bg-blue-500"
+          >
+            <FontAwesomeIcon icon={faDollar} className="icon" />{" "}
+            <span >Add Payment </span>
+          </Button>
+
           <Button
             onClick={AddEmployeeBtn}
             type="primary"
             className="bg-blue-500"
-          >{`Add ${headingValue}`}</Button>
+          >
+            <FontAwesomeIcon icon={faUser} className="icon" />{"  "}
+
+            {`Add ${headingValue}`}</Button>
           </li>
      </ul>
 
@@ -1472,6 +1691,7 @@ const accountData = accountFilter.map( acc => ({
 
       <Col span={25}>
         <Table
+        rowSelection={rowSelection}
           columns={columns}
           dataSource={Tbdata}
           pagination={{ pageSize: 5 }}
@@ -2136,6 +2356,86 @@ const accountData = accountFilter.map( acc => ({
         ) : (
           ""
         )}
+      </Modal>
+
+      <Modal
+        title="Pay Salary"
+        open={SalaryModal}
+        onCancel={SalaryModalClose}
+        width={"550px"}
+        footer={[
+          <Button key="1"
+            onClick={PostSalary}
+          >
+            Pay
+          </Button>,
+          <Button key="2"
+            onClick={() => SalaryModalClose()}
+          >
+            Cancel
+          </Button>
+        ]}
+      >
+        <Form form={form}>
+
+          {/* <Form.Item
+            label="Employee Name"
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
+            <Select
+              showSearch
+              style={{ width: "380px", float: "right" }}
+              placeholder="Select Employee Name"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+              value={employeeSalary.employeeId || undefined}
+              onChange={employeeNameDropdowninProduct}
+            >
+              {employeeOption.map((employee) => (
+                <Select.Option key={employee.value} value={employee.value}>
+                  {employee.label}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item> */}
+
+          <Form.Item
+            label="Gross Salary"
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
+            <Input
+              style={{ width: "380px", float: "right" }}
+              placeholder="Gross Salary"
+              name="grossSalary"
+              value={employeeSalary.grossSalary}
+              onChange={grossSalaryChange}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Net Salary"
+            style={{ marginBottom: 0, marginTop: 10 }}
+          >
+            <Input
+              style={{ width: "380px", float: "right" }}
+              placeholder="Net Salary"
+              name="netSalary"
+              value={employeeSalary.netSalary}
+              onChange={netSalaryChange}
+            />
+
+          </Form.Item>
+
+          <Form.Item
+            label="Salary Date"
+            style={{ marginBottom: 0, marginTop: 10 }}
+
+          >
+            <DatePicker style={{ width: "380px", float: "right" }} value={employeeSalary.salaryDate ? moment(employeeSalary.salaryDate, 'YYYY/MM/DD') : null} onChange={salaryDateChange}></DatePicker>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );
