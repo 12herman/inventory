@@ -725,7 +725,6 @@ const Products = ({ officeData }) => {
         },
       },
     ],
-
   };
 
   //Assigned data

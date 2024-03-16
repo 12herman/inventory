@@ -13,13 +13,14 @@ export const ApiLink = {
     holiday:"https://localhost:7129/api/Holiday" ,
     employeeleave:"https://localhost:7129/api/EmployeeHoliday",
     productsDetail:"https://localhost:7129/api/ProductsDetail",
-    productstoragelocation:"https://localhost:7129/api/ProductStorageLocation",
+    // productstoragelocation:"https://localhost:7129/api/ProductStorageLocation",
     login:"https://localhost:7129/api/Login",
     loginauth:"https://localhost:7129/api/Login/login",
     leavetable:"https://localhost:7129/api/LeaveTable",
     otpapi:"https://localhost:7129/api/Otp",
-    employeeaccessories:"https://localhost:7129/api/Employeeaccessory",
+    // employeeaccessories:"https://localhost:7129/api/Employeeaccessory",
     employeeleavehistory:"https://localhost:7129/api/EmployeeLeaveHistory",
     leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail",
-    productsrepairhistory:"https://localhost:7129/api/ProductsRepairHistory"
+    productsrepairhistory:"https://localhost:7129/api/ProductsRepairHistory",
+    salary:"https://localhost:7129/api/Salary"
   };
