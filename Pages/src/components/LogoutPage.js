@@ -6,8 +6,9 @@ export default function LogoutPage() {
     const [open, setOpen] = useState(false);
   return (
     <>
-    <Button type="link" onClick={() => setOpen(true)}>
-       <FontAwesomeIcon className='text-blue-500' icon={faRightFromBracket}/>
+    <Button type="default" className='bg-blue-500 text-white w-full' onClick={() => setOpen(true)}>
+       {/* <FontAwesomeIcon className='text-blue-500' icon={faRightFromBracket}/> */}
+       signout
     </Button>
     <Modal
       title="Logout"

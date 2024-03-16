@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -36,4 +41,8 @@ code {
 
 .ant-modal-body::-webkit-scrollbar-track {
   background-color: lightgrey; /* Set the color of the track */
+}
+
+.animation-effect{
+  transition: all ease 0.9s;
 }
