@@ -208,7 +208,7 @@ const [EmployeeId,setEmployeeId] = useState(null);
       src={loginBgImg}
     ></img>
   </div> 
-  : UserLogin === true ? <Accessories Id ={EmployeeId}/> : <User Id ={EmployeeId}/>
+  : UserLogin === true ? <Accessories Id ={EmployeeId} Employees ={employee}/> : <User Id ={EmployeeId}/>
   );
 };
 export default Loginpage;

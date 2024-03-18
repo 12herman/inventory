@@ -44,7 +44,7 @@ const FinishForm =({EmployeeData,RoleData,TeamData,CAddData,PAddData,AccountData
 //   }, []);
 
   return (
-    <div className=" flex justify-center items-center h-[59.9vh]">
+    <div className="w-full h-[80vh] overflow-hidden md:h-[52.7vh] flex justify-center items-center ">
     {loadings === true 
           ?  <Spin indicator={<LoadingOutlined style={{ fontSize: 24}} spin/> }/> 
           : <Result

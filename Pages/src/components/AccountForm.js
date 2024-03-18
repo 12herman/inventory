@@ -99,12 +99,14 @@ const AccountForm = forwardRef((props, ref,) => {
 
  
   return (
-    <section className="h-[60vh]">
+    <section className="mt-[85px] pl-12 md:pl-0">
       {/* <div className=" mt-2 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faLandmark} />
       </div> */}
-
-      <Form layout="vertical" form={form} className=" mt-5 px-5">
+      <h2 className="px-5 mt-[62px] text-lg">Bank Details</h2>
+      
+      <Form layout="vertical" form={form} className=" mt-3 px-5">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-x-5">
         {/* bankname */}
         <Form.Item label="Bank Name" style={{ marginBottom: 0, marginTop: 10 }}>
           <Input
@@ -172,6 +174,42 @@ const AccountForm = forwardRef((props, ref,) => {
             onChange={accountInputOnchange}
           />
         </Form.Item>
+
+         {/* Ifsc */}
+         <Form.Item className="invisible" label="IFSC" style={{ marginBottom: 10, marginTop: 10 }}>
+          <Input
+            // style={{ float: "right", width: widthSize }}
+            placeholder="ifsc"
+            name="ifsc"
+            value={FormAccF.ifsc}
+            onChange={accountInputOnchange}
+          />
+        </Form.Item>
+         {/* Ifsc */}
+         <Form.Item className="invisible" label="IFSC" style={{ marginBottom: 10, marginTop: 10 }}>
+          <Input
+            // style={{ float: "right", width: widthSize }}
+            placeholder="ifsc"
+            name="ifsc"
+            value={FormAccF.ifsc}
+            onChange={accountInputOnchange}
+          />
+        </Form.Item>
+         {/* Ifsc */}
+         <Form.Item className="invisible pt-[52px]" label="IFSC" style={{ marginBottom: 10, marginTop: 10 }}>
+          <Input
+            // style={{ float: "right", width: widthSize }}
+            placeholder="ifsc"
+            name="ifsc"
+            value={FormAccF.ifsc}
+            onChange={accountInputOnchange}
+          />
+        </Form.Item>
+     
+        
+        
+       
+        </div>
       </Form>
     </section>
   );

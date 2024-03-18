@@ -104,7 +104,7 @@ const Holiday = ({ Id }) => {
   
  
   return employeeleavehistory.length > 0 ? (
-    <Calendar  cellRender={cellRender}/>
+    <Calendar cellRender={cellRender}/>
   ) : (
     // <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
     <Calendar cellRender={cellRender}/>

@@ -133,16 +133,16 @@ const AddressForm = forwardRef((props, ref) => {
   });
 
   return (
-    <section className="h-[59.9vh]">
+    <section >
       {/* <div className="mt-2 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faLocationDot} />
       </div> */}
       {/* permanet  Address */}
-      <Form form={form} className="mt-5" layout="vertical">
+      <Form form={form} className="mt-[42px]" layout="vertical">
        
-        <Row>
-          <Col span={12}>
-            <h2 className=" px-7 mt-4 text-lg">Permanet Address :</h2>
+        <ul className="grid grid-cols-1 md:grid-cols-2 pl-12 md:pl-0">
+        <li>
+            <h2 className=" px-7 mt-10 text-lg">Permanet Address :</h2>
             <Form.Item
               data-type="1"
               className="px-7"
@@ -240,12 +240,12 @@ const AddressForm = forwardRef((props, ref) => {
                 defaultValue={FormCAdd.postalCode}
               />
             </Form.Item>
-          </Col>
+            </li>
           
           
-          <Col span={12}>
+         <li>
             {/* current Address */}
-            <h2 className="mt-4 px-7 text-lg">Current Address :</h2>
+            <h2 className="mt-10 px-7 text-lg">Current Address :</h2>
             <Form.Item
               data-type="2"
               className="px-7"
@@ -348,8 +348,8 @@ const AddressForm = forwardRef((props, ref) => {
                 defaultValue={FormPAdd.postalCode}
               />
             </Form.Item>
-          </Col>
-        </Row>
+            </li>
+            </ul>
          {/* check-box */}
          <div className="px-7  mt-2">
           <Checkbox

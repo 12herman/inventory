@@ -117,7 +117,7 @@ const Settings = ({user}) => {
         {
           settingList.map((settings, i) => {
             return (
-                <Col key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer block w-full py-4 hover:text-blue-500 z-50 '> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></Col>
+                <Col key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer block w-full py-4 text-gray-400 hover:text-blue-500 z-50 '> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></Col>
             )
           })
         }

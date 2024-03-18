@@ -95,13 +95,12 @@ const TeamForm = forwardRef((props, ref) => {
   });
 
   return (
-    <section className="h-[59.9vh] relative">
-      <div className="mt-2 flex justify-center items-center">
+    <section className=" relative">
+      {/* <div className="mt-2 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faPeopleGroup} />
-      </div>
-
-      <Form className=" mt-5 " layout="vertical">
-        <span className="flex mb-2 justify-center items-center">
+      </div> */}
+      <Form className=" mt-[68px] " layout="vertical">
+        <span className="flex mb-0 justify-center items-center">
         <h2 className="px-7 text-2xl"><Tag color="blue">{EmployeeName}</Tag></h2>
         {/* <Form.Item
           style={{ marginBottom: 0, marginTop: 10 }}
@@ -114,8 +113,8 @@ const TeamForm = forwardRef((props, ref) => {
         {/* <Form.Item style={{ marginBottom: 0, marginTop: 10, }} className='px-7' label="All employee List">
           <Switch className={`mx-5 w-[${filedWidth}]`} size="small" checked={EnableEmp} style={{ background: `${EnableEmp === false ? "rgba(0, 0, 0, 0.45)" : "#4096ff"}` }} trackBgDisabled onClick={enableAllemp} onChange={enableAllemp} />
         </Form.Item> */}
-        <Row>
-        <Col span={12}>
+       <ul className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 pl-12 md:pl-0 ">
+       <li>
         <Form.Item
           name="leader"
           style={{ marginBottom: 0, marginTop: 10 }}
@@ -133,9 +132,9 @@ const TeamForm = forwardRef((props, ref) => {
             defaultValue={leadername}
           />
         </Form.Item>
-        </Col>
+        </li>
 
-        <Col span={12}>
+       <li>
         <Form.Item
           name="hr"
           style={{ marginBottom: 0, marginTop: 15 }}
@@ -152,8 +151,154 @@ const TeamForm = forwardRef((props, ref) => {
             defaultValue={hrname}
           />
         </Form.Item>
-        </Col>
-        </Row>
+        </li>
+       
+        <li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li>
+        <li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li><li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li>
+        <li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li><li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li><li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li>
+        <li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li>
+        <li className="invisible">
+        <Form.Item
+          name="hr"
+          style={{ marginBottom: 0, marginTop: 15 }}
+          className="px-7"
+          label="HR Manager"
+        >
+          <Select
+            name="hrManagerId"
+            onChange={hridOnchange}
+            showSearch
+            placeholder="select HR"
+            // style={{ float: "right", width: filedWidth }}
+            options={EnableEmp === false ? hrOption : empOptions}
+            defaultValue={hrname}
+          />
+        </Form.Item>
+        </li>
+       
+       
+      
+        
+        </ul>
         
       </Form>
       

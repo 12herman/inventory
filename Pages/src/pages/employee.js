@@ -34,7 +34,10 @@ import {
   faLocationDot,
   faLandmark,
   faCircleCheck,
-  faPeopleGroup,faPlus, faDollar, faUser
+  faPeopleGroup,
+  faPlus,
+  faDollar,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { LoadingOutlined } from "@ant-design/icons";
 import { getDepartment } from "../redux/slices/departmentSlice";
@@ -67,10 +70,21 @@ import "../css/employee.css";
 import bcrpt from "bcryptjs";
 import { GetLogin, PostLogin, PutLogin } from "../redux/slices/loginSlice";
 import { Getleavetable } from "../redux/slices/leaveTableSlice";
-import { Getemployeeleave, Postemployeeleave, Putemployeeleave } from "../redux/slices/employeeLeaveSlice";
-import { getProductsDetail, putProductsDetail } from "../redux/slices/productsDetailSlice";
-import { Getemployeeleavehistory, Putemployeeleavehistory } from "../redux/slices/EmployeeLeaveHistorySlice";
-import { getSalary,postSalary } from "../redux/slices/salarySlice";
+import {
+  Getemployeeleave,
+  Postemployeeleave,
+  Putemployeeleave,
+} from "../redux/slices/employeeLeaveSlice";
+import {
+  getProductsDetail,
+  putProductsDetail,
+} from "../redux/slices/productsDetailSlice";
+import {
+  Getemployeeleavehistory,
+  Putemployeeleavehistory,
+} from "../redux/slices/EmployeeLeaveHistorySlice";
+import { getSalary, postSalary } from "../redux/slices/salarySlice";
+import { useMediaQuery } from "react-responsive";
 const dateFormat = "YYYY-MM-DD";
 
 const formatter = (value) => <CountUp end={value} />;
@@ -78,10 +92,7 @@ const headingValue = "Employee";
 const currentDate = new Date();
 const formattedDate = currentDate.toISOString().slice(0, 19);
 
-const Employee = ({ officeData,LoginUser }) => {
-
- 
-
+const Employee = ({ officeData, LoginUser }) => {
   const [form] = Form.useForm();
 
   const [DisplayLogin, setDisplayLogin] = useState({
@@ -238,7 +249,7 @@ const Employee = ({ officeData,LoginUser }) => {
                 case "BIM":
                   color = "yellow";
                   break;
-                  case "Admin":
+                case "Admin":
                   color = "magenta";
                   break;
                 default:
@@ -247,7 +258,6 @@ const Employee = ({ officeData,LoginUser }) => {
               }
 
               return (
-               
                 <Tag color={color} key={tag}>
                   {tag}
                 </Tag>
@@ -269,7 +279,11 @@ const Employee = ({ officeData,LoginUser }) => {
       key: "action",
       render: (_, record) => (
         <div className="flex gap-x-2">
- <Button className="text-black" type="link" onClick={() => EditPencilIcon(record)}>
+          <Button
+            className="text-black"
+            type="link"
+            onClick={() => EditPencilIcon(record)}
+          >
             <FontAwesomeIcon icon={faPen} />
           </Button>
 
@@ -282,12 +296,10 @@ const Employee = ({ officeData,LoginUser }) => {
             }}
             onConfirm={() => DeleteIcon(record)}
           >
-            <Button type="link" className="text-[#fd5353]" >
+            <Button type="link" className="text-[#fd5353]">
               <FontAwesomeIcon icon={faTrash} />
             </Button>
           </Popconfirm>
-
-         
         </div>
       ),
     },
@@ -305,10 +317,11 @@ const Employee = ({ officeData,LoginUser }) => {
   const { account } = useSelector((state) => state.account);
   const { login } = useSelector((state) => state.login);
   const { leavetable } = useSelector((state) => state.leavetable);
-  const {productsDetail} = useSelector(state => state.productsDetail);
-  const {employeeleave} = useSelector(state => state.employeeleave);
-  const {employeeleavehistory} = useSelector(state => state.employeeleavehistory);
-
+  const { productsDetail } = useSelector((state) => state.productsDetail);
+  const { employeeleave } = useSelector((state) => state.employeeleave);
+  const { employeeleavehistory } = useSelector(
+    (state) => state.employeeleavehistory
+  );
 
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);
@@ -327,12 +340,16 @@ const Employee = ({ officeData,LoginUser }) => {
         (off) => off.officeLocationId.officename === officeNames[0]
       );
       console.log(filterOneOffice);
-      const counts = filterOneOffice.filter((data) => data.isDeleted === false).length;
-      
+      const counts = filterOneOffice.filter(
+        (data) => data.isDeleted === false
+      ).length;
+
       setEmpCounts(counts);
       setTableData(filterOneOffice);
     } else {
-      const filterWithoutDeletedData = empData.filter(data => data.isDeleted === false);
+      const filterWithoutDeletedData = empData.filter(
+        (data) => data.isDeleted === false
+      );
       setEmpCounts(filterWithoutDeletedData.length);
       setTableData(empData);
     }
@@ -367,7 +384,7 @@ const Employee = ({ officeData,LoginUser }) => {
             lastname: el.lastName || "",
             age: calculateAge(el.dateOfBirth),
             position: [
-              el.departmentId && el.departmentId.departmentName, 
+              el.departmentId && el.departmentId.departmentName,
               roleName,
             ],
             mobilenumber: el.mobileNumber || "",
@@ -391,6 +408,7 @@ const Employee = ({ officeData,LoginUser }) => {
       icon: null,
       content: <div>Are you sure to exit this process?</div>,
       onCancel: () => {},
+      centered: true,
       onOk: () => setModelOpen(false),
       okButtonProps: { type: "default", danger: true }, // Prevent the default Modal onCancel behavior
       width: 300, // Adjust the width as needed
@@ -398,9 +416,8 @@ const Employee = ({ officeData,LoginUser }) => {
   };
 
   //Salary API
-  const { salary } = useSelector(state => state.salary);
+  const { salary } = useSelector((state) => state.salary);
 
- 
   const [employeeSalary, setEmployeeSalary] = useState({
     id: null,
     employeeId: null,
@@ -414,15 +431,14 @@ const Employee = ({ officeData,LoginUser }) => {
     createdBy: "",
     modifiedDate: "",
     modifiedBy: "",
-    isDeleted: false
+    isDeleted: false,
   });
   useEffect(() => {
     dispatch(getSalary());
-
   }, []);
 
   const clearFields = () => {
-    setEmployeeSalary(pre => ({
+    setEmployeeSalary((pre) => ({
       ...pre,
       id: "",
       employeeId: "",
@@ -434,38 +450,39 @@ const Employee = ({ officeData,LoginUser }) => {
     }));
   };
 
-
-//Salary Modal
+  //Salary Modal
   const [SalaryModal, setSalaryModal] = useState(false);
   const SalaryModalOpen = () => {
     setSalaryModal(true);
     clearFields();
   };
-  const SalaryModalClose = () => { setSalaryModal(false) };
-  
+  const SalaryModalClose = () => {
+    setSalaryModal(false);
+  };
+
   const handleSelectedRows = async (selectedRowKeys) => {
     // Check if selectedRowKeys is not empty
     if (!selectedRowKeys.length) {
       console.log("No rows selected.");
       return;
     }
-  
+
     // Dynamically loop through each selected key
     for (let key of selectedRowKeys) {
       // Perform your operation with the current key
       console.log("Current key:", key); // Example operation
-  
+
       // Example: If you need to fetch data for each key
       // const responseData = await fetchDataForKey(key);
       // console.log(responseData);
-  
+
       // Insert more operations as needed
     }
-  
+
     // After looping through all keys
     console.log("Finished processing all selected rows.");
   };
-//Post Salary
+  //Post Salary
   const PostSalary = async () => {
     if (
       !employeeSalary.grossSalary ||
@@ -474,7 +491,8 @@ const Employee = ({ officeData,LoginUser }) => {
     ) {
       message.error("Please Fill all the Fields!");
       return;
-    } for (const employeeId of selectedRowKeys) {
+    }
+    for (const employeeId of selectedRowKeys) {
       const addSalary = {
         employeeId: employeeId,
         // ctc:employeeSalary.ctc,
@@ -486,7 +504,7 @@ const Employee = ({ officeData,LoginUser }) => {
         // createdBy:employeeSalary.createdBy,
         // modifiedDate:employeeSalary.modifiedDate,
         // modifiedBy:employeeSalary.modifiedBy,
-        isDeleted: employeeSalary.isDeleted
+        isDeleted: employeeSalary.isDeleted,
       };
       console.log(addSalary);
       await dispatch(postSalary(addSalary));
@@ -496,7 +514,6 @@ const Employee = ({ officeData,LoginUser }) => {
       setSelectedRowKeys([]);
     }
   };
-
 
   //new emp id
   const [newempid, setNewempId] = useState("");
@@ -518,11 +535,6 @@ const Employee = ({ officeData,LoginUser }) => {
     department: false,
     role: false,
   });
-
-
-
-
-
 
   // Modal
   // post methods
@@ -580,221 +592,251 @@ const Employee = ({ officeData,LoginUser }) => {
     // setNewempId(3);
   };
   const currentDate = new Date();
-const formattedDate = currentDate.toISOString(); // "2024-03-12T11:14:02.946Z"
-const TodayDate = currentDate.toISOString().substring(0, 10);
+  const formattedDate = currentDate.toISOString(); // "2024-03-12T11:14:02.946Z"
+  const TodayDate = currentDate.toISOString().substring(0, 10);
   // Table Delete Icon
   const DeleteIcon = async (data) => {
     // await dispatch(deleteEmployee(data.key));
     //filter
-    const employeeData = employee.filter(emp => emp.id === data.key );
-    const cAddress = address.filter(cadd => cadd.employeeId === data.key && cadd.type === 1);
-    const pAddress = address.filter(padd => padd.employeeId === data.key && padd.type === 2);
-    const ProductsFilter = productsDetail.filter(pro => pro.employeeId === data.key && pro.isDeleted === false);
-    const empLeave = employeeleave.filter(leave => leave.employeeId === data.key && leave.isdeleted === false);
-    const empLeaveHistory = employeeleavehistory.filter(leaveHis => leaveHis.employeeId === data.key && leaveHis.isDeleted === false);
-     const leaderEmployeeFilter = leaderemployee.filter(leaderEmployee => leaderEmployee.employeeId === data.key && leaderEmployee.isdeleted === false);
-    const roleFilter = roledetail.filter(role => role.employeeId === data.key && role.isdeleted === false);
-    const loginFilter = login.filter(login => login.employeeId === data.key && login.isDeleted === false);
-    const accountFilter = account.filter(acc => acc.employeeId === data.key && acc.isDeleted ===false);
+    const employeeData = employee.filter((emp) => emp.id === data.key);
+    const cAddress = address.filter(
+      (cadd) => cadd.employeeId === data.key && cadd.type === 1
+    );
+    const pAddress = address.filter(
+      (padd) => padd.employeeId === data.key && padd.type === 2
+    );
+    const ProductsFilter = productsDetail.filter(
+      (pro) => pro.employeeId === data.key && pro.isDeleted === false
+    );
+    const empLeave = employeeleave.filter(
+      (leave) => leave.employeeId === data.key && leave.isdeleted === false
+    );
+    const empLeaveHistory = employeeleavehistory.filter(
+      (leaveHis) =>
+        leaveHis.employeeId === data.key && leaveHis.isDeleted === false
+    );
+    const leaderEmployeeFilter = leaderemployee.filter(
+      (leaderEmployee) =>
+        leaderEmployee.employeeId === data.key &&
+        leaderEmployee.isdeleted === false
+    );
+    const roleFilter = roledetail.filter(
+      (role) => role.employeeId === data.key && role.isdeleted === false
+    );
+    const loginFilter = login.filter(
+      (login) => login.employeeId === data.key && login.isDeleted === false
+    );
+    const accountFilter = account.filter(
+      (acc) => acc.employeeId === data.key && acc.isDeleted === false
+    );
 
-    const EmpData = employeeData.map(emp => ({
-  "id": emp.id,
-  "firstName": emp.firstName,
-  "lastName": emp.lastName,
-  "gender": emp.gender,
-  "personalEmail": emp.personalEmail,
-  "officeEmail": emp.officeEmail,
-  "mobileNumber": emp.mobileNumber,
-  "dateOfBirth": emp.dateOfBirth,
-  "dateOfJoin": emp.dateOfJoin,
-  "bloodGroup": emp.bloodGroup,
-  "alternateContactNo": emp.alternateContactNo,
-  "contactPersonName": emp.contactPersonName,
-  "relationship": emp.relationship,
-  "maritalStatus": emp.maritalStatus,
-  "officeLocationId": emp.officeLocationId ? emp.officeLocationId.id : null,
-  "departmentId": emp.departmentId ? emp.departmentId.id :null,
-  "lastWorkDate": TodayDate,
-  "isDeleted": true,
-  "createdDate": emp.createdDate,
-  "createdBy": emp.createdDate,
-  "modifiedDate": formattedDate,
-  "modifiedBy": LoginUser
+    const EmpData = employeeData.map((emp) => ({
+      id: emp.id,
+      firstName: emp.firstName,
+      lastName: emp.lastName,
+      gender: emp.gender,
+      personalEmail: emp.personalEmail,
+      officeEmail: emp.officeEmail,
+      mobileNumber: emp.mobileNumber,
+      dateOfBirth: emp.dateOfBirth,
+      dateOfJoin: emp.dateOfJoin,
+      bloodGroup: emp.bloodGroup,
+      alternateContactNo: emp.alternateContactNo,
+      contactPersonName: emp.contactPersonName,
+      relationship: emp.relationship,
+      maritalStatus: emp.maritalStatus,
+      officeLocationId: emp.officeLocationId ? emp.officeLocationId.id : null,
+      departmentId: emp.departmentId ? emp.departmentId.id : null,
+      lastWorkDate: TodayDate,
+      isDeleted: true,
+      createdDate: emp.createdDate,
+      createdBy: emp.createdDate,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
     }));
 
-    const CAddressData = cAddress.map(data => ({
-      "id": data.id,
-      "employeeId": data.employeeId,
-      "address1": data.address1,
-      "city": data.city,
-      "state": data.state,
-      "country": data.country,
-      "postalCode": data.postalCode,
-      "type": data.type,
-      "createdDate": data.createdDate,
-      "createdBy": data.createdBy,
-      "modifiedDate": formattedDate,
-      "modifiedBy": LoginUser,
-      "isdeleted": true
+    const CAddressData = cAddress.map((data) => ({
+      id: data.id,
+      employeeId: data.employeeId,
+      address1: data.address1,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      postalCode: data.postalCode,
+      type: data.type,
+      createdDate: data.createdDate,
+      createdBy: data.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      isdeleted: true,
     }));
 
-    const PAddressData = pAddress.map(data => ({
-      "id": data.id,
-      "employeeId": data.employeeId,
-      "address1": data.address1,
-      "city": data.city,
-      "state": data.state,
-      "country": data.country,
-      "postalCode": data.postalCode,
-      "type": data.type,
-      "createdDate": data.createdDate,
-      "createdBy": data.createdBy,
-      "modifiedDate": formattedDate,
-      "modifiedBy": LoginUser,
-      "isdeleted": true
+    const PAddressData = pAddress.map((data) => ({
+      id: data.id,
+      employeeId: data.employeeId,
+      address1: data.address1,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      postalCode: data.postalCode,
+      type: data.type,
+      createdDate: data.createdDate,
+      createdBy: data.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      isdeleted: true,
     }));
-    
-  const ProductData = ProductsFilter.map(pro =>({
-      "id":  pro.id,
-      "accessoriesId": pro.accessoriesId,
-      "brandId":  pro.brandId,
-      "productName":  pro.productName,
-      "modelNumber":  pro.modelNumber,
-      "serialNumber":  pro.serialNumber,
-      "createdDate":  pro.createdDate,
-      "createdBy":  pro.createdBy,
-      "modifiedDate":formattedDate,
-      "modifiedBy": LoginUser,
-      "isDeleted": false,
-      "isRepair":  pro.isRepair,
-      "isAssigned": false,
-      "comments":  pro.comments,
-      "officeLocationId":  pro.officeLocationId,
-      "isStorage":  pro.isStorage,
-      "employeeId": null
-  }));
 
-  const LeaveData = empLeave.map(leave => ({
-      "id": leave.id,
-      "employeeId": leave.employeeId,
-      "sickLeave": leave.sickLeave,
-      "casualLeave": leave.casualLeave,
-      "total": leave.total,
-      "leaveAvailed": leave.leaveAvailed,
-      "createdDate": leave.createdDate,
-      "createdBy": leave.createdBy,
-      "modifiedDate": formattedDate,
-      "modifiedBy": LoginUser,
-      "isDeleted": true
-  }));
+    const ProductData = ProductsFilter.map((pro) => ({
+      id: pro.id,
+      accessoriesId: pro.accessoriesId,
+      brandId: pro.brandId,
+      productName: pro.productName,
+      modelNumber: pro.modelNumber,
+      serialNumber: pro.serialNumber,
+      createdDate: pro.createdDate,
+      createdBy: pro.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      isDeleted: false,
+      isRepair: pro.isRepair,
+      isAssigned: false,
+      comments: pro.comments,
+      officeLocationId: pro.officeLocationId,
+      isStorage: pro.isStorage,
+      employeeId: null,
+    }));
 
-  const LeaveHistoryData = empLeaveHistory.map(leave => ({
-    "id": leave.id,
-    "employeeId": leave.employeeId,
-    "leaveType": leave.leaveType,
-    "fromdate": leave.fromdate,
-    "todate": leave.todate,
-    "numberOfDays": leave.numberOfDays,
-    "comments": leave.comments,
-    "hrIsApproved": leave.hrIsApproved,
-    "hrIsRejected": leave.hrIsApproved,
-    "rejectedComments": leave.rejectedComments,
-    "isDeleted": true,
-    "createdDate": leave.createdDate,
-    "createdBy": leave.createdBy,
-    "modifiedDate": formattedDate,
-    "modifiedBy": LoginUser,
-    "leaderIsApproved": leave.leaderIsApproved,
-    "leaderIsRejected": leave.leaderIsRejected
-  }));
+    const LeaveData = empLeave.map((leave) => ({
+      id: leave.id,
+      employeeId: leave.employeeId,
+      sickLeave: leave.sickLeave,
+      casualLeave: leave.casualLeave,
+      total: leave.total,
+      leaveAvailed: leave.leaveAvailed,
+      createdDate: leave.createdDate,
+      createdBy: leave.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      isDeleted: true,
+    }));
 
- 
-  const LeaderEmployeeData = leaderEmployeeFilter.map(le => ({
-      "id": le.id,
-      "employeeId": le.employeeId,
-      "leaderId": le.leaderId,
-      "hrManagerId": le.hrManagerId,
-      "createdDate": le.createdDate,
-      "createdBy": le.createdBy,
-      "modifiedDate": formattedDate,
-      "modifiedBy": LoginUser,
-      "isDeleted": true
-  }));
+    const LeaveHistoryData = empLeaveHistory.map((leave) => ({
+      id: leave.id,
+      employeeId: leave.employeeId,
+      leaveType: leave.leaveType,
+      fromdate: leave.fromdate,
+      todate: leave.todate,
+      numberOfDays: leave.numberOfDays,
+      comments: leave.comments,
+      hrIsApproved: leave.hrIsApproved,
+      hrIsRejected: leave.hrIsApproved,
+      rejectedComments: leave.rejectedComments,
+      isDeleted: true,
+      createdDate: leave.createdDate,
+      createdBy: leave.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      leaderIsApproved: leave.leaderIsApproved,
+      leaderIsRejected: leave.leaderIsRejected,
+    }));
 
-  const roleDetailData  = roleFilter.map(role => ({
-    "id": role.id,
-  "roleId": role.roleId,
-  "employeeId": role.employeeId,
-  "createdDate": role.createdDate,
-  "createdBy": role.createdBy,
-  "modifiedDate": formattedDate,
-  "modifiedBy": LoginUser,
-  "isDeleted": true
-  }));
- 
-const loginData = loginFilter.map(login => ({
-  "id": login.id,
-  "employeeId": login.employeeId,
-  "userName": login.userName,
-  "password": login.password,
-  "isDeleted": true,
-  "createdDate": login.createdDate,
-  "createdBy": login.createdBy,
-  "modifiedDate": formattedDate,
-  "modifiedBy": LoginUser,
-  "otp": login.otp
-}));
+    const LeaderEmployeeData = leaderEmployeeFilter.map((le) => ({
+      id: le.id,
+      employeeId: le.employeeId,
+      leaderId: le.leaderId,
+      hrManagerId: le.hrManagerId,
+      createdDate: le.createdDate,
+      createdBy: le.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      isDeleted: true,
+    }));
 
-const accountData = accountFilter.map( acc => ({
-  "id": acc.accountId,
-  "employeeId": acc.employeeId,
-  "bankName": acc.bankName,
-  "branchName": acc.branchName,
-  "bankLocation": acc.bankLocation,
-  "accountNumber": acc.accountNumber,
-  "ifsc": acc.ifsc,
-  "isdeleted": true,
-  "createdDate": acc.createdDate,
-  "createdBy": acc.createdBy,
-  "modifiedDate": formattedDate,
-  "modifiedBy": LoginUser
-}));
+    const roleDetailData = roleFilter.map((role) => ({
+      id: role.id,
+      roleId: role.roleId,
+      employeeId: role.employeeId,
+      createdDate: role.createdDate,
+      createdBy: role.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      isDeleted: true,
+    }));
 
+    const loginData = loginFilter.map((login) => ({
+      id: login.id,
+      employeeId: login.employeeId,
+      userName: login.userName,
+      password: login.password,
+      isDeleted: true,
+      createdDate: login.createdDate,
+      createdBy: login.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+      otp: login.otp,
+    }));
+
+    const accountData = accountFilter.map((acc) => ({
+      id: acc.accountId,
+      employeeId: acc.employeeId,
+      bankName: acc.bankName,
+      branchName: acc.branchName,
+      bankLocation: acc.bankLocation,
+      accountNumber: acc.accountNumber,
+      ifsc: acc.ifsc,
+      isdeleted: true,
+      createdDate: acc.createdDate,
+      createdBy: acc.createdBy,
+      modifiedDate: formattedDate,
+      modifiedBy: LoginUser,
+    }));
 
     await dispatch(putEmployees(...EmpData));
 
-    if(CAddressData.length > 0)  await CAddressData.map(data => dispatch(putAddress(data))) ;
-   
-    if(PAddressData.length > 0) await PAddressData.map(data => dispatch(putAddress(data)));
-    
-    if(ProductData.length > 0) await ProductData.map(data => dispatch(putProductsDetail(data)));
-    
-    if(LeaveData.length > 0) await LeaveData.map(leave => dispatch(Putemployeeleave(leave)));
+    if (CAddressData.length > 0)
+      await CAddressData.map((data) => dispatch(putAddress(data)));
 
-    if(LeaveHistoryData.length > 0) await LeaveHistoryData.map(leave => dispatch(Putemployeeleavehistory(leave)));  
+    if (PAddressData.length > 0)
+      await PAddressData.map((data) => dispatch(putAddress(data)));
 
-    if(LeaderEmployeeData.length > 0) await LeaderEmployeeData.map(le => dispatch(putleaderemployee(le)));
-   
-    if(roleDetailData.length > 0 ) await roleDetailData.map(role => dispatch(putRoleDetail(role)));
+    if (ProductData.length > 0)
+      await ProductData.map((data) => dispatch(putProductsDetail(data)));
 
-    if(loginData.length > 0) await loginData.map(login => dispatch(PutLogin(login)));
+    if (LeaveData.length > 0)
+      await LeaveData.map((leave) => dispatch(Putemployeeleave(leave)));
 
-    if(accountData.length > 0) await accountData.map(acc => dispatch(putaccount(acc)));
+    if (LeaveHistoryData.length > 0)
+      await LeaveHistoryData.map((leave) =>
+        dispatch(Putemployeeleavehistory(leave))
+      );
+
+    if (LeaderEmployeeData.length > 0)
+      await LeaderEmployeeData.map((le) => dispatch(putleaderemployee(le)));
+
+    if (roleDetailData.length > 0)
+      await roleDetailData.map((role) => dispatch(putRoleDetail(role)));
+
+    if (loginData.length > 0)
+      await loginData.map((login) => dispatch(PutLogin(login)));
+
+    if (accountData.length > 0)
+      await accountData.map((acc) => dispatch(putaccount(acc)));
 
     await setFullComponentLoading(!FullComponentLoading);
 
-   await dispatch(getEmployees());
-   await dispatch(getrole());
-   await dispatch(getDepartment());
-   await dispatch(getleaderemployee());
-   await dispatch(getRoleDetail());
-   await dispatch(getAddress());
-   await dispatch(getaccount());
-   await dispatch(GetLogin());
-   await dispatch(Getleavetable());
-   await dispatch(getProductsDetail());
-   await dispatch(Getemployeeleave());
-   await dispatch(Getemployeeleavehistory());
+    await dispatch(getEmployees());
+    await dispatch(getrole());
+    await dispatch(getDepartment());
+    await dispatch(getleaderemployee());
+    await dispatch(getRoleDetail());
+    await dispatch(getAddress());
+    await dispatch(getaccount());
+    await dispatch(GetLogin());
+    await dispatch(Getleavetable());
+    await dispatch(getProductsDetail());
+    await dispatch(Getemployeeleave());
+    await dispatch(Getemployeeleavehistory());
   };
 
   // Table Edit Icon
@@ -808,11 +850,11 @@ const accountData = accountFilter.map( acc => ({
     await setEditPencilState(true);
 
     //employee
-    const EmpFilter = await employee.filter((emp) => emp.id ===  data.key);
+    const EmpFilter = await employee.filter((emp) => emp.id === data.key);
     const EData = (await EmpFilter) && EmpFilter[0] ? EmpFilter[0] : [];
     //role
     const RoleDetailsFilter = await roledetail.filter(
-      (roleDetails) => roleDetails.employeeId ===  data.key
+      (roleDetails) => roleDetails.employeeId === data.key
     );
     const RoleDetailsData =
       (await RoleDetailsFilter.length) === 0 ? null : RoleDetailsFilter[0];
@@ -821,27 +863,31 @@ const accountData = accountFilter.map( acc => ({
       (leader) => leader.employeeId === data.key
     );
     const TeamData = (await TeamFilter.length) === 0 ? null : TeamFilter[0];
-    
-    // address
-    const AddressFilter = await address.filter((add) => add.employeeId === data.key);
-    
-    const AddressData = await AddressFilter.length > 0 ?  AddressFilter : null;
-    
-    const PermanetFilter = AddressData.length > 0
-        ?  await AddressData.filter((per) => per.type === 2)
-        : null;
-    const PermanetData =await PermanetFilter.length > 0 ?  PermanetFilter[0] :null;
 
-    const CurrentFilter =(await AddressData) === null
+    // address
+    const AddressFilter = await address.filter(
+      (add) => add.employeeId === data.key
+    );
+
+    const AddressData = (await AddressFilter.length) > 0 ? AddressFilter : null;
+
+    const PermanetFilter =
+      AddressData.length > 0
+        ? await AddressData.filter((per) => per.type === 2)
+        : null;
+    const PermanetData =
+      (await PermanetFilter.length) > 0 ? PermanetFilter[0] : null;
+
+    const CurrentFilter =
+      (await AddressData) === null
         ? null
         : await AddressData.filter((per) => per.type === 1);
     const CurrentData =
       (await CurrentFilter) === null ? null : CurrentFilter[0];
 
-
     //account
     const AccountFilter = await account.filter(
-      (acc) => acc.employeeId ===  data.key
+      (acc) => acc.employeeId === data.key
     );
     const AccountData =
       (await AccountFilter.length) === 0 ? null : AccountFilter[0];
@@ -894,7 +940,7 @@ const accountData = accountFilter.map( acc => ({
       isDeleted: false,
       Role: RoleDetailsData === null ? null : RoleDetailsData.roleId,
     });
-   
+
     //role details
     setRoleValue({
       id: RoleDetailsData === null ? null : RoleDetailsData.id,
@@ -920,7 +966,6 @@ const accountData = accountFilter.map( acc => ({
       modifiedDate: formattedDate,
       modifiedBy: TeamData === null ? null : TeamData.modifiedBy,
     });
-
 
     //address
     await setPermanetFAdd({
@@ -969,8 +1014,6 @@ const accountData = accountFilter.map( acc => ({
       modifiedDate: formattedDate,
       modifiedBy: AccountData === null ? null : AccountData.modifiedBy,
     });
-  
- 
   };
 
   // Employee Inputs
@@ -1407,10 +1450,18 @@ const accountData = accountFilter.map( acc => ({
         );
         // address creation
         await dispatch(
-          postAddress({ employeeId: employeeDatas.payload.id, ...CureentFAdd,type:1 })
+          postAddress({
+            employeeId: employeeDatas.payload.id,
+            ...CureentFAdd,
+            type: 1,
+          })
         );
         await dispatch(
-          postAddress({ employeeId: employeeDatas.payload.id, ...PermanetFAdd,type:2 })
+          postAddress({
+            employeeId: employeeDatas.payload.id,
+            ...PermanetFAdd,
+            type: 2,
+          })
         );
         //account creation
         await dispatch(
@@ -1420,7 +1471,6 @@ const accountData = accountFilter.map( acc => ({
         await dispatch(PostLogin(LoginDatas));
         //leave data (automatically created)
         await dispatch(Postemployeeleave(...LeaveData));
-
 
         await dispatch(getRoleDetail());
         await dispatch(getleaderemployee());
@@ -1439,7 +1489,7 @@ const accountData = accountFilter.map( acc => ({
 
   //put employee
   const [FullComponentLoading, setFullComponentLoading] = useState(false);
-  
+
   const PutEmployee = async () => {
     await dispatch(putEmployees(EmployeeInput)); //employee
     await dispatch(putRoleDetail(RoleValue)); //role
@@ -1484,22 +1534,20 @@ const accountData = accountFilter.map( acc => ({
       done: "wait",
     });
   };
-  useEffect(() => { 
+  useEffect(() => {
     InitialFormEdit();
   }, [modelOpen]);
-   
 
   //skip
-  const [SkipAccount,setSkipAccount] = useState(false);
-  const skipAccount = async ()=>{
+  const [SkipAccount, setSkipAccount] = useState(false);
+  const skipAccount = async () => {
     await setSkipAccount(true);
     if (accFormRef.current) {
-     await accFormRef.current.accountValidateData();
-     await setSkipAccount(false);
+      await accFormRef.current.accountValidateData();
+      await setSkipAccount(false);
     }
     await setSkipAccount(false);
   };
-
 
   //Table Row Selection Check box
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -1512,11 +1560,9 @@ const accountData = accountFilter.map( acc => ({
     await setSelectedRowKeys(newSelectedRowKeys);
     await setIsButtonEnabled(newSelectedRowKeys.length > 0);
     await setSelectedIds(newSelectedRowKeys);
-    const types = await x.map(obj => (
-      obj.producttype
-    ));
+    const types = await x.map((obj) => obj.producttype);
     const counts = await {};
-    await types.forEach(item => {
+    await types.forEach((item) => {
       counts[item] = counts[item] ? counts[item] + 1 : 1;
     });
     const filteredCounts = [];
@@ -1537,8 +1583,8 @@ const accountData = accountFilter.map( acc => ({
       Table.SELECTION_INVERT,
       Table.SELECTION_NONE,
       {
-        id: 'odd',
-        text: 'Select Odd Row',
+        id: "odd",
+        text: "Select Odd Row",
         onSelect: (changeableRowKeys) => {
           let newSelectedRowKeys = [];
           newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
@@ -1551,8 +1597,8 @@ const accountData = accountFilter.map( acc => ({
         },
       },
       {
-        id: 'even',
-        text: 'Select Even Row',
+        id: "even",
+        text: "Select Even Row",
         onSelect: (changeableRowKeys) => {
           let newSelectedRowKeys = [];
           newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
@@ -1565,7 +1611,6 @@ const accountData = accountFilter.map( acc => ({
         },
       },
     ],
-
   };
 
   const replaceDate = (date) => {
@@ -1574,8 +1619,8 @@ const accountData = accountFilter.map( acc => ({
     return convertedDate;
   };
 
-   //Gross Salary Input
-   const grossSalaryChange = (e) => {
+  //Gross Salary Input
+  const grossSalaryChange = (e) => {
     setEmployeeSalary((pre) => ({ ...pre, grossSalary: e.target.value }));
   };
 
@@ -1603,12 +1648,14 @@ const accountData = accountFilter.map( acc => ({
   const salaryDateChange = (date) => {
     setEmployeeSalary((pre) => ({
       ...pre,
-      salaryDate: date ? date.format('YYYY/MM/DD') : null,
+      salaryDate: date ? date.format("YYYY/MM/DD") : null,
     }));
   };
 
+  const isMobile = useMediaQuery({ maxWidth: 768 });
+
   return (
-    <div>
+    <div className="">
       {/* <Row align="middle">
         <Col span={4}>
           <Statistic
@@ -1639,18 +1686,18 @@ const accountData = accountFilter.map( acc => ({
           >{`Add ${headingValue}`}</Button>
         </Col>
       </Row> */}
-     <ul className="flex justify-between items-center">
-      <li className="grid grid-flow-col gap-x-10 items-center">
-      <Statistic
-      className="block w-fit"
+      <ul className="flex flex-col md:flex-row justify-between md:items-center gap-y-3 md:gap-y-0">
+        <li className="grid grid-flow-col gap-x-10 items-center self-center xs:self-start">
+          <Statistic
+            className="block w-fit text-center "
             title="User Count"
             value={empCounts}
             valueStyle={{ color: "#3f8600" }}
             formatter={formatter}
           />
-         
-           <Input.Search
-           className="block w-fit"
+
+          <Input.Search
+            className=" w-fit hidden md:block"
             placeholder="Search here...."
             onSearch={(value) => {
               setSearchText(value);
@@ -1660,43 +1707,55 @@ const accountData = accountFilter.map( acc => ({
             }}
             style={{ width: `100%` }}
           />
-          </li>
+        </li>
 
-          
-        
-          <li className="flex gap-x-6">
-
-          <Button    
-            disabled={!isButtonEnabled}       
+        <li className="flex gap-x-2 gap-y-3 md:gap-y-0 flex-col xs:flex-row">
+          <Button
+            disabled={!isButtonEnabled}
             onClick={SalaryModalOpen}
             type="primary"
-            className="bg-blue-500"
+            className="bg-blue-500 flex justify-center items-center gap-x-1"
           >
             <FontAwesomeIcon icon={faDollar} className="icon" />{" "}
-            <span >Add Payment </span>
+            <span>Add Payment </span>
           </Button>
 
           <Button
             onClick={AddEmployeeBtn}
             type="primary"
-            className="bg-blue-500"
+            className="bg-blue-500 flex justify-center items-center gap-x-2"
           >
-            <FontAwesomeIcon icon={faUser} className="icon" />{"  "}
+            <FontAwesomeIcon icon={faUser} className="icon inline-block" />
 
-            {`Add ${headingValue}`}</Button>
-          </li>
-     </ul>
+            <span className="inline-block">{`Add ${headingValue}`}</span>
+          </Button>
+        </li>
+
+        <li className="block md:hidden">
+          <Input.Search
+            className=" w-fit "
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+            style={{ width: `100%` }}
+          />
+        </li>
+      </ul>
 
       <Divider />
 
-      <Col span={25}>
-        <Table
-        rowSelection={rowSelection}
+      <div className="w-full overflow-x-scroll sm:overflow-x-hidden">
+      <Table
+          rowSelection={rowSelection}
           columns={columns}
           dataSource={Tbdata}
           pagination={{ pageSize: 5 }}
         />
-      </Col>
+      </div>
 
       <Modal
         title={[
@@ -1705,74 +1764,12 @@ const accountData = accountFilter.map( acc => ({
               ? `Add New ${headingValue}`
               : `Edit Employee Details`}
           </h2>,
-          <Steps
-            className="mt-3 px-[100px]"
-            size="small"
-            items={[
-              {
-                title: "Info",
-                key: 1,
-                status: processbar.info,
-                icon:
-                  processbar.info === "process" ? (
-                    <LoadingOutlined />
-                  ) : (
-                    <FontAwesomeIcon icon={faInfoCircle} />
-                  ),
-                //&& <LoadingOutlined />
-              },
-              {
-                title: "Team",
-                key: 2,
-                status: processbar.team,
-                icon:
-                  processbar.team === "process" ? (
-                    <LoadingOutlined />
-                  ) : (
-                    <FontAwesomeIcon icon={faPeopleGroup} />
-                  ),
-                //&& <LoadingOutlined />
-              },
-              {
-                title: "Address",
-                key: 3,
-                status: processbar.address,
-                icon:
-                  processbar.address === "process" ? (
-                    <LoadingOutlined />
-                  ) : (
-                    <FontAwesomeIcon icon={faLocationDot} />
-                  ),
-              },
-              {
-                title: "Account",
-                key: 4,
-                status: processbar.account,
-                icon:
-                  processbar.account === "process" ? (
-                    <LoadingOutlined />
-                  ) : (
-                    <FontAwesomeIcon icon={faLandmark} />
-                  ),
-              },
-              {
-                title: "Done",
-                key: 5,
-                status: processbar.done,
-                icon:
-                  processbar.done === "process" ? (
-                    <LoadingOutlined />
-                  ) : (
-                    <FontAwesomeIcon icon={faCircleCheck} />
-                  ),
-              },
-            ]}
-          />,
         ]}
+        className="relative block"
         open={modelOpen}
         centered
         onCancel={handleCancel}
-        width={1000}
+        width={isMobile === true ? undefined : 1000}
         footer={[
           //info back
           // close && finish btn
@@ -1816,27 +1813,39 @@ const accountData = accountFilter.map( acc => ({
               Next
             </Button>
           ) : processbar.team === "process" ? ( //condition
-           <>
-            {EditPencilState === false ? <Button key="submit8" type="submit" onClick={teamPostProcessBar}>
-              Skip
-            </Button> :""}
-             <Button key="submit8" type="submit" onClick={postTeam}>
-              Next
-            </Button>
-           </>
+            <>
+              {EditPencilState === false ? (
+                <Button
+                  key="submit8"
+                  type="submit"
+                  onClick={teamPostProcessBar}
+                >
+                  Skip
+                </Button>
+              ) : (
+                ""
+              )}
+              <Button key="submit8" type="submit" onClick={postTeam}>
+                Next
+              </Button>
+            </>
           ) : processbar.address === "process" ? ( //condition
             <Button key="submit9" type="submit" onClick={postAdd}>
               Next
             </Button>
           ) : processbar.account === "process" ? ( //condition
             <>
-            {EditPencilState === false ?  <Button key="submit10" type="submit" onClick={skipAccount}>
-              Skip
-            </Button> : ""}
-            
+              {EditPencilState === false ? (
+                <Button key="submit10" type="submit" onClick={skipAccount}>
+                  Skip
+                </Button>
+              ) : (
+                ""
+              )}
+
               <Button key="submit10" type="submit" onClick={postAcc}>
-              Next
-            </Button>
+                Next
+              </Button>
             </>
           ) : (
             ""
@@ -1844,518 +1853,598 @@ const accountData = accountFilter.map( acc => ({
         ]}
         maskClosable={false}
       >
-        {/* (i)Employee-Details-section */}
-        {processbar.info === "process" ? (
-          <section className="mt-3 h-[59.9vh]">
-            {/* <div className="mt-4 flex justify-center items-center">
+       
+          <Steps
+            className="w-fit mt-3 md:px-[100px] absolute left-[60px] top-1/2  -translate-x-1/2 -translate-y-1/2 md:-translate-x-0 md:-translate-y-0  z-50 md:left-0 md:w-full md:top-10 md:bg-white md:pt-5 "
+            size="small"
+            direction={`${isMobile === false ? "horizontal" : "vertical"}`}
+            items={[
+              {
+                title: `${isMobile === true ? "" : "Info"}`,
+                key: 1,
+                status: processbar.info,
+                icon:
+                  processbar.info === "process" ? (
+                    <LoadingOutlined />
+                  ) : (
+                    <FontAwesomeIcon icon={faInfoCircle} />
+                  ),
+                //&& <LoadingOutlined />
+              },
+              {
+                title: `${isMobile === true ? "" : "Team"}`,
+                key: 2,
+                status: processbar.team,
+                icon:
+                  processbar.team === "process" ? (
+                    <LoadingOutlined />
+                  ) : (
+                    <FontAwesomeIcon icon={faPeopleGroup} />
+                  ),
+                //&& <LoadingOutlined />
+              },
+              {
+                title: `${isMobile === true ? "" : "Address"}`,
+                key: 3,
+                status: processbar.address,
+                icon:
+                  processbar.address === "process" ? (
+                    <LoadingOutlined />
+                  ) : (
+                    <FontAwesomeIcon icon={faLocationDot} />
+                  ),
+              },
+              {
+                title: `${isMobile === true ? "" : "Account"}`,
+                key: 4,
+                status: processbar.account,
+                icon:
+                  processbar.account === "process" ? (
+                    <LoadingOutlined />
+                  ) : (
+                    <FontAwesomeIcon icon={faLandmark} />
+                  ),
+              },
+              {
+                title: `${isMobile === true ? "" : "Done"}`,
+                key: 5,
+                status: processbar.done,
+                icon:
+                  processbar.done === "process" ? (
+                    <LoadingOutlined />
+                  ) : (
+                    <FontAwesomeIcon icon={faCircleCheck} />
+                  ),
+              },
+            ]}
+          />
+          {/* (i)Employee-Details-section */}
+          {processbar.info === "process" ? (
+            <section className="pt-14 ">
+              {/* <div className="mt-4 flex justify-center items-center">
         <FontAwesomeIcon className="text-2xl " icon={faInfoCircle} />
       </div> */}
-            {/* <h1 className='font-bold mt-2 text-center'>Employee Details</h1> */}
-            <Form form={form} layout="vertical ">
-              <Row>
-                <Col span={6}>
-                  {/* firstName */}
-                  <Form.Item
-                    name="firstName"
-                    label="First Name"
-                    className="px-3"
-                    validateStatus={Validate.firstName === true ? "error" : ""}
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="first name"
+              {/* <h1 className='font-bold mt-2 text-center'>Employee Details</h1> */}
+              <Form form={form} layout="vertical ">
+                <ul className="pl-12 md:pl-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                    
+                    <li>
+                    {/* firstName */}
+                    <Form.Item
                       name="firstName"
-                      value={EmployeeInput.firstName}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
+                      label="First Name"
+                      className="px-3"
+                      validateStatus={
+                        Validate.firstName === true ? "error" : ""
+                      }
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="first name"
+                        name="firstName"
+                        value={EmployeeInput.firstName}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
 
-                  {/* lastName */}
-                  <Form.Item
-                    name="lastName"
-                    label="Last Name"
-                    className="px-3"
-                    validateStatus={Validate.lastName === true ? "error" : ""}
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="last name"
+                    {/* lastName */}
+                    <Form.Item
                       name="lastName"
-                      value={EmployeeInput.lastName}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
-
-                  {/* gender */}
-                  <Form.Item
-                    name="gender"
-                    rules={[
-                      { message: "Please select your gender!", type: "string" },
-                    ]}
-                    label="Gender"
-                    className="px-3"
-                    validateStatus={Validate.gender === true ? "error" : ""}
-                  >
-                    <Select
-                      optionFilterProp="children"
-                      placeholder="select gender"
-                      style={{ width: filedWidth }}
-                      onChange={GengerDropDown}
-                      options={[
+                      label="Last Name"
+                      className="px-3"
+                      validateStatus={Validate.lastName === true ? "error" : ""}
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="last name"
+                        name="lastName"
+                        value={EmployeeInput.lastName}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
+                   
+                    {/* gender */}
+                    <Form.Item
+                      name="gender"
+                      rules={[
                         {
-                          key: 1,
-                          value: "Male",
-                          label: "Male",
-                        },
-                        {
-                          key: 2,
-                          value: "Female",
-                          label: "Female",
-                        },
-                        {
-                          key: 3,
-                          value: "Other",
-                          label: "Other",
+                          message: "Please select your gender!",
+                          type: "string",
                         },
                       ]}
-                      value={EmployeeInput.gender}
-                    />
-                  </Form.Item>
-
-                  {/* personalEmail */}
-                  <Form.Item
-                    // rules={[{ type: "email" }]}
-                    className="px-3"
-                    label="Personal Email"
-                    name="personalEmail"
-                    validateStatus={
-                      Validate.personalEmail === true ? "error" : ""
-                    }
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="personal email"
+                      label="Gender"
+                      className="px-3"
+                      validateStatus={Validate.gender === true ? "error" : ""}
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        placeholder="select gender"
+                        style={{ width: filedWidth }}
+                        onChange={GengerDropDown}
+                        options={[
+                          {
+                            key: 1,
+                            value: "Male",
+                            label: "Male",
+                          },
+                          {
+                            key: 2,
+                            value: "Female",
+                            label: "Female",
+                          },
+                          {
+                            key: 3,
+                            value: "Other",
+                            label: "Other",
+                          },
+                        ]}
+                        value={EmployeeInput.gender}
+                      />
+                    </Form.Item>
+                    
+                    {/* personalEmail */}
+                    <Form.Item
+                      // rules={[{ type: "email" }]}
+                      className="px-3"
+                      label="Personal Email"
                       name="personalEmail"
-                      value={EmployeeInput.personalEmail}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
+                      validateStatus={
+                        Validate.personalEmail === true ? "error" : ""
+                      }
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="personal email"
+                        name="personalEmail"
+                        value={EmployeeInput.personalEmail}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
 
-                  {/* officeEmail */}
-                  <Form.Item
-                    // rules={[{ type: "email" }]}
-                    className="px-3"
-                    name="officeEmail"
-                    label="Office Email (optional)"
-                    validateStatus={
-                      Validate.officeEmail === true ? "error" : ""
-                    }
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="office email"
+                    {/* officeEmail */}
+                    <Form.Item
+                      // rules={[{ type: "email" }]}
+                      className="px-3"
                       name="officeEmail"
-                      value={EmployeeInput.officeEmail}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
-                </Col>
+                      label="Office Email (optional)"
+                      validateStatus={
+                        Validate.officeEmail === true ? "error" : ""
+                      }
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="office email"
+                        name="officeEmail"
+                        value={EmployeeInput.officeEmail}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
+                    </li>
 
-                <Col span={6}>
-                  {/* mobileNumber */}
-                  <Form.Item
-                    className="px-3"
-                    label="Mobile Number"
-                    name="mobileNumber"
-                    // rules={[
-                    //   { message: "Please enter your mobile number" },
-                    //   {
-                    //     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    //     message: "Enter 10-digit number",
-                    //   },
-                    // ]}
-                    validateStatus={
-                      Validate.mobileNumber === true ? "error" : ""
-                    }
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="Mobile Number"
+                 <li>
+                    {/* mobileNumber */}
+                    <Form.Item
+                      className="px-3"
+                      label="Mobile Number"
                       name="mobileNumber"
-                      value={EmployeeInput.mobileNumber}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
-                  {/* dateOfBirth*/}
-                  <Form.Item
-                    name="dateOfBirth"
-                    className="px-3"
-                    label="Date Of Birth"
-                    validateStatus={
-                      Validate.dateOfBirth === true ? "error" : ""
-                    }
-                  >
-                    <DatePicker
-                      style={{ width: filedWidth }}
-                      format={dateFormat}
-                      onChange={DateOfBirthValue}
-                    />
-                  </Form.Item>
-                  {/* maritalStatus */}
-                  <Form.Item
-                    name="maritalStatus"
-                    className="px-3"
-                    label="Marital Status"
-                    validateStatus={
-                      Validate.maritalStatus === true ? "error" : ""
-                    }
-                  >
-                    <Select
-                      optionFilterProp="children"
-                      placeholder="select marital status"
-                      style={{ width: filedWidth }}
-                      onChange={MarriedDropDown}
-                      options={[
-                        {
-                          value: "Married",
-                          label: "Married",
-                        },
-                        {
-                          value: "Unmarried",
-                          label: "Unmarried",
-                        },
-                      ]}
-                      value={EmployeeInput.maritalStatus}
-                    />
-                  </Form.Item>
-                  {/* dateOfJoin*/}
-                  <Form.Item
-                    name="dateOfJoin"
-                    className="px-3"
-                    label="Date Of Join"
-                    validateStatus={
-                      Validate.dateOfBirth === true ? "error" : ""
-                    }
-                  >
-                    <DatePicker
-                      style={{ width: filedWidth }}
-                      format={dateFormat}
-                      onChange={DateOfJoinValue}
-                    />
-                  </Form.Item>
+                      // rules={[
+                      //   { message: "Please enter your mobile number" },
+                      //   {
+                      //     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
+                      //     message: "Enter 10-digit number",
+                      //   },
+                      // ]}
+                      validateStatus={
+                        Validate.mobileNumber === true ? "error" : ""
+                      }
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="Mobile Number"
+                        name="mobileNumber"
+                        value={EmployeeInput.mobileNumber}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
+                
+                    {/* dateOfBirth*/}
+                    <Form.Item
+                      name="dateOfBirth"
+                      className="px-3"
+                      label="Date Of Birth"
+                      validateStatus={
+                        Validate.dateOfBirth === true ? "error" : ""
+                      }
+                    >
+                      <DatePicker
+                        style={{ width: filedWidth }}
+                        format={dateFormat}
+                        onChange={DateOfBirthValue}
+                      />
+                    </Form.Item>
+                    {/* maritalStatus */}
+                    <Form.Item
+                      name="maritalStatus"
+                      className="px-3"
+                      label="Marital Status"
+                      validateStatus={
+                        Validate.maritalStatus === true ? "error" : ""
+                      }
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        placeholder="select marital status"
+                        style={{ width: filedWidth }}
+                        onChange={MarriedDropDown}
+                        options={[
+                          {
+                            value: "Married",
+                            label: "Married",
+                          },
+                          {
+                            value: "Unmarried",
+                            label: "Unmarried",
+                          },
+                        ]}
+                        value={EmployeeInput.maritalStatus}
+                      />
+                    </Form.Item>
+                    {/* dateOfJoin*/}
+                    <Form.Item
+                      name="dateOfJoin"
+                      className="px-3"
+                      label="Date Of Join"
+                      validateStatus={
+                        Validate.dateOfBirth === true ? "error" : ""
+                      }
+                    >
+                      <DatePicker
+                        style={{ width: filedWidth }}
+                        format={dateFormat}
+                        onChange={DateOfJoinValue}
+                      />
+                    </Form.Item>
 
-                  {/* bloodGroup */}
-                  <Form.Item
-                    name="bloodGroup"
-                    className="px-3"
-                    label="Blood Group"
-                    validateStatus={Validate.bloodGroup === true ? "error" : ""}
-                  >
-                    <Select
-                      //mode="multiple"
-                      //size={size}
-                      placeholder="select blood group"
-                      onChange={BloodGroupValue}
-                      style={{ width: filedWidth }}
-                      options={[
-                        {
-                          key: 1,
-                          value: "A+",
-                          label: "A+",
-                        },
-                        {
-                          key: 2,
-                          value: "A-",
-                          label: "A-",
-                        },
-                        {
-                          key: 3,
-                          value: "B+",
-                          label: "B+",
-                        },
-                        {
-                          key: 4,
-                          value: "B-",
-                          label: "B-",
-                        },
-                        {
-                          key: 5,
-                          value: "O+",
-                          label: "O+",
-                        },
-                        {
-                          key: 6,
-                          value: "O-",
-                          label: "O-",
-                        },
-                        {
-                          key: 7,
-                          value: "AB+",
-                          label: "AB+",
-                        },
-                        {
-                          key: 8,
-                          value: "AB-",
-                          label: "AB-",
-                        },
-                      ]}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={6}>
-                  {/* alternateContactNo */}
-                  <Form.Item
-                    className="px-3"
-                    label="Alternate Contact No"
-                    name="alternateContactNo"
-                    // rules={[
-                    //   { message: "Please enter your mobile number" },
-                    //   {
-                    //     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
-                    //     message: "Enter 10-digit number",
-                    //   },
-                    // ]}
-                    validateStatus={
-                      Validate.alternateContactNo === true ? "error" : ""
-                    }
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="alternate contact no"
+                    {/* bloodGroup */}
+                    <Form.Item
+                      name="bloodGroup"
+                      className="px-3"
+                      label="Blood Group"
+                      validateStatus={
+                        Validate.bloodGroup === true ? "error" : ""
+                      }
+                    >
+                      <Select
+                        //mode="multiple"
+                        //size={size}
+                        placeholder="select blood group"
+                        onChange={BloodGroupValue}
+                        style={{ width: filedWidth }}
+                        options={[
+                          {
+                            key: 1,
+                            value: "A+",
+                            label: "A+",
+                          },
+                          {
+                            key: 2,
+                            value: "A-",
+                            label: "A-",
+                          },
+                          {
+                            key: 3,
+                            value: "B+",
+                            label: "B+",
+                          },
+                          {
+                            key: 4,
+                            value: "B-",
+                            label: "B-",
+                          },
+                          {
+                            key: 5,
+                            value: "O+",
+                            label: "O+",
+                          },
+                          {
+                            key: 6,
+                            value: "O-",
+                            label: "O-",
+                          },
+                          {
+                            key: 7,
+                            value: "AB+",
+                            label: "AB+",
+                          },
+                          {
+                            key: 8,
+                            value: "AB-",
+                            label: "AB-",
+                          },
+                        ]}
+                      />
+                    </Form.Item>
+                    </li>
+
+                 <li>
+                    {/* alternateContactNo */}
+                    <Form.Item
+                      className="px-3"
+                      label="Alternate Contact No"
                       name="alternateContactNo"
-                      value={EmployeeInput.alternateContactNo}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
-                  {/* contactPersonName */}
-                  <Form.Item
-                    name="contactPersonName"
-                    className="px-3"
-                    label="Contact Person Name"
-                    validateStatus={
-                      Validate.contactPersonName === true ? "error" : ""
-                    }
-                  >
-                    <Input
-                      style={{ width: filedWidth }}
-                      placeholder="contact person name"
+                      // rules={[
+                      //   { message: "Please enter your mobile number" },
+                      //   {
+                      //     pattern: /^[0-9]{10}$/, // Adjust the regular expression as needed
+                      //     message: "Enter 10-digit number",
+                      //   },
+                      // ]}
+                      validateStatus={
+                        Validate.alternateContactNo === true ? "error" : ""
+                      }
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="alternate contact no"
+                        name="alternateContactNo"
+                        value={EmployeeInput.alternateContactNo}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
+                  
+                    {/* contactPersonName */}
+                    <Form.Item
                       name="contactPersonName"
-                      value={EmployeeInput.contactPersonName}
-                      onChange={EmployeeInputsOnchange}
-                    />
-                  </Form.Item>
-                  {/* Relationship */}
-                  <Form.Item
-                    name="relationship"
-                    className="px-3"
-                    label="Relationship"
-                    validateStatus={
-                      Validate.relationship === true ? "error" : ""
-                    }
-                  >
-                    <Select
-                      optionFilterProp="children"
-                      placeholder="select relationship"
-                      style={{ width: filedWidth }}
-                      onChange={relationShipValue}
-                      options={[
-                        {
-                          key: 1,
-                          value: "Father",
-                          label: "Father",
-                        },
-                        {
-                          key: 2,
-                          value: "Mother",
-                          label: "Mother",
-                        },
-                        {
-                          key: 3,
-                          value: "Son",
-                          label: "Son",
-                        },
-                        {
-                          key: 4,
-                          value: "Daughter",
-                          label: "Daughter",
-                        },
-                        {
-                          key: 5,
-                          value: "Husband",
-                          label: "Husband",
-                        },
-                        {
-                          key: 6,
-                          value: "Wife",
-                          label: "Wife",
-                        },
-                        {
-                          key: 7,
-                          value: "Brother",
-                          label: "Brother",
-                        },
-                        {
-                          key: 8,
-                          value: "Sister",
-                          label: "Sister",
-                        },
-                        {
-                          key: 9,
-                          value: "Grandfather",
-                          label: "Grandfather",
-                        },
-                        {
-                          key: 10,
-                          value: "Grandmother",
-                          label: "Grandmother",
-                        },
-                        {
-                          key: 11,
-                          value: "Grandson",
-                          label: "Grandson",
-                        },
-                        {
-                          key: 12,
-                          value: "Uncle",
-                          label: "Uncle",
-                        },
-                        {
-                          key: 13,
-                          value: "Aunt",
-                          label: "Aunt",
-                        },
-                        {
-                          key: 14,
-                          value: "Nephew",
-                          label: "Nephew",
-                        },
-                        {
-                          key: 15,
-                          value: "Niece",
-                          label: "Niece",
-                        },
-                        {
-                          key: 16,
-                          value: "Cousins",
-                          label: "Cousins",
-                        },
-                      ]}
-                      value={EmployeeInput.relationship}
-                    />
-                  </Form.Item>
+                      className="px-3"
+                      label="Contact Person Name"
+                      validateStatus={
+                        Validate.contactPersonName === true ? "error" : ""
+                      }
+                    >
+                      <Input
+                        style={{ width: filedWidth }}
+                        placeholder="contact person name"
+                        name="contactPersonName"
+                        value={EmployeeInput.contactPersonName}
+                        onChange={EmployeeInputsOnchange}
+                      />
+                    </Form.Item>
+                    {/* Relationship */}
+                    <Form.Item
+                      name="relationship"
+                      className="px-3"
+                      label="Relationship"
+                      validateStatus={
+                        Validate.relationship === true ? "error" : ""
+                      }
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        placeholder="select relationship"
+                        style={{ width: filedWidth }}
+                        onChange={relationShipValue}
+                        options={[
+                          {
+                            key: 1,
+                            value: "Father",
+                            label: "Father",
+                          },
+                          {
+                            key: 2,
+                            value: "Mother",
+                            label: "Mother",
+                          },
+                          {
+                            key: 3,
+                            value: "Son",
+                            label: "Son",
+                          },
+                          {
+                            key: 4,
+                            value: "Daughter",
+                            label: "Daughter",
+                          },
+                          {
+                            key: 5,
+                            value: "Husband",
+                            label: "Husband",
+                          },
+                          {
+                            key: 6,
+                            value: "Wife",
+                            label: "Wife",
+                          },
+                          {
+                            key: 7,
+                            value: "Brother",
+                            label: "Brother",
+                          },
+                          {
+                            key: 8,
+                            value: "Sister",
+                            label: "Sister",
+                          },
+                          {
+                            key: 9,
+                            value: "Grandfather",
+                            label: "Grandfather",
+                          },
+                          {
+                            key: 10,
+                            value: "Grandmother",
+                            label: "Grandmother",
+                          },
+                          {
+                            key: 11,
+                            value: "Grandson",
+                            label: "Grandson",
+                          },
+                          {
+                            key: 12,
+                            value: "Uncle",
+                            label: "Uncle",
+                          },
+                          {
+                            key: 13,
+                            value: "Aunt",
+                            label: "Aunt",
+                          },
+                          {
+                            key: 14,
+                            value: "Nephew",
+                            label: "Nephew",
+                          },
+                          {
+                            key: 15,
+                            value: "Niece",
+                            label: "Niece",
+                          },
+                          {
+                            key: 16,
+                            value: "Cousins",
+                            label: "Cousins",
+                          },
+                        ]}
+                        value={EmployeeInput.relationship}
+                      />
+                    </Form.Item>
 
-                  {/* officeLocationId */}
-                  <Form.Item
-                    name="officeLocationId"
-                    className="px-3"
-                    label="Office Location"
-                    validateStatus={
-                      Validate.officeLocationId === true ? "error" : ""
-                    }
-                  >
-                    <Select
-                      optionFilterProp="children"
-                      placeholder="select office location"
-                      style={{ width: filedWidth }}
-                      onChange={officeLocationDropDown}
-                      options={officeOption}
-                      value={EmployeeInput.officeLocationId}
-                    />
-                  </Form.Item>
+                    {/* officeLocationId */}
+                    <Form.Item
+                      name="officeLocationId"
+                      className="px-3"
+                      label="Office Location"
+                      validateStatus={
+                        Validate.officeLocationId === true ? "error" : ""
+                      }
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        placeholder="select office location"
+                        style={{ width: filedWidth }}
+                        onChange={officeLocationDropDown}
+                        options={officeOption}
+                        value={EmployeeInput.officeLocationId}
+                      />
+                    </Form.Item>
 
-                  {/* departmentId */}
-                  <Form.Item
-                    name="departmentId"
-                    className="px-3"
-                    label="Department"
-                    validateStatus={Validate.department === true ? "error" : ""}
-                  >
-                    <Select
-                      optionFilterProp="children"
-                      placeholder="select department"
-                      style={{ width: filedWidth }}
-                      onChange={departmentDropDown}
-                      options={departmentOption}
-                      value={EmployeeInput.departmentId}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={6}>
-                  {/* Roll Detail */}
-                  <Form.Item
-                    name="Role"
-                    className="px-3"
-                    label="Role"
-                    validateStatus={Validate.role === true ? "error" : ""}
-                  >
-                    <Select
-                      optionFilterProp="children"
-                      placeholder="select role"
-                      style={{ width: filedWidth }}
-                      onChange={roleDropDown}
-                      options={optionRoles}
-                      value={RoleValue.roleId}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Form>
-          </section>
-        ) : processbar.team === "process" ? (
-          <TeamForm
-            key="team"
-            EmpApi={employeeRoleData} //api
-            TeamFData={TeamFData} //state
-            UpdatedTeamFData={UpdatedTeamFData} //updated data
-            EmployeeInput={EmployeeInput} //input employee name
-            teamPostProcessBar={teamPostProcessBar} // process bar
-            ref={teamFormRef}
-            EditData={EditPencilData} //edit data
-          />
-        ) : processbar.address === "process" ? (
-          <AddressForm
-            key="address"
-            FormCAdd={CureentFAdd} //state1
-            FormPAdd={PermanetFAdd} //state2
-            CheckBoxF={AddressCheck} //state3
-            UpdateCAdd={UpdatedCurrentFAdd} //update cureent add
-            UpdatePAdd={UpdatedPermanetFAdd} //update permanent add
-            UpdateCheckBox={AddCheckBox} // update check box
-            addressPostProcessBar={addressPostProcessBar} // process bar
-            ref={addressRef}
-            EditData={EditPencilData} //edit data
-          />
-        ) : processbar.account === "process" ? (
-          <AccountForm
-            key="account"
-            FormAccF={AccF} //state
-            UpdateAccF={UpdateAccountF} //update account
-            accountPostProcessBar={accountPostProcessBar} //process bar
-            newEmployee={newEmployee}
-            ref={accFormRef}
-            EditData={EditPencilData} //edit data
-            EditPencilState={EditPencilState} // true put method
-            PutEmployee={PutEmployee}
-            SkipAccount={SkipAccount}
-          />
-        ) : processbar.done === "finish" ? (
-          <FinishForm
-            EmployeeData={EmployeeInput} //emp data
-            RoleData={RoleValue} //role data
-            TeamData={TeamFData} //team data
-            CAddData={CureentFAdd} //cureent add data
-            PAddData={PermanetFAdd} //permenanat add data
-            AccountData={AccF} //account data
-            newempid={newempid} //emp id
-            loadings={loadings} //loading
-            modelclose={ModelClose}
-            EditData={EditPencilData} //edit data
-            EditPencilState={EditPencilState} // true put method
-            DisplayLogin={DisplayLogin} //one time login data
-          />
-        ) : (
-          ""
-        )}
+                    {/* departmentId */}
+                    <Form.Item
+                      name="departmentId"
+                      className="px-3"
+                      label="Department"
+                      validateStatus={
+                        Validate.department === true ? "error" : ""
+                      }
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        placeholder="select department"
+                        style={{ width: filedWidth }}
+                        onChange={departmentDropDown}
+                        options={departmentOption}
+                        value={EmployeeInput.departmentId}
+                      />
+                    </Form.Item>
+                    </li>
+
+              <li>
+                    {/* Roll Detail */}
+                    <Form.Item
+                      name="Role"
+                      className="px-3"
+                      label="Role"
+                      validateStatus={Validate.role === true ? "error" : ""}
+                    >
+                      <Select
+                        optionFilterProp="children"
+                        placeholder="select role"
+                        style={{ width: filedWidth }}
+                        onChange={roleDropDown}
+                        options={optionRoles}
+                        value={RoleValue.roleId}
+                      />
+                    </Form.Item>
+                    </li>
+                </ul>
+              </Form>
+            </section>
+          ) : processbar.team === "process" ? (
+            <TeamForm
+              key="team"
+              EmpApi={employeeRoleData} //api
+              TeamFData={TeamFData} //state
+              UpdatedTeamFData={UpdatedTeamFData} //updated data
+              EmployeeInput={EmployeeInput} //input employee name
+              teamPostProcessBar={teamPostProcessBar} // process bar
+              ref={teamFormRef}
+              EditData={EditPencilData} //edit data
+            />
+          ) : processbar.address === "process" ? (
+            <AddressForm
+              key="address"
+              FormCAdd={CureentFAdd} //state1
+              FormPAdd={PermanetFAdd} //state2
+              CheckBoxF={AddressCheck} //state3
+              UpdateCAdd={UpdatedCurrentFAdd} //update cureent add
+              UpdatePAdd={UpdatedPermanetFAdd} //update permanent add
+              UpdateCheckBox={AddCheckBox} // update check box
+              addressPostProcessBar={addressPostProcessBar} // process bar
+              ref={addressRef}
+              EditData={EditPencilData} //edit data
+            />
+          ) : processbar.account === "process" ? (
+            <AccountForm
+              key="account"
+              FormAccF={AccF} //state
+              UpdateAccF={UpdateAccountF} //update account
+              accountPostProcessBar={accountPostProcessBar} //process bar
+              newEmployee={newEmployee}
+              ref={accFormRef}
+              EditData={EditPencilData} //edit data
+              EditPencilState={EditPencilState} // true put method
+              PutEmployee={PutEmployee}
+              SkipAccount={SkipAccount}
+            />
+          ) : processbar.done === "finish" ? (
+            <FinishForm
+              EmployeeData={EmployeeInput} //emp data
+              RoleData={RoleValue} //role data
+              TeamData={TeamFData} //team data
+              CAddData={CureentFAdd} //cureent add data
+              PAddData={PermanetFAdd} //permenanat add data
+              AccountData={AccF} //account data
+              newempid={newempid} //emp id
+              loadings={loadings} //loading
+              modelclose={ModelClose}
+              EditData={EditPencilData} //edit data
+              EditPencilState={EditPencilState} // true put method
+              DisplayLogin={DisplayLogin} //one time login data
+            />
+          ) : (
+            ""
+          )}
+       
       </Modal>
 
       <Modal
@@ -2364,20 +2453,15 @@ const accountData = accountFilter.map( acc => ({
         onCancel={SalaryModalClose}
         width={"550px"}
         footer={[
-          <Button key="1"
-            onClick={PostSalary}
-          >
+          <Button key="1" onClick={PostSalary}>
             Pay
           </Button>,
-          <Button key="2"
-            onClick={() => SalaryModalClose()}
-          >
+          <Button key="2" onClick={() => SalaryModalClose()}>
             Cancel
-          </Button>
+          </Button>,
         ]}
       >
         <Form form={form}>
-
           {/* <Form.Item
             label="Employee Name"
             style={{ marginBottom: 0, marginTop: 10 }}
@@ -2425,15 +2509,21 @@ const accountData = accountFilter.map( acc => ({
               value={employeeSalary.netSalary}
               onChange={netSalaryChange}
             />
-
           </Form.Item>
 
           <Form.Item
             label="Salary Date"
             style={{ marginBottom: 0, marginTop: 10 }}
-
           >
-            <DatePicker style={{ width: "380px", float: "right" }} value={employeeSalary.salaryDate ? moment(employeeSalary.salaryDate, 'YYYY/MM/DD') : null} onChange={salaryDateChange}></DatePicker>
+            <DatePicker
+              style={{ width: "380px", float: "right" }}
+              value={
+                employeeSalary.salaryDate
+                  ? moment(employeeSalary.salaryDate, "YYYY/MM/DD")
+                  : null
+              }
+              onChange={salaryDateChange}
+            ></DatePicker>
           </Form.Item>
         </Form>
       </Modal>

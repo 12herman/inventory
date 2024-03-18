@@ -165,6 +165,7 @@ const User = ({ Id, Data }) => {
       <LogoutPage/>
     </div>
   );
+
   const isMobile = useMediaQuery({ maxWidth: 1024 });
   //nav bar responsive
   const [Nav,setNav] = useState({
@@ -172,6 +173,7 @@ const User = ({ Id, Data }) => {
     menu: "Dashboard",
     content: null
   });
+
   const menuClcik = (menu,contents) => {
     setNav(pre => ({...pre,menu: menu,content:contents}));
     if(isMobile === true){
@@ -179,120 +181,8 @@ const User = ({ Id, Data }) => {
     }
   };
 
-  console.log("mobile" +" " + isMobile);
-  console.log('nav' +" "+ Nav.open)
+ 
   return (
-    // <Layout
-    //  style={{
-    //   minHeight: '100vh',
-    // }}>
-    //   <Sider
-    //     trigger={null}
-    //     collapsible
-    //     collapsed={collapsed}
-    //     //style={{ height: "100vh" }}
-    //   >
-    //     <div className="demo-logo-vertical" />
-    //     <Menu
-    //       theme="dark"
-    //       mode="inline"
-    //       defaultSelectedKeys={["1"]}
-    //       onClick={({ key }) =>
-    //         {
-    //           handleMenuClick(menuItems.find((item) => item.key === key))
-    //         }
-    //       }
-    //             style={{
-    //               overflow: 'auto', // Set overflow to auto to enable scrolling
-    //             }}
-    //     >
-    //       {menuItems.map((item) => (
-    //         <Menu.Item key={item.key} icon={item.icon}>
-    //           {item.label}
-    //         </Menu.Item>
-    //       ))}
-    //     </Menu>
-    //   </Sider>
-    //   <Layout>
-    //     <Header
-    //       style={{
-    //         padding: 0,
-    //         background: colorBgContainer,
-    //         fontSize: "25px",
-    //         fontWeight: "bold",
-    //       }}
-    //     >
-    //       <Row justify="space-between" align="middle">
-    //         <Col>
-    //           <Button
-    //             type="text"
-    //             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-    //             onClick={() => setCollapsed(!collapsed)}
-    //             style={{
-    //               fontSize: "26px",
-    //               width: 64,
-    //               height: 64,
-    //             }}
-    //           />
-    //           {selectedMenuItem ? selectedMenuItem.label : "Dashboard"}
-    //         </Col>
-    //         <Col justify="flex-end" style={{ right: "1%" }}>
-    //           <LogoutPage />
-    //         </Col>
-    //       </Row>
-    //     </Header>
-    //     <Content
-    //       className="custom-content"
-    //       style={{
-    //         margin: "10px 16px",
-    //         padding: 24,
-    //         background: colorBgContainer,
-    //         borderRadius: borderRadiusLG,
-    //       }}
-    //     >
-    //      {
-    //   selectedMenuItem != null?
-    //   selectedMenuItem.Content
-    //   :
-    //   employeeleave &&
-    //   holiday &&
-    //   employee &&
-    //   employeeleavehistory &&
-    //   leavetable &&
-    //   hrData &&
-    //   leaderData &&
-    //   employeeleave.length > 0 &&
-    //   holiday.length > 0 &&
-    //   employee.length > 0 &&
-    //   employeeleavehistory.length > 0 &&
-    //   leavetable.length > 0 &&
-    //   hrData.length > 0 &&
-    //   leaderData.length > 0 ?
-    // <UserDashboard
-    // Id={UpdateId}
-    // LeaveDatas={employeeleave}
-    // holiday={holiday}
-    // employee={employee}
-    // leavehistory={LeaveFilter}
-    // leaderData={leaderData}
-    // hrData={hrData[0]}
-    // leavetable={leavetable[0]}
-    //   />
-    // : (
-    //  <div className="w-full h-screen flex justify-center items-center">
-    //  <LoadingOutlined
-    //     style={{
-    //       fontSize: 24,
-    //     }}
-    //     spin
-    //   />
-    //  </div>
-    // )
-    //   }
-    //     </Content>
-    //   </Layout>
-    // </Layout>
-
     <main className={`relative w-11/12 ${ isMobile === true ? "mx-auto" : " ml-auto"} transition-all ease-in duration-300`}>
       
       <ul className="header bg-blue-500 px-5 fixed flex justify-between top-[0px] left-[0px] z-10 w-full  shadow-md  py-5 ">
@@ -337,7 +227,7 @@ const User = ({ Id, Data }) => {
 
       </ul> 
 
-      <section className={`relative pt-24 pb-5 transition-all ease-in duration-300  ${Nav.open === false && isMobile === false ? "pl-[135px] lg:pr-5" : "pl-[0px] lg:pr-5"} `}>
+      <section className={`relative pt-24 pb-5 transition-all ease-in duration-300  ${Nav.open === false && isMobile === false ? "pl-[135px] lg:pr-20" : "pl-[0px] lg:pr-20"} `}>
      
         {Nav.content != null ? 
           (
