@@ -1,7 +1,7 @@
-import { Button, Popconfirm,Table,message,Modal,Form,Input } from "antd";
+import { Button, Popconfirm,Table,message,Modal,Form,Input,Divider } from "antd";
 import React, { useEffect,useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash, faPen, faL } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrash, faPen, faL ,faChevronLeft} from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
 import { getaccessories, postaccessories,putaccessories,deleteaccessories } from "../../redux/slices/accessoriesSlice";
 
@@ -33,12 +33,12 @@ const AccessoriesSettings = ({BackToSetting})=>{
                        onConfirm={() => DeleteMethod(record)}
                     >
                     
-                       <Button><FontAwesomeIcon icon={faTrash} /></Button>
+                       <Button type="link"><FontAwesomeIcon icon={faTrash} color="#fd5353" /></Button>
                     </Popconfirm>
-                    <Button
+                    <Button type="link"
                         onClick={() => PencelBtn(record.key)}
                     >
-                        <FontAwesomeIcon icon={faPen} /></Button>
+                        <FontAwesomeIcon icon={faPen} color="#000000"/></Button>
                 </div>
             )
         }
@@ -180,22 +180,53 @@ const AccessoriesSettings = ({BackToSetting})=>{
    
 return(
     <>
-       <div className="flex items-center justify-between" >
-       <h2>Accessories Settings </h2>
+ <ul className="flex flex-col md:flex-row gap-y-3 md:items-center justify-between">
+        <li>
+          <h2 className="text-xl">Accessories Settings</h2>
+        </li>
+        <li className="flex flex-col xs:flex-row gap-x-2 gap-y-3 xs:gap-y-0 mt-5 md:mt-0">
+          <Button
+            className="flex justify-center items-center gap-x-2"
+            type="dashed"
+            onClick={() => BackToSetting()}
+          >
+            <FontAwesomeIcon
+              className="text-[10px] inline-block"
+              icon={faChevronLeft}
+            />
+            <span>Back</span>
+          </Button>
+          <Button
+            onClick={() => AddNewBtn()}
+            type="primary"
+            className="bg-blue-500 flex items-center justify-center gap-x-1"
+          >
+            <span>Add New Accessory</span>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+          </Button>
+        </li>
+      </ul>
+
+       {/* <div className="flex items-center justify-between" >
+       <h2> </h2>
         <Button style={{float:"right"}} onClick={()=>BackToSetting()}> Back</Button>
        </div>
-       <Button onClick={() => AddNewBtn()} type='primary' className='bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3'> <span>Add New Accessory</span> <FontAwesomeIcon icon={faPlus} className='icon' /> </Button>
+       <Button onClick={() => AddNewBtn()} type='primary' className='bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3'> <span>Add New Accessory</span> <FontAwesomeIcon icon={faPlus} className='icon' /> </Button> */}
+       <Divider />
+
+       <div className="overflow-x-scroll md:overflow-x-hidden">
        <Table
                 style={{ marginTop: 10 }}
                 bordered
                 columns={columns}
                 dataSource={TableDatas}
             pagination={{
-                pageSize: 6
+                pageSize: 5
             }}
             />
-
+            </div>
             <Modal
+            centered={true}
                 title={`Add New ${headingValue}`}
                 open={modalOpen}
                 onCancel={ModalClose}
@@ -205,10 +236,10 @@ return(
                     <Button type='text' key="2" danger="red" style={{ border: "0.5px solid red" }} onClick={() => ModalClose()}>Close</Button>
                 ]}>
 
-                <Form>
+                <Form className="mt-3">
                     {/* RollName */}
-                    <Form.Item label="Name" style={{ marginBottom: 0, marginTop: 10 }}>
-                        <Input style={{ float: "right", width: "380px" }} placeholder='Accessory Name' name='name' value={accessory.Name} onChange={InputDataFields} />
+                    <Form.Item label="Name" className="mb-2">
+                        <Input  placeholder='Accessory Name' name='name' value={accessory.Name} onChange={InputDataFields} />
                     </Form.Item>
                 </Form>
             </Modal>

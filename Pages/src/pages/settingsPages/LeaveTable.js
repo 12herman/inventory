@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Form, Table, message, Modal, Input, Popconfirm } from "antd";
+import { Button, Form, Table, message, Modal, Input, Popconfirm,Divider } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
@@ -8,6 +8,7 @@ import {
   faL,
   faRotate,
   faCaretUp,
+  faChevronLeft
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Tuple } from "@reduxjs/toolkit";
@@ -251,10 +252,38 @@ const LeaveTable = ({ BackToSetting }) => {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <h2>{headingValue} Settings</h2>
+<ul className="flex flex-col md:flex-row gap-y-3 md:items-center justify-between">
+        <li>
+          <h2 className="text-xl">{headingValue} Settings</h2>
+        </li>
+        <li className="flex flex-col xs:flex-row gap-x-2 gap-y-3 xs:gap-y-0 mt-5 md:mt-0">
+          <Button
+            className="flex justify-center items-center gap-x-2"
+            type="dashed"
+            onClick={() => BackToSetting()}
+          >
+            <FontAwesomeIcon
+              className="text-[10px] inline-block"
+              icon={faChevronLeft}
+            />
+            <span>Back</span>
+          </Button>
+          <Button
+            onClick={() => AddNewBtn()}
+            type="primary"
+            className="bg-blue-500 flex items-center justify-center gap-x-1"
+          >
+            <span>Reset</span>
+            <FontAwesomeIcon icon={faRotate} className="icon" />
+          </Button>
+        </li>
+      </ul>
+      <Divider />
+
+      {/* <div className="flex items-center justify-between">
+        <h2></h2>
         <Button style={{ float: "right" }} onClick={() => BackToSetting()}>
-          {" "}
+
           Back
         </Button>
       </div>
@@ -263,9 +292,10 @@ const LeaveTable = ({ BackToSetting }) => {
         type="primary"
         className="bg-red-500 flex items-center gap-x-1 float-right mb-3 mt-3"
       >
-        {" "}
         <span>Reset</span> <FontAwesomeIcon icon={faRotate} className="icon" />{" "}
-      </Button>
+      </Button> */}
+
+      <div className="overflow-x-scroll md:overflow-x-hidden">
       <Table
         style={{ marginTop: 10 }}
         bordered
@@ -275,8 +305,9 @@ const LeaveTable = ({ BackToSetting }) => {
           pageSize: 6,
         }}
       />
-
+      </div>
       <Modal
+      centered={true}
         title={`Add New ${headingValue}`}
         open={modelOpen}
         onCancel={ModelClose}
@@ -302,16 +333,16 @@ const LeaveTable = ({ BackToSetting }) => {
           </Button>,
         ]}
       >
-        <Form>
+        <Form layout="vertical" className="mt-3">
           {/* sickLeave */}
           <Form.Item
             label="Sick Leave"
-            style={{ marginBottom: 0, marginTop: 10 }}
+            className="mb-2"
             validateStatus={NumberValidate.sickLeave === true ? "error" : ""}
             pattern="[0-9]*"
           >
             <Input
-              style={{ float: "right", width: "370px" }}
+              
               placeholder="Sick Leave"
               name="sickLeave"
               value={LeaveTable.sickLeave}
@@ -322,12 +353,12 @@ const LeaveTable = ({ BackToSetting }) => {
           {/* casualLeave */}
           <Form.Item
             label="Casual Leave"
-            style={{ marginBottom: 0, marginTop: 10 }}
+            className="mb-2"
             validateStatus={NumberValidate.casualLeave === true ? "error" : ""}
             pattern="[0-9]*"
           >
             <Input
-              style={{ float: "right", width: "370px" }}
+              
               placeholder="Sick Leave"
               name="casualLeave"
               value={LeaveTable.casualLeave}
@@ -338,12 +369,12 @@ const LeaveTable = ({ BackToSetting }) => {
           {/* leaveAvailed */}
           <Form.Item
             label="Leave Availed"
-            style={{ marginBottom: 0, marginTop: 10 }}
+            className="mb-2"
             validateStatus={NumberValidate.leaveAvailed === true ? "error" : ""}
             pattern="[0-9]*"
           >
             <Input
-              style={{ float: "right", width: "370px" }}
+              
               placeholder="Sick Leave"
               name="leaveAvailed"
               value={LeaveTable.leaveAvailed}
@@ -354,12 +385,12 @@ const LeaveTable = ({ BackToSetting }) => {
           {/* total */}
           <Form.Item
             label="Total"
-            style={{ marginBottom: 0, marginTop: 10 }}
+            className="mb-2"
             validateStatus={NumberValidate.total === true ? "error" : ""}
             pattern="[0-9]*"
           >
             <Input
-              style={{ float: "right", width: "370px" }}
+              
               placeholder="Sick Leave"
               name="total"
               value={LeaveTable.total}

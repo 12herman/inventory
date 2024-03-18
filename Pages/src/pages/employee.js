@@ -1689,7 +1689,7 @@ const Employee = ({ officeData, LoginUser }) => {
       <ul className="flex flex-col md:flex-row justify-between md:items-center gap-y-3 md:gap-y-0">
         <li className="grid grid-flow-col gap-x-10 items-center self-center xs:self-start">
           <Statistic
-            className="block w-fit text-center "
+            className="block text-center w-fit lg:w-[120px]"
             title="User Count"
             value={empCounts}
             valueStyle={{ color: "#3f8600" }}

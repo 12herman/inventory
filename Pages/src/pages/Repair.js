@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { getEmployees } from '../redux/slices/employeeSlice';
 import { getProductsDetail, putProductsDetail } from '../redux/slices/productsDetailSlice';
 import { getProductsRepairHistory, putProductsRepairHistory, postProductsRepairHistory } from '../redux/slices/productsrepairhistorySlice';
+import { triggerFocus } from 'antd/es/input/Input';
 
 const formatter = (value) => <CountUp end={value} />;
 
@@ -433,14 +434,19 @@ const Repair = ({ officeData }) => {
 
   return (
     <div>
-      <Row justify='space-between' align='middle' gutter={12} className="flex justify-between items-center">
-        <Col span={4} className="grid grid-flow-col gap-x-10 items-center">
-          <Statistic  className="block w-fit" title="Repair Count " value={proCount} formatter={formatter} valueStyle={{ color: "#3f8600" }} />
-        </Col>{" "}
-        <Col span={10} style={{ right: "25.50%" ,width:"100%"}}>
-          {" "}
-          <Input.Search
-           className="block w-fit"
+
+    <ul className='flex flex-col md:flex-row justify-between md:items-center gap-y-3 lg:gap-y-0'>
+      
+      <li className=' flex items-center gap-x-10 self-center xs:self-start'>
+      <Statistic  
+      className="block w-fit lg:w-[120px] text-center" 
+      title="Repair Count " value={proCount} 
+      formatter={formatter} 
+      valueStyle={{ color: "#3f8600" }} 
+
+      />
+      <Input.Search
+           className=" w-full md:w-fit hidden md:block"
             placeholder="Search here...."
             onSearch={(value) => {
               setSearchText(value);
@@ -450,9 +456,10 @@ const Repair = ({ officeData }) => {
             }}
            
           />
-        </Col>
-        <Col justify='flex-end' style={{ right: '0%' }} >
-          <Popconfirm
+      </li>
+
+<li>
+<Popconfirm
             title="Are you sure you want to transfer the Products to Storage?"
             open={popConfirmRepairVisible}
             onConfirm={handleStorageConfirm}
@@ -464,7 +471,7 @@ const Repair = ({ officeData }) => {
             }}
           >
             <Button
-              type="primary" className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"
+              type="primary" className="bg-blue-500 flex justify-center items-center gap-x-2 w-full xs:w-fit"
               open={StorageModal}
               onClick={() => {
                 setPopConfirmRepairVisible(true);
@@ -475,9 +482,37 @@ const Repair = ({ officeData }) => {
               <FontAwesomeIcon icon={faWarehouse} className="icon" style={{ marginRight: '5px' }} /> {"  "}
               <span>Send to Storage</span></Button>
           </Popconfirm>
+</li>
+
+
+<li className=" w-full md:w-fit block md:hidden">
+<Input.Search
+           
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+           
+          />
+</li>
+    </ul>
+      {/* <Row justify='space-between' align='middle' gutter={12} className="flex justify-between items-center">
+        <Col span={4} className="grid grid-flow-col gap-x-10 items-center">
+         
+        </Col>{" "}
+        <Col span={10} style={{ right: "25.50%" ,width:"100%"}}>
+          {" "}
+         
         </Col>
-      </Row>
+        <Col justify='flex-end' style={{ right: '0%' }} >
+         
+        </Col>
+      </Row> */}
       <Divider />
+      <div className='overflow-x-scroll md:overflow-x-hidden'>
       <Table
         rowSelection={rowSelection}
         dataSource={TableDatas}
@@ -486,11 +521,13 @@ const Repair = ({ officeData }) => {
           pageSize: 6,
         }}
       />
+      </div>
       <Modal                                //Add to Storage Modal 
         title="Send to Storage"
         open={StorageModal}
+        centered={true}
         onCancel={closeStorageModal}
-        width={"1200px"}
+        width={1000}
         footer={[
           <Button key="1"
             onClick={PostStorage}
@@ -507,17 +544,17 @@ const Repair = ({ officeData }) => {
             Cancel
           </Button>
         ]}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+        
+          <div className='my-3'>
             <Select
-              style={{ width: "20%" }}
               placeholder="Change Office Location"
               options={officeOption}
               // value={system.officeLocationId}
               onChange={officeNameDropdowninProduct}
             />
           </div>
-        </div>
+       
+        <div className='overflow-x-scroll md:overflow-x-hidden'>
         <Table
           columns={modalColumn}
           dataSource={selectedrowrepairData}
@@ -526,9 +563,11 @@ const Repair = ({ officeData }) => {
           }}
         >
         </Table>
+        </div>
       </Modal>
 
       <Modal
+      centered={true}
         title="Products History"
         open={repairHistoryModal}
         onOk={CloseRepairHistoryModal}

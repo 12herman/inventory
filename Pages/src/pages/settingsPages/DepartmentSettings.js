@@ -2,9 +2,9 @@ import { Button } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteDepartment, getDepartment, postDepartment, putDepartment } from "../../redux/slices/departmentSlice";
-import { Popconfirm, Table, Modal, Form, Input, message } from 'antd';
+import { Popconfirm, Table, Modal, Form, Input, message,Divider } from 'antd';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faTrash, faPlus ,faChevronLeft} from "@fortawesome/free-solid-svg-icons";
 
 const DepartmentSettings = ({ BackToSetting }) => {
 
@@ -63,13 +63,13 @@ const DepartmentSettings = ({ BackToSetting }) => {
                         okButtonProps={{ style: { backgroundColor: 'red', color: 'white' } }}
                         onConfirm={() => Deletebtn(record)}
                     >
-                        <Button><FontAwesomeIcon icon={faTrash} /></Button>
+                        <Button type="link"><FontAwesomeIcon icon={faTrash} color="#fd5353"/></Button>
                     </Popconfirm>
 
-                    <Button
+                    <Button type="link"
                         onClick={() => PencelBtn(record)}
                     >
-                        <FontAwesomeIcon icon={faPen} /></Button>
+                        <FontAwesomeIcon icon={faPen} color="#000000"/></Button>
 
                 </div>
 
@@ -161,11 +161,36 @@ const DepartmentSettings = ({ BackToSetting }) => {
 
     return (
         <>
-            <div className="flex items-center justify-between" >
-                <h2>Department Settings</h2>
-                <Button style={{ float: "right" }} onClick={() => BackToSetting()}> Back</Button>
-            </div>
-            <Button onClick={() => AddNewBtn()} type='primary' className='bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3'> <span>Add New Role</span> <FontAwesomeIcon icon={faPlus} className='icon' /> </Button>
+
+<ul className="flex flex-col md:flex-row gap-y-3 md:items-center justify-between">
+        <li>
+          <h2 className="text-xl">Department Settings</h2>
+        </li>
+        <li className="flex flex-col xs:flex-row gap-x-2 gap-y-3 xs:gap-y-0 mt-5 md:mt-0">
+          <Button
+            className="flex justify-center items-center gap-x-2"
+            type="dashed"
+            onClick={() => BackToSetting()}
+          >
+            <FontAwesomeIcon
+              className="text-[10px] inline-block"
+              icon={faChevronLeft}
+            />
+            <span>Back</span>
+          </Button>
+          <Button
+            onClick={() => AddNewBtn(true)}
+            type="primary"
+            className="bg-blue-500 flex items-center justify-center gap-x-1"
+          >
+            <span>Add New Role</span>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+          </Button>
+        </li>
+      </ul>
+
+      <Divider />
+      <div className="overflow-x-scroll md:overflow-x-hidden mt-7">
             <Table
                 style={{ marginTop: 10 }}
                 bordered
@@ -175,26 +200,27 @@ const DepartmentSettings = ({ BackToSetting }) => {
                     pageSize: 6
                 }}
             />
-
+            </div>
             <Modal
+                centered={true}
                 title={`Add New ${headingValue}`}
                 open={modelOpen}
                 onCancel={ModelClose}
                 //onOk={handleOk}
                 footer={[
                     saveBtn === false ? <Button key="1" onClick={PostMethod}>Add</Button> : <Button key="1" onClick={PutMethod} >Save</Button>,
-                    <Button type='text' key="2" danger="red" style={{ border: "0.5px solid red" }} onClick={() => ModelClose()}>Close</Button>
+                    <Button type='default' key="2" danger="red"  onClick={() => ModelClose()}>Close</Button>
                 ]}>
 
-                <Form >
+                <Form layout="vertical" className="mt-3">
                     {/* deprartmentname */}
-                    <Form.Item label={`${headingValue} Name`} style={{ marginBottom: 0, marginTop: 10 }}>
-                        <Input style={{ float: "right", width: "345px" }} placeholder='Department name' name='departmentName' value={inputFields.departmentName} onChange={inputValue} />
+                    <Form.Item label={`${headingValue} Name`} >
+                        <Input  placeholder='Department name' name='departmentName' value={inputFields.departmentName} onChange={inputValue} />
                     </Form.Item>
 
 
                 </Form>
-            </Modal >
+            </Modal>
 
         </>
     )

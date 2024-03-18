@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash, faPen } from '@fortawesome/free-solid-svg-icons';
-import { Button, Modal, Popconfirm,Table, message,Form,Input } from "antd";
+import { faPlus, faTrash, faPen, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { Button, Modal, Popconfirm,Table, message,Form,Input,Divider } from "antd";
 import React, { useEffect,useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getbrand, postbrand, putbrand,deletebrand} from "../../redux/slices/brandSlice";
@@ -33,11 +33,11 @@ const BrandSettings = ({BackToSetting})=>{
                        okButtonProps={{style: {backgroundColor:"red" ,color:"white"}}}
                        onConfirm={() => DeleteMethod(record)}
                     >
-                        <Button><FontAwesomeIcon icon={faTrash} /></Button>
+                        <Button type="link"><FontAwesomeIcon icon={faTrash} color="#fd5353" /></Button>
                     </Popconfirm>  
-                    <Button onClick={() => PencilBtn(record.key)}
+                    <Button type="link" onClick={() => PencilBtn(record.key)}
                     >
-                        <FontAwesomeIcon icon={faPen} />
+                        <FontAwesomeIcon color="#000000" icon={faPen} />
                     </Button> 
                 </div>
             )
@@ -223,11 +223,41 @@ const BrandSettings = ({BackToSetting})=>{
 
 return(
     <>
-       <div className="flex items-center justify-between" >
-       <h2>Brand Settings</h2>
+       <ul className="flex flex-col md:flex-row gap-y-3 md:items-center justify-between">
+        <li>
+          <h2 className="text-xl">Brand Settings</h2>
+        </li>
+        <li className="flex flex-col xs:flex-row gap-x-2 gap-y-3 xs:gap-y-0 mt-5 md:mt-0">
+          <Button
+            className="flex justify-center items-center gap-x-2"
+            type="dashed"
+            onClick={() => BackToSetting()}
+          >
+            <FontAwesomeIcon
+              className="text-[10px] inline-block"
+              icon={faChevronLeft}
+            />
+            <span>Back</span>
+          </Button>
+          <Button
+            onClick={() => AddNewBtn()}
+            type="primary"
+            className="bg-blue-500 flex items-center justify-center gap-x-1"
+          >
+            <span>Add New Brand</span>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+          </Button>
+        </li>
+      </ul>
+       
+       {/* <div className="flex items-center justify-between" >
+       <h2></h2>
         <Button style={{float:"right"}} onClick={()=>BackToSetting()}> Back</Button>
        </div>
-       <Button onClick={() => AddNewBtn()} type='primary' className='bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3'> <span>Add New Brand</span> <FontAwesomeIcon icon={faPlus} className='icon' /> </Button>
+       <Button onClick={() => AddNewBtn()} type='primary' className='bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3'> <span>Add New Brand</span> <FontAwesomeIcon icon={faPlus} className='icon' /> </Button> */}
+       <Divider />
+       
+       <div className="overflow-x-scroll md:overflow-x-hidden mt-7">
        <Table
                 style={{ marginTop: 10 }}
                 bordered
@@ -237,9 +267,11 @@ return(
                 pageSize: 6
             }}
             />
+            </div>
             <Modal
             title={`Add New ${headingValue}`}
             open={modalOpen}
+            centered={true}
             onCancel={ModalClose}
             footer={
                 [
@@ -247,9 +279,9 @@ return(
                     <Button type='text' key="2" danger="red" style={{border:"0.5px solid red"}} onClick={() =>ModalClose()}>Close</Button>
                 ]
             }>
-                <Form>
-                    <Form.Item label="Name" style={{marginBottom:0,marginTop:10}}>
-                        <Input style={{float:"right",width:"380px"}} placeholder="Brand Name" name="BrandName" value={Brand.Name} onChange={InputDataFields} />
+                <Form layout="vertical mt-3">
+                    <Form.Item label="Name" className="mb-2">
+                        <Input  placeholder="Brand Name" name="BrandName" value={Brand.Name} onChange={InputDataFields} />
                     </Form.Item>
                 </Form>
             </Modal>

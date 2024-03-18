@@ -53,7 +53,7 @@ const Accessories = ({Id,Employees}) => {
 
 
   const isDeleteOffice = office.filter(off => off.isdeleted === false);
-  console.log(isDeleteOffice);
+  // console.log(isDeleteOffice);
 
   
   // const EmployeeFiltering = 
@@ -72,7 +72,7 @@ const Accessories = ({Id,Employees}) => {
 const Emp = employee.filter(emp => emp.id === Id) ;
 const EmpFilter = Emp && typeof Emp === 'object' ?  Emp[0] : undefined;
 
-console.log(EmpFilter);
+// console.log(EmpFilter);
 
 const LoginUser = EmpFilter && EmpFilter !== undefined ? EmpFilter.firstName +" "+ EmpFilter.lastName : null;
 
@@ -236,97 +236,7 @@ const LoginUser = EmpFilter && EmpFilter !== undefined ? EmpFilter.firstName +" 
   
 
   return (
-//     <Layout style={{ position: 'relative' }}>
 
-//       <Sider trigger={null} collapsible collapsed={collapsed} style={{
-//         height: '100vh', zIndex: 99,
-//         //position:'fixed'
-//       }}>
-//         <div className="demo-logo-vertical" />
-
-//         <Menu
-//   theme="dark"
-//   mode="inline"
-//   defaultSelectedKeys={['1']}
-//   onClick={({ key }) => handleMenuClick(menuItems.find((item) =>  item.key === key ))}
-//   items={ menuItems.map((item) => ({
-//     key: item.key,
-//     icon: item.icon,
-//     label: item.label,
-//   }))}
-// />
-//       </Sider>
-
-//       <Layout>
-//         <Header
-//           style={{
-//             padding: 0,
-//             background: colorBgContainer,
-//             fontSize: '25px',
-//             fontWeight: 'bold',
-//             // margin: '0px 0px 0px 15%',
-//           }}>
-//           <Row justify='space-between' align='middle' >
-//             <Col>
-//               <Button
-//                 type="text"
-//                 icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-//                 onClick={() => setCollapsed(!collapsed)}
-//                 style={{
-//                   fontSize: '26px',
-//                   width: 64,
-//                   height: 64,
-
-//                 }}
-//               />
-//               {selectedMenuItem ? selectedMenuItem.label : 'Dashboard'}
-//             </Col>
-//             <Col justify='flex-end' style={{ right: '1%' }}>
-//               <div className='flex justify-center items-center gap-x-2'>
-                  
-//                   <Dropdown  overlay={officeMenu} trigger={['click']} placement="bottomLeft">
-//                     <Button>
-//                       <Space>
-//                         {selectedOffice ? selectedOffice : 'All Office'} <DownOutlined />
-//                       </Space>
-//                     </Button>
-//                   </Dropdown>
-
-//                   <LogoutPage/>
-//               </div>
-//             </Col>
-//           </Row>
-//         </Header>
-
-
-
-//         <Content //content
-//           className="custom-content"
-//           style={{
-//             //width:'85%',
-//             //margin: '10px 10px 0px 15%',
-//             margin: '20px 20px',
-//             padding: 24,
-//             background: colorBgContainer,
-//             borderRadius: borderRadiusLG,
-//             height: `auto`,
-//             overflow:'auto'
-//           }}>
-//           {selectedMenuItem ? (
-//             React.cloneElement(selectedMenuItem.Content, {
-//               key: selectedMenuItem.Components, // Ensure a unique key for each component
-//               officeData: officeData,
-//               LoginUser:LoginUser,
-//             })
-//           ) : <Dashboard officeData={officeData} />}
-
-//         </Content>
-
-
-
-
-//       </Layout>
-//     </Layout>
 <main className={`relative w-11/12 ${ isMobile === true ? "mx-auto" : " ml-auto"} transition-all ease-in duration-300`}>
 
 <ul className="header bg-blue-500 px-5 fixed flex justify-between top-[0px] left-[0px] z-10 w-full  shadow-md  py-5 ">
@@ -351,7 +261,7 @@ const LoginUser = EmpFilter && EmpFilter !== undefined ? EmpFilter.firstName +" 
         </li>
       </ul>
 
-      <ul className={`transition-all ease-in duration-300 menu-slide fixed bg-white border top-16  h-screen z-10 
+      <ul className={`transition-all ease-in duration-300 menu-slide fixed bg-white border top-16  h-screen z-50 
       ${Nav.open === false && isMobile === false ? "w-[200px]" : 
       isMobile === true && Nav.open === false ? " left-0 w-[200px]" 
     : isMobile === true && Nav.open === true ? "-left-[150%]  w-[200px]" 

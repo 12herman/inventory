@@ -1,11 +1,32 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Popconfirm, Table, message, Col, Row, Statistic, Divider, Tag, Modal, Select } from 'antd';
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Popconfirm,
+  Table,
+  message,
+  Col,
+  Row,
+  Statistic,
+  Divider,
+  Tag,
+  Modal,
+  Select,
+} from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faUser, faScrewdriverWrench } from "@fortawesome/free-solid-svg-icons";
-import CountUp from 'react-countup';
-import { useDispatch, useSelector } from 'react-redux';
-import { getProductsDetail, putProductsDetail } from '../redux/slices/productsDetailSlice';
-import { postProductsRepairHistory } from '../redux/slices/productsrepairhistorySlice';
+import {
+  faTrash,
+  faUser,
+  faScrewdriverWrench,
+} from "@fortawesome/free-solid-svg-icons";
+import CountUp from "react-countup";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getProductsDetail,
+  putProductsDetail,
+} from "../redux/slices/productsDetailSlice";
+import { postProductsRepairHistory } from "../redux/slices/productsrepairhistorySlice";
 
 const formatter = (value) => <CountUp end={value} />;
 
@@ -14,20 +35,26 @@ const Storage = ({ officeData }) => {
 
   //Post to Repair Page Function Validation
   const onFinish = () => {
-    form.validateFields().then((values) => {
-      PostRepair();
-    }).catch((errorInfo) => {
-      console.log('Validation failed:', errorInfo);
-    });
+    form
+      .validateFields()
+      .then((values) => {
+        PostRepair();
+      })
+      .catch((errorInfo) => {
+        console.log("Validation failed:", errorInfo);
+      });
   };
 
   //Assign to Employee Function
   const onAssign = () => {
-    form.validateFields().then((values) => {
-      ProductAssign();
-    }).catch((errorInfo) => {
-      console.log("Validation Failed", errorInfo);
-    });
+    form
+      .validateFields()
+      .then((values) => {
+        ProductAssign();
+      })
+      .catch((errorInfo) => {
+        console.log("Validation Failed", errorInfo);
+      });
   };
   const [searchText, setSearchText] = useState("");
 
@@ -39,7 +66,7 @@ const Storage = ({ officeData }) => {
     {
       title: "S.No",
       dataIndex: "SNo",
-      key: "SNo"
+      key: "SNo",
     },
     {
       title: "Product Name",
@@ -90,34 +117,37 @@ const Storage = ({ officeData }) => {
       title: "Status",
       key: "tags",
       dataIndex: "tags",
-      render: (x, text, record) =>
-      (
-
+      render: (x, text, record) => (
         <>
-          <div className="flex gap-x-2 pt-2">{
-            text.isRepair === true ? <Tag color="yellow">Repair</Tag>
-              : text.isAssigned === true
-                ? <Tag color="green">Assigned</Tag>
-                : text.isStorage === true ? <Tag color="orange">Storage</Tag>
-                  : text.isAssigned === false ? <Tag color="red">Not Assigned</Tag> : 0
-          }
-            {
-              text.employeeId === null ?
-                "" : <Tag color="blue">
-                  {text.employeeId}
-                </Tag>
-            }
-          </div></>
+          <div className="flex gap-x-2 pt-2">
+            {text.isRepair === true ? (
+              <Tag color="yellow">Repair</Tag>
+            ) : text.isAssigned === true ? (
+              <Tag color="green">Assigned</Tag>
+            ) : text.isStorage === true ? (
+              <Tag color="orange">Storage</Tag>
+            ) : text.isAssigned === false ? (
+              <Tag color="red">Not Assigned</Tag>
+            ) : (
+              0
+            )}
+            {text.employeeId === null ? (
+              ""
+            ) : (
+              <Tag color="blue">{text.employeeId}</Tag>
+            )}
+          </div>
+        </>
       ),
     },
   ];
 
-  //Columns that are appeared in the Repair modal 
+  //Columns that are appeared in the Repair modal
   const modalColumn = [
     {
       title: "S.No",
       dataIndex: "SNo",
-      key: "SNo"
+      key: "SNo",
     },
     {
       title: "Product Name",
@@ -168,17 +198,17 @@ const Storage = ({ officeData }) => {
       title: "Office Location",
       dataIndex: "officeLocationId",
       key: "officeLocationId",
-    }
+    },
   ];
 
-  const [comments, setComments] = useState('');
+  const [comments, setComments] = useState("");
 
   const currentDate = new Date();
   const formattedDate = currentDate.toISOString().slice(0, 19);
 
   const dispatch = useDispatch();
 
-  const { productsDetail } = useSelector(state => state.productsDetail);
+  const { productsDetail } = useSelector((state) => state.productsDetail);
 
   const { office } = useSelector((state) => state.office);
 
@@ -213,7 +243,7 @@ const Storage = ({ officeData }) => {
     isStorage: false,
     officeLocationId: null,
     comments: "",
-    employeeId: null
+    employeeId: null,
   });
 
   const [popConfirmRepairVisible, setPopConfirmRepairVisible] = useState(false);
@@ -229,9 +259,8 @@ const Storage = ({ officeData }) => {
     DataLoading();
   }, [officeData, productsDetail, loadTable]);
 
-  //Filter Table Data Based on the Office in Dropdown 
+  //Filter Table Data Based on the Office in Dropdown
   function DataLoading() {
-
     var numberOfOffice = officeData.filter((off) => off.isdeleted === false);
 
     var officeNames = numberOfOffice.map((off) => {
@@ -239,24 +268,43 @@ const Storage = ({ officeData }) => {
     });
 
     if (officeNames.length === 1) {
-      const filterOneOffice = productsDetail ? productsDetail.filter(system => system.isDeleted === false && system.officeName === officeNames[0] && system.isStorage === true) : 0;
+      const filterOneOffice = productsDetail
+        ? productsDetail.filter(
+            (system) =>
+              system.isDeleted === false &&
+              system.officeName === officeNames[0] &&
+              system.isStorage === true
+          )
+        : 0;
       console.log(filterOneOffice);
       setstorageLocationCount(filterOneOffice.length);
       setTableData(filterOneOffice);
-    }
-    else {
-      const filterAllOffice = productsDetail ? productsDetail.filter(system => system.isDeleted === false && system.isStorage === true) : 0;
+    } else {
+      const filterAllOffice = productsDetail
+        ? productsDetail.filter(
+            (system) => system.isDeleted === false && system.isStorage === true
+          )
+        : 0;
       setstorageLocationCount(filterAllOffice.length);
       setTableData(filterAllOffice);
-
     }
   }
 
-  //Table Data 
+  //Table Data
   const [tableData, setTableData] = useState([]);
 
   //Displayed table in UI
-  const FilterDatas = tableData && tableData.length > 0 ? tableData.filter(data => data.isDeleted === false && data.isStorage === true && data.isRepair === false).sort((a, b) => a.id - b.id) : []
+  const FilterDatas =
+    tableData && tableData.length > 0
+      ? tableData
+          .filter(
+            (data) =>
+              data.isDeleted === false &&
+              data.isStorage === true &&
+              data.isRepair === false
+          )
+          .sort((a, b) => a.id - b.id)
+      : [];
 
   const TableDatas = FilterDatas.map((data, i) => ({
     SNo: i + 1,
@@ -274,8 +322,8 @@ const Storage = ({ officeData }) => {
     isAssigned: data.isAssigned,
     isStorage: false,
     comments: data.comments,
-    employeeId: data.employeeName
-  }))
+    employeeId: data.employeeName,
+  }));
   // console.log(TableDatas);
 
   //Row key selection
@@ -291,15 +339,15 @@ const Storage = ({ officeData }) => {
     selectedRowKeys,
     onChange: onSelectChange,
     getCheckboxProps: (record) => ({
-      disabled: record.isAssigned === true
+      disabled: record.isAssigned === true,
     }),
     selections: [
       Table.SELECTION_ALL,
       Table.SELECTION_INVERT,
       Table.SELECTION_NONE,
       {
-        key: 'odd',
-        text: 'Select Odd Row',
+        key: "odd",
+        text: "Select Odd Row",
         onSelect: (changeableRowKeys) => {
           let newSelectedRowKeys = [];
           newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
@@ -310,11 +358,10 @@ const Storage = ({ officeData }) => {
           });
           setSelectedRowKeys(newSelectedRowKeys);
         },
-
       },
       {
-        key: 'even',
-        text: 'Select Even Row',
+        key: "even",
+        text: "Select Even Row",
         onSelect: (changeableRowKeys) => {
           let newSelectedRowKeys = [];
           newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
@@ -349,7 +396,7 @@ const Storage = ({ officeData }) => {
       isAssigned: false,
       officeLocationId: null,
       comments: null,
-      employeeId: null
+      employeeId: null,
     });
     OpenAssignModal();
     setPopConfirmAssignVisible(false);
@@ -382,8 +429,8 @@ const Storage = ({ officeData }) => {
       isAssigned: false,
       officeLocationId: null,
       comments: null,
-      employeeId: null
-    })
+      employeeId: null,
+    });
     OpenRepairModal();
     setPopConfirmRepairVisible(false);
     setSelectedRowKeys(temporaryKey);
@@ -397,10 +444,12 @@ const Storage = ({ officeData }) => {
 
   //Send Repair Function
   const PostRepair = async () => {
-    const ProductRepair = await productsDetail.filter(data => SelectedIds.some(id => id === data.id));
+    const ProductRepair = await productsDetail.filter((data) =>
+      SelectedIds.some((id) => id === data.id)
+    );
     console.log(ProductRepair);
 
-    const UpdateRepairedProductDetails = await ProductRepair.map(data => ({
+    const UpdateRepairedProductDetails = await ProductRepair.map((data) => ({
       id: data.id,
       accessoriesId: data.accessoriesId,
       brandId: data.brandId,
@@ -417,10 +466,10 @@ const Storage = ({ officeData }) => {
       isStorage: false,
       officeLocationId: data.officeLocationId,
       comments: comments,
-      employeeId: data.employeeId
+      employeeId: data.employeeId,
     }));
 
-    const UpdateProductRepairHistory = await ProductRepair.map(data2 => ({
+    const UpdateProductRepairHistory = await ProductRepair.map((data2) => ({
       productsDetailId: data2.id,
       comments: comments,
       createdDate: data2.createdDate,
@@ -428,34 +477,32 @@ const Storage = ({ officeData }) => {
       modifiedDate: data2.modifiedDate,
       modifiedBy: data2.modifiedBy,
       isDeleted: data2.isDeleted,
-
     }));
 
-    UpdateRepairedProductDetails.map(async data => {
+    UpdateRepairedProductDetails.map(async (data) => {
       await dispatch(putProductsDetail(data));
       await dispatch(getProductsDetail());
-
     });
 
-    UpdateProductRepairHistory.map(async data2 => {
+    UpdateProductRepairHistory.map(async (data2) => {
       await dispatch(postProductsRepairHistory(data2));
-    })
+    });
 
     CloseRepairModal();
     setIsButtonEnabled(false);
+  };
 
-  }
-
-
-  //Product Assign 
+  //Product Assign
   const ProductAssign = async () => {
     if (system.employeeId === undefined) {
-      message.error("Select an Employee")
+      message.error("Select an Employee");
     } else {
-      const ProductAssignation = await productsDetail.filter(data => SelectedIds.some(id => id === data.id));
+      const ProductAssignation = await productsDetail.filter((data) =>
+        SelectedIds.some((id) => id === data.id)
+      );
       console.log(ProductAssignation);
 
-      const updateProductAssignation = await ProductAssignation.map(data => ({
+      const updateProductAssignation = await ProductAssignation.map((data) => ({
         id: data.id,
         accessoriesId: data.accessoriesId,
         brandId: data.brandId,
@@ -473,17 +520,21 @@ const Storage = ({ officeData }) => {
         officeLocationId: data.officeLocationId,
         comments: comments,
         employeeId: system.employeeId,
-      }))
+      }));
 
-      await Promise.all(updateProductAssignation.map(data => dispatch(putProductsDetail(data))));
+      await Promise.all(
+        updateProductAssignation.map((data) =>
+          dispatch(putProductsDetail(data))
+        )
+      );
       await setLoadTable(!loadTable);
       // await dispatch(getProductsDetail());
       CloseAssignModal();
       setIsButtonEnabled(false);
       setSelectedRowKeys([]);
       //  setSystem(pre => ({...pre,employeeId:null}))
-    };
-  }
+    }
+  };
 
   // //Delete Button Function
   // const DeleteIcon = async () => {
@@ -520,14 +571,15 @@ const Storage = ({ officeData }) => {
   //   setSelectedRowKeys([]);
   // };
 
-
   //Employee Dropdown option
   const employeeOption = [
-    { label: 'Select an Employee', value: null },
-    ...employee.filter(empacc => !empacc.isDeleted).map(emp => ({
-      label: emp.firstName,
-      value: emp.id
-    })),
+    { label: "Select an Employee", value: null },
+    ...employee
+      .filter((empacc) => !empacc.isDeleted)
+      .map((emp) => ({
+        label: emp.firstName,
+        value: emp.id,
+      })),
   ];
 
   //Employee Dropdown
@@ -539,21 +591,125 @@ const Storage = ({ officeData }) => {
     } else {
       setAssignStatus(true);
     }
-  }
+  };
 
-  const selectedrowrepairData = TableDatas.filter(row => selectedRowKeys.includes(row.key));
+  const selectedrowrepairData = TableDatas.filter((row) =>
+    selectedRowKeys.includes(row.key)
+  );
   return (
     <div>
-      <Row justify='space-between' align='middle' gutter={12} className="flex justify-between items-center">
-        <Col span={4} className="grid grid-flow-col gap-x-10 items-center">
+      <ul className="flex flex-col gap-y-3 md:gap-y-0 md:flex-row justify-between items-start md:items-center">
+
+        <li className="flex justify-center items-center gap-x-10 self-center xs:self-start">
           <Statistic
-            className="block w-fit"
+            className="block w-fit lg:w-[120px] text-center"
             title="Storage Count"
             value={storageLocationCount}
             formatter={formatter}
             valueStyle={{ color: "#3f8600" }}
           />
-        </Col>{" "}
+          <Input.Search
+            className="hidden w-fit md:block"
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+          />
+        </li>
+
+        <li className="flex flex-col xm:flex-row gap-x-2 gap-y-3 md:gap-y-0 w-full xs:w-fit">
+          <Popconfirm //Assign to Employee Button
+            title="Are you sure you want to assign the Products to Employee?"
+            open={popConfirmAssignVisible}
+            onConfirm={handleAsssignConfirm}
+            onCancel={handleAssignCancel}
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{
+              style: { backgroundColor: "#4088ff" },
+            }}
+          >
+            <Button
+              type="primary"
+              className="bg-blue-500 flex gap-x-2 justify-center items-center"
+              open={AssignModal}
+              onClick={() => {
+                setPopConfirmAssignVisible(true);
+                setTemporaryCheckKey(selectedRowKeys);
+                // Store the temporary selected row keys
+              }}
+              disabled={!isButtonEnabled}
+            >
+              <FontAwesomeIcon
+                icon={faUser}
+                className="icon"
+                
+              />
+
+              <span > Assign to Employee</span>
+            </Button>
+          </Popconfirm>
+
+
+          <Popconfirm
+            title="Are you sure you want to transfer the Products to Repair?"
+            open={popConfirmRepairVisible}
+            onConfirm={handleRepairConfirm}
+            onCancel={handleRepairCancel}
+            okText="Yes"
+            cancelText="No"
+            okButtonProps={{
+              style: { backgroundColor: "#4088ff" },
+            }}
+          >
+            <Button
+              type="primary"
+              className="bg-blue-500 flex gap-x-2 justify-center items-center" //Transfer to Repair Button
+              open={RepairModal}
+              onClick={() => {
+                setPopConfirmRepairVisible(true);
+                setTemporaryKey(selectedRowKeys); // Store the temporary selected row keys
+              }}
+              disabled={!isButtonEnabled}
+            >
+              <FontAwesomeIcon
+                icon={faScrewdriverWrench}
+                className="icon"
+                
+              />
+              <span >Add to Repair</span>
+            </Button>
+          </Popconfirm>
+        </li>
+
+        <li  className="block w-full md:hidden">
+        <Input.Search
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+          />
+        </li>
+
+      </ul>
+
+
+      {/* <Row
+        justify="space-between"
+        align="middle"
+        gutter={12}
+        className="flex justify-between items-center"
+      >
+        <Col
+          span={4}
+          className="grid grid-flow-col gap-x-10 items-center"
+        ></Col>{" "}
         <Col span={10} style={{ right: "16.50%", width: "100%" }}>
           {" "}
           <Input.Search
@@ -565,63 +721,11 @@ const Storage = ({ officeData }) => {
             onChange={(e) => {
               setSearchText(e.target.value);
             }}
-
           />
         </Col>
-
-        <Col justify='flex-end' style={{ left: '6%', }}>
-          <Popconfirm                                                              //Assign to Employee Button
-            title="Are you sure you want to assign the Products to Employee?"
-            open={popConfirmAssignVisible}
-            onConfirm={handleAsssignConfirm}
-            onCancel={handleAssignCancel}
-            okText="Yes"
-            cancelText="No"
-            okButtonProps={{
-              style: { backgroundColor: "#4088ff" }
-            }}
-          >
-            <Button type="primary" className='bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3'
-              open={AssignModal}
-              onClick={() => {
-                setPopConfirmAssignVisible(true);
-                setTemporaryCheckKey(selectedRowKeys);
-                // Store the temporary selected row keys
-              }}
-              disabled={!isButtonEnabled}
-            >
-              <FontAwesomeIcon icon={faUser} className="icon" style={{ marginRight: '5px' }} />
-
-              <span style={{ marginLeft: '5px' }}> Assign to Employee</span></Button>
-          </Popconfirm>
-        </Col>
-
-        <Col justify='flex-end' style={{ right: '0%' }}>
-          <Popconfirm
-            title="Are you sure you want to transfer the Products to Repair?"
-            open={popConfirmRepairVisible}
-            onConfirm={handleRepairConfirm}
-            onCancel={handleRepairCancel}
-            okText="Yes"
-            cancelText="No"
-            okButtonProps={{
-              style: { backgroundColor: "#4088ff" }
-            }}
-          >
-            <Button type="primary" className="bg-blue-500 flex items-center gap-x-1float-right mb-3 mt-3"    //Transfer to Repair Button
-              open={RepairModal}
-              onClick={() => {
-                setPopConfirmRepairVisible(true);
-                setTemporaryKey(selectedRowKeys); // Store the temporary selected row keys
-              }}
-              disabled={!isButtonEnabled}
-            >
-              <FontAwesomeIcon icon={faScrewdriverWrench} className="icon" style={{ marginRight: '5px' }} />
-              <span style={{ marginLeft: '5px' }}>Add to Repair</span>
-            </Button></Popconfirm>
-        </Col>
-
-        {/* <Col justify='flex-end' style={{ right: '1%' }}>
+        <Col justify="flex-end" style={{ left: "6%" }}></Col>
+        <Col justify="flex-end" style={{ right: "0%" }}></Col>
+         <Col justify='flex-end' style={{ right: '1%' }}>
           <Popconfirm
             title="Are you sure to delete this?"
             okText="Yes"
@@ -638,10 +742,10 @@ const Storage = ({ officeData }) => {
               <FontAwesomeIcon icon={faTrash} color="#fd5353" />
             </Button>
           </Popconfirm>
-        </Col> */}
-
-      </Row>
+        </Col> 
+      </Row> */}
       <Divider />
+      <div className="overflow-x-scroll md:overflow-x-hidden">
       <Table
         rowSelection={rowSelection}
         dataSource={TableDatas}
@@ -650,16 +754,17 @@ const Storage = ({ officeData }) => {
           pageSize: 6,
         }}
       />
+      </div>
+     
 
-      <Modal                                //Assign to Employee Modal 
+      <Modal //Assign to Employee Modal
+      centered={true}
         title="Assign to Employee"
         open={AssignModal}
         onCancel={CloseAssignModal}
-        width={"1200px"}
+        width={1000}
         footer={[
-          <Button key="1"
-            onClick={onAssign}
-          >
+          <Button key="1" onClick={onAssign}>
             Assign
           </Button>,
           <Button
@@ -670,15 +775,13 @@ const Storage = ({ officeData }) => {
             onClick={() => CloseAssignModal()}
           >
             Cancel
-          </Button>
-        ]}>
+          </Button>,
+        ]}
+      >
         <Form>
-          <Form.Item
-            style={{ marginBottom: 0, marginTop: 10 }}
-          >
+          <Form.Item className="w-fit mt-3">
             <Select
               showSearch
-              style={{ width: 380, float: "right" }}
               placeholder="Select Employee Name"
               optionFilterProp="children"
               filterOption={(input, option) =>
@@ -696,27 +799,27 @@ const Storage = ({ officeData }) => {
           </Form.Item>
         </Form>
 
-        <Divider />
+        {/* <Divider /> */}
 
-        <Table
+       <div className="overflow-x-scroll md:overflow-x-hidden">
+       <Table
           columns={modalColumn}
           dataSource={selectedrowrepairData}
           pagination={{
             pageSize: 6,
           }}
-        >
-        </Table>
+        ></Table>
+       </div>
       </Modal>
 
-      <Modal                                //Add to Repair Modal 
+      <Modal //Add to Repair Modal
         title="Add to Repair"
+        centered={true}
         open={RepairModal}
         onCancel={CloseRepairModal}
-        width={"1200px"}
+        width={1000}
         footer={[
-          <Button key="1"
-            onClick={onFinish}
-          >
+          <Button key="1" onClick={onFinish}>
             Send
           </Button>,
           <Button
@@ -727,30 +830,38 @@ const Storage = ({ officeData }) => {
             onClick={() => CloseRepairModal()}
           >
             Cancel
-          </Button>
-        ]}>
+          </Button>,
+        ]}
+      >
         <Form form={form}>
           <Form.Item
+          className="mt-3"
             name="comments"
-            rules={[{ required: true, message: 'Add a Comment!' }]}
+            rules={[{ required: true, message: "Add a Comment!" }]}
           >
-            <Input.TextArea rows={3} style={{ width: "40%" }} placeholder='Add a Comment...' value={comments} onChange={(e) => setComments(e.target.value)} />
+            <Input.TextArea
+              rows={3}
+              placeholder="Add a Comment..."
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+            />
           </Form.Item>
         </Form>
 
-        <Divider />
-
+        {/* <Divider /> */}
+        <div className="overflow-x-scroll md:overflow-x-hidden">
         <Table
           columns={modalColumn}
           dataSource={selectedrowrepairData}
           pagination={{
             pageSize: 6,
           }}
-        >
-        </Table>
+        ></Table>
+        </div>
+       
       </Modal>
     </div>
   );
-}
+};
 
 export default Storage;

@@ -9,10 +9,11 @@ import {
   Select,
   DatePicker,
   message,
+  Divider
 } from "antd";
 import en_US from "antd/lib/locale/en_US";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash, faPen,faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DeleteHoliday,
@@ -245,10 +246,38 @@ const HolidaySetting = ({ BackToSetting }) => {
   };
   return (
     <>
-      <div className="flex items-center justify-between">
-        <h2>Holiday Settings </h2>
+
+<ul className="flex flex-col md:flex-row gap-y-3 md:items-center justify-between">
+        <li>
+          <h2 className="text-xl">Holiday Settings</h2>
+        </li>
+        <li className="flex flex-col xs:flex-row gap-x-2 gap-y-3 xs:gap-y-0 mt-5 md:mt-0">
+          <Button
+            className="flex justify-center items-center gap-x-2"
+            type="dashed"
+            onClick={() => BackToSetting()}
+          >
+            <FontAwesomeIcon
+              className="text-[10px] inline-block"
+              icon={faChevronLeft}
+            />
+            <span>Back</span>
+          </Button>
+          <Button
+            onClick={() => AddBtn()}
+            type="primary"
+            className="bg-blue-500 flex items-center justify-center gap-x-1"
+          >
+            <span>Add Holiday</span>
+            <FontAwesomeIcon icon={faPlus} className="icon" />
+          </Button>
+        </li>
+      </ul>
+      <Divider />
+      {/* <div className="flex items-center justify-between">
+        <h2> </h2>
         <Button style={{ float: "right" }} onClick={() => BackToSetting()}>
-          {" "}
+          
           Back
         </Button>
       </div>
@@ -257,21 +286,22 @@ const HolidaySetting = ({ BackToSetting }) => {
         type="primary"
         className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
       >
-        {" "}
-        <span>Add Holiday</span>{" "}
-        <FontAwesomeIcon icon={faPlus} className="icon" />{" "}
-      </Button>
+        <span></span>
+        <FontAwesomeIcon icon={faPlus} className="icon" />
+      </Button> */}
+      <div className="overflow-x-scroll md:overflow-x-hidden">
       <Table
         style={{ marginTop: 10 }}
         bordered
         columns={columns}
         dataSource={HolidayData}
         pagination={{
-          pageSize: 6,
+          pageSize: 5,
         }}
       />
-
+ </div>
       <Modal
+      centered={true}
         title="Add New Holiday"
         open={FormPopUp}
         onCancel={ClosePopUp}
@@ -296,14 +326,13 @@ const HolidaySetting = ({ BackToSetting }) => {
           </Button>,
         ]}
       >
-        <Form form={form}>
+        <Form form={form} layout="vertical" className="mt-3">
           {/* RollName */}
-          <Form.Item
+          <Form.Item className="mb-2"
             label="Holiday Name"
-            style={{ marginBottom: 0, marginTop: 10 }}
+            
           >
             <Input
-              style={{ float: "right", width: widthSize }}
               placeholder="holiday name"
               name="holidayName"
               value={FormInData.holidayName}
@@ -311,22 +340,20 @@ const HolidaySetting = ({ BackToSetting }) => {
             />
           </Form.Item>
 
-          <Form.Item
+          <Form.Item className="mb-2 "
             name="DatePicker"
             label="Date"
-            style={{ marginBottom: 0, marginTop: 10 }}
           >
             <DatePicker
-              style={{ float: "right", width: widthSize }}
+            className="w-full"
               format={dateFormat}
               onChange={DateSelect}
               value={FormInData.date}
             />
           </Form.Item>
 
-          <Form.Item label="Office" style={{ marginBottom: 0, marginTop: 10 }}>
+          <Form.Item className="mb-2" label="Office" >
             <Select
-              style={{ float: "right", width: widthSize }}
               placeholder="office location"
               name="officeLocationId"
               value={FormInData.officeLocationId}

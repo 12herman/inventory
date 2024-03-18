@@ -10,6 +10,7 @@ import {
   DatePicker,
   Tag,
   message,
+  Divider,
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,6 +18,7 @@ import {
   faTrash,
   faPen,
   faRotate,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -76,15 +78,16 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
             }}
             onConfirm={() => Delete(record.key)}
           >
-            <Button disabled={SelectTableData}>
-              <FontAwesomeIcon icon={faTrash} />
+            <Button disabled={SelectTableData} type="link">
+              <FontAwesomeIcon icon={faTrash} color="#fd5353"/>
             </Button>
           </Popconfirm>
           <Button
+          type="link"
             disabled={SelectTableData}
             onClick={() => PencelBtn(record.key)}
           >
-            <FontAwesomeIcon icon={faPen} />
+            <FontAwesomeIcon icon={faPen} color="#000000" />
           </Button>
         </div>
       ),
@@ -290,7 +293,7 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
       await dispatch(Putemployeeleave(EmployeeLeaveIn));
       await dispatch(Getemployeeleave());
       await ModalClose();
-      await setSelectTableData(false)
+      await setSelectTableData(false);
     }
   };
   //delete method
@@ -372,98 +375,96 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
     }
   };
 
-
-
   //reset btn
-  const [ResetState,setResetState]= useState({
-    sickLeave:null,
-    casualLeave:null,
-    total:null,
-    leaveAvailed:0,
-    isDeleted:false,
+  const [ResetState, setResetState] = useState({
+    sickLeave: null,
+    casualLeave: null,
+    total: null,
+    leaveAvailed: 0,
+    isDeleted: false,
   });
-  const ClearResetState= ()=> setResetState({
-    sickLeave:null,
-    casualLeave:null,
-    total:null,
-    leaveAvailed:0,
-    isDeleted:false,
-  })
-  const [ResetModel,setResetModel]=useState(false);
-  const OpenRestModal=()=> {setResetModel(true);ClearResetState();};
-  const CloseResetModal=()=>setResetModel(false);
-  const ResetStateOnchange= (e)=>{
-    const {name,value}=e.target;
-    setResetState(pre=>({...pre,[name]:value}));
+  const ClearResetState = () =>
+    setResetState({
+      sickLeave: null,
+      casualLeave: null,
+      total: null,
+      leaveAvailed: 0,
+      isDeleted: false,
+    });
+  const [ResetModel, setResetModel] = useState(false);
+  const OpenRestModal = () => {
+    setResetModel(true);
+    ClearResetState();
+  };
+  const CloseResetModal = () => setResetModel(false);
+  const ResetStateOnchange = (e) => {
+    const { name, value } = e.target;
+    setResetState((pre) => ({ ...pre, [name]: value }));
     if (name === "sickLeave") {
       isNaN(value) === false
         ? setNumberValidate((pre) => ({ ...pre, sickLeave: false }))
         : setNumberValidate((pre) => ({ ...pre, sickLeave: true }));
-    } else{
+    } else {
       isNaN(value) === false
         ? setNumberValidate((pre) => ({ ...pre, casualLeave: false }))
         : setNumberValidate((pre) => ({ ...pre, casualLeave: true }));
     }
   };
   const ResetConfirm = async () => {
-    if (
-      ResetState.casualLeave === null ||
-      ResetState.sickLeave === null 
-    ) {
+    if (ResetState.casualLeave === null || ResetState.sickLeave === null) {
       message.error("fill the all field");
-    }
-    else if (
-      isNaN(ResetState.casualLeave) ||
-      isNaN(ResetState.sickLeave) 
-    ) {
+    } else if (isNaN(ResetState.casualLeave) || isNaN(ResetState.sickLeave)) {
       message.error("check the field it's not a number");
-    }
-    else{
+    } else {
       const FilterDeletingData = await employeeleave.filter((data) =>
-      selectedRowKeys.some((id) => id === data.id)
-    );
-    const updateDeletingData = await FilterDeletingData.map((data, i) => ({
-      id: data.id,
-      employeeId: data.employeeId,
-      sickLeave: data.sickLeave,
-      casualLeave: data.casualLeave,
-      total: data.total,
-      leaveAvailed: data.leaveAvailed,
-      isdeleted: true,
-      createdBy: data.createdBy,
-      createdDate: data.createdDate,
-      modifiedBy: data.modifiedBy,
-      modifiedDate: formattedDate,
-    }));
- 
-    //api delete
-    await updateDeletingData.map(async (data) => {
-      await dispatch(Putemployeeleave(data));
-      await dispatch(Getemployeeleave());
-    });
+        selectedRowKeys.some((id) => id === data.id)
+      );
+      const updateDeletingData = await FilterDeletingData.map((data, i) => ({
+        id: data.id,
+        employeeId: data.employeeId,
+        sickLeave: data.sickLeave,
+        casualLeave: data.casualLeave,
+        total: data.total,
+        leaveAvailed: data.leaveAvailed,
+        isdeleted: true,
+        createdBy: data.createdBy,
+        createdDate: data.createdDate,
+        modifiedBy: data.modifiedBy,
+        modifiedDate: formattedDate,
+      }));
 
-  //post method
-   const EmpIds= await updateDeletingData.map(getemp => getemp.employeeId);
-   const TotalLeaves=await parseInt(ResetState.casualLeave) +await parseInt(ResetState.sickLeave);
-   const YearlyLeaveData = await EmpIds.map(ids=>({
-    employeeId: ids,
-    sickLeave: ResetState.sickLeave,
-    casualLeave: ResetState.casualLeave,
-    total: TotalLeaves,
-    leaveAvailed: ResetState.leaveAvailed,
-    isdeleted: false,
-      // createdBy: data.createdBy,
-      // createdDate: data.createdDate,
-      // modifiedBy: data.modifiedBy,
-      // modifiedDate: formattedDate,
-  }));
-  await YearlyLeaveData.map(async(newdata)=>{
-   await dispatch(Postemployeeleave(newdata));
-   await dispatch(Getemployeeleave());
-  });
-  await CloseResetModal();
-  await ClearResetState();
-  await setSelectedRowKeys([]);
+      //api delete
+      await updateDeletingData.map(async (data) => {
+        await dispatch(Putemployeeleave(data));
+        await dispatch(Getemployeeleave());
+      });
+
+      //post method
+      const EmpIds = await updateDeletingData.map(
+        (getemp) => getemp.employeeId
+      );
+      const TotalLeaves =
+        (await parseInt(ResetState.casualLeave)) +
+        (await parseInt(ResetState.sickLeave));
+      const YearlyLeaveData = await EmpIds.map((ids) => ({
+        employeeId: ids,
+        sickLeave: ResetState.sickLeave,
+        casualLeave: ResetState.casualLeave,
+        total: TotalLeaves,
+        leaveAvailed: ResetState.leaveAvailed,
+        isdeleted: false,
+        // createdBy: data.createdBy,
+        // createdDate: data.createdDate,
+        // modifiedBy: data.modifiedBy,
+        // modifiedDate: formattedDate,
+      }));
+      await YearlyLeaveData.map(async (newdata) => {
+        await dispatch(Postemployeeleave(newdata));
+        await dispatch(Getemployeeleave());
+      });
+      await CloseResetModal();
+      await ClearResetState();
+      await setSelectedRowKeys([]);
     }
   };
 
@@ -540,77 +541,88 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <h2>Employee Leave Settings </h2>
-
-        <Button style={{ float: "right" }} onClick={() => BackToSetting()}>
-          {" "}
-          Back
-        </Button>
-      </div>
-
-      <>
-        {SelectTableData === true ? (
-          //multi edit and delete btn
-          <span className="flex items-center justify-end mt-2">
-            <Popconfirm
-              okButtonProps={{
-                style: { backgroundColor: "red", color: "white" },
-              }}
-              title="Reset the task"
-              description={<>Selected data is reset so <br/>are you sure to reset this data?</>}
-              okText="Yes"
-              cancelText="No"
-              onConfirm={OpenRestModal}
-              className="mr-2 flex items-center justify-center"
-            >
-              <Button danger>
-                {" "}
-                <FontAwesomeIcon
-                  icon={faRotate}
-                  className="icon mr-2"
-                /> Reset{" "}
-              </Button>
-            </Popconfirm>
-
-            <Button
-              onClick={() => MultiEditBtn()}
-              type="primary"
-              className="mr-2 bg-blue-500 flex justify-center items-center gap-x-2"
-            >
-              <FontAwesomeIcon icon={faPen} className="icon" />
-            </Button>
-
-            <Popconfirm
-              okButtonProps={{
-                style: { backgroundColor: "red", color: "white" },
-              }}
-              title="Delete the task"
-              description="Are you sure to delete this task?"
-              okText="Yes"
-              cancelText="No"
-              onConfirm={MultiDelete}
-            >
-              <Button danger>
-                <FontAwesomeIcon icon={faTrash} className="icon" />
-              </Button>
-            </Popconfirm>
-          </span>
-        ) : (
-          // add btn
+      <ul className="flex flex-col md:flex-row gap-y-3 md:items-center justify-between">
+        <li>
+          <h2 className="text-xl">Employee Leave Settings</h2>
+        </li>
+        <li className="flex flex-col xs:flex-row gap-x-2 gap-y-3 xs:gap-y-0 mt-5 md:mt-0">
           <Button
-            disabled={SelectTableData}
-            onClick={() => AddBtn()}
-            type="primary"
-            className="bg-blue-500 flex items-center gap-x-1 float-right mt-2 mb-2"
+            className="flex justify-center items-center gap-x-2"
+            type="dashed"
+            onClick={() => BackToSetting()}
           >
-            {" "}
-            <span>Add Holiday</span>{" "}
-            <FontAwesomeIcon icon={faPlus} className="icon" />{" "}
+            <FontAwesomeIcon
+              className="text-[10px] inline-block"
+              icon={faChevronLeft}
+            />
+            <span>Back</span>
           </Button>
-        )}
-      </>
+          <div>
+            {SelectTableData === true ? (
+              //multi edit and delete btn
+              <span className="flex gap-x-1">
+                <Popconfirm
+                  okButtonProps={{
+                    style: { backgroundColor: "red", color: "white" },
+                  }}
+                  title="Reset the task"
+                  description={
+                    <>
+                      Selected data is reset so <br />
+                      are you sure to reset this data?
+                    </>
+                  }
+                  okText="Yes"
+                  cancelText="No"
+                  onConfirm={OpenRestModal}
+                >
+                  <Button danger className="flex justify-center items-center gap-x-2 w-full">
+                    <FontAwesomeIcon icon={faRotate} className="icon " /> Reset
+                  </Button>
+                </Popconfirm>
 
+                <Button
+                  onClick={() => MultiEditBtn()}
+                 className=" w-full"
+                  
+                >
+                  <FontAwesomeIcon icon={faPen} color="#000000" className="icon" />
+                </Button>
+
+                <Popconfirm
+                  okButtonProps={{
+                    style: { backgroundColor: "red", color: "white" },
+                  }}
+                  title="Delete the task"
+                  description="Are you sure to delete this task?"
+                  okText="Yes"
+                  cancelText="No"
+                  onConfirm={MultiDelete}
+                >
+                  <Button  danger className=" w-full">
+                    <FontAwesomeIcon icon={faTrash} className="icon" />
+                  </Button>
+                </Popconfirm>
+              </span>
+            ) : (
+              // add btn
+              <Button
+                disabled={SelectTableData}
+                onClick={() => AddBtn()}
+                type="primary"
+                className="bg-blue-500 w-full xs:w-fit"
+              >
+                <span>Add Holiday</span>
+                <FontAwesomeIcon icon={faPlus} className="icon" />
+              </Button>
+            )}
+          </div>
+        </li>
+      </ul>
+
+      <Divider />
+
+      <div className="overflow-x-scroll md:overflow-x-hidden">
       <Table
         rowSelection={rowSelection}
         style={{ marginTop: 10 }}
@@ -618,10 +630,12 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
         columns={columns}
         dataSource={EmpLeaveData}
         pagination={{
-          pageSize: 6,
+          pageSize: 5,
         }}
       />
+        </div>
       <Modal
+        centered={true}
         title={`Add New ${headingValue}`}
         open={modalOpen}
         onCancel={ModalClose}
@@ -652,12 +666,8 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
           </Button>,
         ]}
       >
-        <Form form={form}>
-          <Form.Item
-            name="Employee"
-            label="Employee"
-            style={{ marginBottom: 0, marginTop: 10 }}
-          >
+        <Form form={form} className="mt-3" layout="vertical">
+          <Form.Item className="mb-2" name="Employee" label="Employee">
             {SelectTableData === false ? (
               //normal select
               <Select
@@ -670,20 +680,23 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
                     .includes(input.toLowerCase())
                 }
                 placeholder="Select Employee"
-                style={{ float: "right", width: filedWidth }}
                 onChange={DropDown}
                 options={employeeOption}
               />
             ) : (
-              UpdateDefalutValue.map((emname,i) => {
-                return <Tag key={i} bordered={false}>{emname},</Tag>;
+              UpdateDefalutValue.map((emname, i) => {
+                return (
+                  <Tag key={i} bordered={false}>
+                    {emname},
+                  </Tag>
+                );
               })
             )}
           </Form.Item>
 
           <Form.Item
+            className="mb-2"
             label="Sick Leave"
-            style={{ marginBottom: 0, marginTop: 10 }}
             rules={[
               {
                 type: "number",
@@ -694,7 +707,6 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
           >
             <Input
               value={EmployeeLeaveIn.sickLeave}
-              style={{ float: "right", width: filedWidth }}
               placeholder="Sick Leave"
               name="sickLeave"
               onChange={InputDataFields}
@@ -702,8 +714,8 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
           </Form.Item>
 
           <Form.Item
+            className="mb-2"
             label="Casual Leave"
-            style={{ marginBottom: 0, marginTop: 10 }}
             rules={[
               {
                 type: "number",
@@ -714,15 +726,14 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
           >
             <Input
               value={EmployeeLeaveIn.casualLeave}
-              style={{ float: "right", width: filedWidth }}
               placeholder="Casual Leave"
               name="casualLeave"
               onChange={InputDataFields}
             />
           </Form.Item>
           <Form.Item
+            className="mb-2"
             label="Total"
-            style={{ marginBottom: 0, marginTop: 10 }}
             rules={[
               {
                 type: "number",
@@ -733,20 +744,18 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
           >
             <Input
               value={EmployeeLeaveIn.total}
-              style={{ float: "right", width: filedWidth }}
               placeholder="Total"
               name="total"
               onChange={InputDataFields}
             />
           </Form.Item>
           <Form.Item
+            className="mb-2"
             label="Leave Availed"
-            style={{ marginBottom: 0, marginTop: 10 }}
             validateStatus={NumberValidate.leaveAvalied === true ? "error" : ""}
           >
             <Input
               value={EmployeeLeaveIn.leaveAvailed}
-              style={{ float: "right", width: filedWidth }}
               placeholder="Leave Availed"
               name="leaveAvailed"
               onChange={InputDataFields}
@@ -756,14 +765,15 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
       </Modal>
 
       <Modal
-      title={`Add New ${headingValue}`}
-      open={ResetModel}
-      onCancel={CloseResetModal}
-      footer={[
-        <Button key="1" onClick={ResetConfirm}>
-                Add
-        </Button>,
-        <Button
+        centered={true}
+        title={`Add New ${headingValue}`}
+        open={ResetModel}
+        onCancel={CloseResetModal}
+        footer={[
+          <Button key="1" onClick={ResetConfirm}>
+            Add
+          </Button>,
+          <Button
             type="text"
             key="2"
             danger="red"
@@ -771,28 +781,46 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
             onClick={() => CloseResetModal()}
           >
             Close
-          </Button>
-      ]}>
-     <Form.Item label="Sick Leave" style={{ marginBottom: 0, marginTop: 10 }}
-     rules={[
-              {
-                type: "number",
-                message: "Please enter a valid number!",
-              },
-            ]}
-            validateStatus={NumberValidate.sickLeave === true ? "error" : ""}>
-      <Input onChange={ResetStateOnchange} style={{ float: "right", width: filedWidth }} value={ResetState.sickLeave} name="sickLeave" placeholder="Sick Leave"/>
-     </Form.Item>
+          </Button>,
+        ]}
+      >
+        <Form.Item
+          className="mb-2"
+          label="Sick Leave"
+          rules={[
+            {
+              type: "number",
+              message: "Please enter a valid number!",
+            },
+          ]}
+          validateStatus={NumberValidate.sickLeave === true ? "error" : ""}
+        >
+          <Input
+            onChange={ResetStateOnchange}
+            value={ResetState.sickLeave}
+            name="sickLeave"
+            placeholder="Sick Leave"
+          />
+        </Form.Item>
 
-     <Form.Item  rules={[
-              {
-                type: "number",
-                message: "Please enter a valid number!",
-              },
-            ]}
-            validateStatus={NumberValidate.casualLeave === true ? "error" : ""} label="Casual Leave" style={{ marginBottom: 0, marginTop: 10 }}>
-      <Input onChange={ResetStateOnchange} style={{ float: "right", width: filedWidth }} value={ResetState.casualLeave} name="casualLeave" placeholder="Casual Leave"/>
-     </Form.Item>
+        <Form.Item
+          className="mb-2"
+          rules={[
+            {
+              type: "number",
+              message: "Please enter a valid number!",
+            },
+          ]}
+          validateStatus={NumberValidate.casualLeave === true ? "error" : ""}
+          label="Casual Leave"
+        >
+          <Input
+            onChange={ResetStateOnchange}
+            value={ResetState.casualLeave}
+            name="casualLeave"
+            placeholder="Casual Leave"
+          />
+        </Form.Item>
       </Modal>
     </>
   );

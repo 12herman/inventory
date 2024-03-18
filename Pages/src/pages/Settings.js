@@ -111,17 +111,17 @@ const Settings = ({user}) => {
       {/* <h3>Theme <Switch checkedChildren="Dark" unCheckedChildren="Light" defaultChecked /></h3> */}
       {
         settingsBack === true ? 
-        <Row align="middle">
-        <Col key="1" ><FontAwesomeIcon className='text-3xl ' icon={faUserTie}/> <span className='ml-2 font-medium'>{user === undefined ? "Admin Not Fount" : user.firstName + " " + user.lastName}</span></Col>
-        <Divider className='mb-0 mt-2'/>
+        <ul className='flex flex-col gap-y-5'>
+        <li key="1" className='border-b-[1px] border-gray-200 pb-2'><FontAwesomeIcon className='text-3xl ' icon={faUserTie}/> <span className='ml-2 font-medium'>{user === undefined ? "Admin Not Fount" : user.firstName + " " + user.lastName}</span></li>
+        {/* <Divider className='mb-0 mt-2'/> */}
         {
           settingList.map((settings, i) => {
             return (
-                <Col key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer block w-full py-4 text-gray-400 hover:text-blue-500 z-50 '> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></Col>
+                <li key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer border-b-[1px] border-gray-200 block w-full text-gray-400 hover:text-blue-500 z-50 text-base'> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></li>
             )
           })
         }
-      </Row> : setingPreview
+      </ul> : setingPreview
       }
     </div>
   );
