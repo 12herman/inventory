@@ -107,7 +107,7 @@ const Settings = ({user}) => {
   };
   
   return (
-    <div>
+    <div className='z-0'>
       {/* <h3>Theme <Switch checkedChildren="Dark" unCheckedChildren="Light" defaultChecked /></h3> */}
       {
         settingsBack === true ? 
@@ -117,7 +117,7 @@ const Settings = ({user}) => {
         {
           settingList.map((settings, i) => {
             return (
-                <li key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer border-b-[1px] border-gray-200 block w-full text-gray-400 hover:text-blue-500 z-50 text-base'> <FontAwesomeIcon  icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></li>
+                <li key={i} onClick={curdPage} name={settings.settingname} className='cursor-pointer border-b-[1px] border-gray-200 block w-full text-gray-400 hover:text-blue-500  text-base '> <FontAwesomeIcon   icon={settings.icon}/> &#160; <span className='text-gray-400 font-[480]'>{settings.settingname}</span></li>
             )
           })
         }

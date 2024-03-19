@@ -219,11 +219,7 @@ export default function EmployeeLeaveSettings({ BackToSetting }) {
 
   //table data
   const EmpLeaveData = employeeleave
-    .filter((data) =>
-      employee.some(
-        (emp) => emp.isDeleted === false && data.isdeleted === false
-      )
-    )
+    .filter(data => employee.some( emp => emp.isDeleted === false && data.isdeleted === false))
     .map((data, i) => ({
       SerialNo: i + 1,
       key: data.id,

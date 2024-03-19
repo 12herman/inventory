@@ -1261,21 +1261,24 @@ const Products = ({ officeData }) => {
       </Modal>
 
       <Modal //History Button Modal
-        title="Products History"
+      centered={true}
+        title={<div className="text-center mt-3">Products History</div>}
         open={repairHistoryModal}
-        onOk={CloseRepairHistoryModal}
-        okButtonProps={{
-          style: { backgroundColor: "#4088ff" },
-        }}
+        // onOk={CloseRepairHistoryModal}
+        // okButtonProps={{
+        //   style: { backgroundColor: "#4088ff" },
+        // }}
+        className="h-fit m-0"
         onCancel={CloseRepairHistoryModal}
-        width={1200}
+        //width={1000}
         xs={20}
         xl={4}
+        footer={[""]}
       >
         {items.length > 0 ? (
-          <Timeline mode="left" style={{ margin: "10px" }}>
+          <Timeline mode="left" className="w-full pt-4 xs:overflow-x-hidden ">
             {items.map((item) => (
-              <Timeline.Item key={item.key} label={item.label}>
+              <Timeline.Item key={item.key} label={item.label.split('T')[0]}>
                 {item.children}
               </Timeline.Item>
             ))}

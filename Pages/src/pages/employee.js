@@ -319,9 +319,7 @@ const Employee = ({ officeData, LoginUser }) => {
   const { leavetable } = useSelector((state) => state.leavetable);
   const { productsDetail } = useSelector((state) => state.productsDetail);
   const { employeeleave } = useSelector((state) => state.employeeleave);
-  const { employeeleavehistory } = useSelector(
-    (state) => state.employeeleavehistory
-  );
+  const { employeeleavehistory } = useSelector((state) => state.employeeleavehistory);
 
   const [empData, setEmpData] = useState([]);
   const [roledetailData, setRoledetailData] = useState([]);

@@ -19,14 +19,20 @@ import {
 } from "../../redux/slices/leaveTableSlice";
 import { Getemployeeleave, Postemployeeleave, Putemployeeleave } from "../../redux/slices/employeeLeaveSlice";
 import dayjs from "dayjs";
+import { getEmployees } from "../../redux/slices/employeeSlice";
 
 const LeaveTable = ({ BackToSetting }) => {
   const dispatch = useDispatch();
   const { leavetable } = useSelector((state) => state.leavetable);
   const { employeeleave } = useSelector((state) => state.employeeleave);
+  const {employee} = useSelector(state => state.employee);
+
   useEffect(() => {
     dispatch(Getleavetable());
+    dispatch(getEmployees());
   }, []);
+
+  
 
   const columns = [
     {
@@ -225,8 +231,19 @@ const LeaveTable = ({ BackToSetting }) => {
           isDeleted: true,
         }));
        
-        const UpdateDeletedNewData =await DeletedLeaveData.map(data=>({
-            employeeId: data.employeeId,
+        // const UpdateDeletedNewData =await DeletedLeaveData.map(data=>({
+        //     employeeId: data.employeeId,
+        //     sickLeave: LeaveTable.sickLeave,
+        //     casualLeave: LeaveTable.casualLeave,
+        //     total: LeaveTable.total,
+        //     leaveAvailed: LeaveTable.leaveAvailed,
+        //     isDeleted: false,
+        // }));
+
+        const EmpFilters =await employee.filter(emp => emp.isDeleted === false);
+        
+        const UpdateDeletedNewData = await EmpFilters.map( data =>({
+          employeeId: data.id,
             sickLeave: LeaveTable.sickLeave,
             casualLeave: LeaveTable.casualLeave,
             total: LeaveTable.total,
@@ -234,13 +251,15 @@ const LeaveTable = ({ BackToSetting }) => {
             isDeleted: false,
         }));
 
+       
+
         await DeletedLeaveData.map(data => dispatch (Putemployeeleave(data)));
         await UpdateDeletedNewData.map(data => dispatch(Postemployeeleave(data)))
-       
           await dispatch(Getleavetable());
           await dispatch(Getemployeeleave());
           await ModelClose();
-    }
+          await message.success('Employee leaves updates successfully')
+     }
   };
 
   // pencil icon click
