@@ -14,7 +14,10 @@ import OtpPage from "./components/OtpPage";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import Accessories from "./pages/Accessories";
 import User from "./userpages/User";
-
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import SlideOne from './Assets/slider/slide-1.png';
+import SlideTwo from './Assets/slider/slide-2.png';
 // import nodemailer from 'nodemailer';
 // import { decrypt,compare, encrypt } from "n-krypta";
 // var transporter = nodemailer.createTransport({
@@ -96,15 +99,20 @@ const Loginpage = () => {
  const [UserLogin,setUserLogin] = useState(null);
 const [EmployeeId,setEmployeeId] = useState(null);
   return (
-    UserLogin === null ? <div>
-    <section className="w-10/12 mx-auto my-20 sm:grid sm:grid-cols-3 ">
-      <div className="col-span-1 lg:col-span-2"></div>
-      <div className="sm:col-span-2 lg:col-span-1">
-        <h2 className="text-5xl lg:text-7xl font-black text-center ">
+    UserLogin === null ? 
+  <div className="login-bg">
+    <div className="w-full h-screen flex justify-center items-center">
+    
+    <section className="grid grid-cols-1 lg:grid-cols-2 items-center bg-white rounded-lg py-10 w-[70%]">
+      
+     
+      <div className=" justify-self-center">
+      
+        <h2 className="text-3xl lg:text-5xl font-black text-center ">
           Qosteq
         </h2>
-        <h3 className="text-4xl font-bold text-center mt-5">Payroll</h3>
-        <h3 className="text-2xl font-black text-center mt-5">Login</h3>
+        <h3 className="text-2xl font-bold text-center mt-3">Payroll</h3>
+        <h3 className="text-xl font-black text-center mt-3">Login</h3>
         
         {currentSection === 1 && (
           <Form
@@ -126,7 +134,7 @@ const [EmployeeId,setEmployeeId] = useState(null);
             onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
-            <Form.Item
+            <Form.Item className="mb-2"
               // label="Username"
               name="userName"
               rules={[
@@ -139,7 +147,7 @@ const [EmployeeId,setEmployeeId] = useState(null);
               <Input placeholder="User Name" />
             </Form.Item>
 
-            <Form.Item
+            <Form.Item className="mb-2"
               // label="Password"
               name="password"
               rules={[
@@ -152,17 +160,17 @@ const [EmployeeId,setEmployeeId] = useState(null);
               <Input.Password placeholder="Password" />
             </Form.Item>
 
-            <Form.Item>
+            <Form.Item className="mb-2">
               <Button
                 onClick={() => goToNextSection ()}
-                type="text"
-                className="text-[12px] sm:text-blue-500 "
+                type="link"
+                className="text-[12px] sm:text-blue-500 p-0"
               >
                 Forget Password?
               </Button>
             </Form.Item>
 
-            <Form.Item>
+            <Form.Item className="mb-2">
               <Button
                 className="bg-blue-500 w-full"
                 type="primary"
@@ -197,17 +205,36 @@ const [EmployeeId,setEmployeeId] = useState(null);
             <FontAwesomeIcon icon={faEnvelope} />
           </li>
         </ul>
+    
       </div>
+
+<div className=" hidden lg:block ">
+<span className="w-full">
+<Swiper
+      spaceBetween={50}
+      slidesPerView={1}
+      onSlideChange={() => console.log('slide change')}
+      onSwiper={(swiper) => console.log(swiper)}
+    >
+      <SwiperSlide><img  className="p-10" src={SlideOne}/></SwiperSlide>
+      <SwiperSlide><img className="p-10" src={SlideTwo}/></SwiperSlide>
+      {/* <SwiperSlide>Slide 3</SwiperSlide>
+      <SwiperSlide>Slide 4</SwiperSlide> */}
+    </Swiper>
+</span>
+</div>
     </section>
-    <div
+
+    {/* <div
       className="-z-20 sm:z-0 w-[5%] sm:w-[30%] lg:w-[60%] h-[90%] bg-blue-500 absolute top-[50%] -translate-y-1/2"
       style={{ borderRadius: "0 500px 500px 0" }}
     ></div>
     <img
       className=" w-[40%] bottom-0 sm:w-[20%] lg:w-[40%] absolute sm:top-[50%] sm:-translate-y-1/2"
       src={loginBgImg}
-    ></img>
-  </div> 
+    ></img> */}
+    </div>
+ </div> 
   : UserLogin === true ? <Accessories Id ={EmployeeId} Employees ={employee}/> : <User Id ={EmployeeId}/>
   );
 };
