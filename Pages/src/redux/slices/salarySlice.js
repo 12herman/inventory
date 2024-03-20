@@ -8,7 +8,7 @@ export const getSalary = createAsyncThunk('get/getSalary',async()=>{
 });
 
 export const postSalary = createAsyncThunk('salary/postSalary', async (newProductData) => {
-    console.log(newProductData);
+    // console.log(newProductData);
     return Axios.post(ApiLink.salary, newProductData)
         .then(res => {
             return res.data 

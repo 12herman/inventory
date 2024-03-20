@@ -1,39 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { Table, Space, Col, Input, Divider, Button, Row, Modal, Form, Select, DatePicker, message, Upload } from 'antd';
-import { UploadOutlined,DownloadOutlined,InboxOutlined  } from '@ant-design/icons';
+import { Table, Space, Col, Input, Divider, Button, Row, Modal, Form, Select, DatePicker, message, Upload, Alert } from 'antd';
+import { UploadOutlined, DownloadOutlined, InboxOutlined } from '@ant-design/icons';
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDispatch, useSelector } from 'react-redux';
 import { getSalary, postSalary } from '../redux/slices/salarySlice';
 import * as FileSaver from 'file-saver';
 import XLSX from 'sheetjs-style';
-import Axios from 'axios';
+
 
 const { Dragger } = Upload;
-const props = {
-  name: 'file',
-  multiple: true,
-  action: 'https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188',
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== 'uploading') {
+
+
+const Salary = ({ excelData, fileName }) => {
+  // const [excelFileName,setExcelFileName] = useState(null);
+  const [xlFileResponse, setxlFileResponse] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
+  const props = {
+    name: 'file',
+    accept: 'multipart/form-data',
+    multiple: true,
+    action: 'https://localhost:7129/api/XlSalary/api/excel/upload',
+    onChange(info) {
+      const { status } = info.file;
       console.log(info.file);
-      // console.log(info.file, info.fileList);
 
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  onDrop(e) {
-    console.log('Dropped files', e.dataTransfer.files);
-  },
-};
-
-const Salary = ({excelData,fileName}) => {
+      if (status !== 'uploading') {
+        console.log(info.file.response);
+        // console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully.`);
+        
+      } else if (status === 'error') {
+        if (info.file.response) {
+          const Names = info.file.response.unmatchedEmployees.map(name => `${name}`);
+          setUploadError(`Unmatched Employee Id " ${Names.join(', ')} ",Please Update Employee Id.`);
+          // setxlFileResponse(info.file.response);
+        }
+        // setUploadError(`${info.file.name} file upload failed.`);
+        //  message.error(`${info.file.response.unmatchedEmployees
+        //  } file upload failed.`);
+        else {
+          // Render generic error message if response is not available
+          setUploadError(`${info.file.name} file upload failed.`);
+        }
+      }
+    },
+    onDrop(e) {
+      console.log('Dropped files', e.dataTransfer.files);
+    },
+  };
 
   const onChange = (pagination, filters, sorter, extra) => {
     console.log('params', pagination, filters, sorter, extra);
@@ -43,10 +61,10 @@ const Salary = ({excelData,fileName}) => {
 
   const { salary } = useSelector(state => state.salary);
 
-
   const { employee } = useSelector((state) => state.employee);
 
   const [tableDATA, setTableDATA] = useState();
+
   const [employeeSalary, setEmployeeSalary] = useState({
     id: null,
     employeeId: null,
@@ -65,7 +83,6 @@ const Salary = ({excelData,fileName}) => {
   useEffect(() => {
     dispatch(getSalary());
     setTableDATA(salary);
-
   }, []);
 
   const clearFields = () => {
@@ -88,9 +105,13 @@ const Salary = ({excelData,fileName}) => {
   };
   const SalaryModalClose = () => { setSalaryModal(false) };
 
-  const [excelModal,setExcelModal] = useState(false);
-  const OpenExcelModal =()=>{setExcelModal(true)};
-  const CloseExcelModal =()=>{setExcelModal(false)};
+  const [excelModal, setExcelModal] = useState(false);
+  const OpenExcelModal = () => { setExcelModal(true) };
+  const CloseExcelModal = () => {
+    setExcelModal(false);
+    setUploadError(null);
+    setxlFileResponse(null);
+  };
 
   const [searchText, setSearchText] = useState("");
   const columns = [
@@ -123,7 +144,7 @@ const Salary = ({excelData,fileName}) => {
         compare: (a, b) => {
           const grossA = moment(a.grossSalary);
           const grossB = moment(b.grossSalary);
-          return grossA-grossB;
+          return grossA - grossB;
         },
         multiple: 3,
       },
@@ -136,7 +157,7 @@ const Salary = ({excelData,fileName}) => {
         compare: (a, b) => {
           const netA = moment(a.netSalary);
           const netB = moment(b.netSalary);
-          return netA-netB;
+          return netA - netB;
         },
         multiple: 3,
       },
@@ -149,13 +170,46 @@ const Salary = ({excelData,fileName}) => {
         compare: (a, b) => {
           const dateA = moment(a.salaryDate);
           const dateB = moment(b.salaryDate);
-          return dateA-dateB;
+          return dateA - dateB;
         },
         multiple: 3,
       },
     },
   ];
 
+  //Import Excel Modal Ok Button Function
+  const handleOkButtonClick = async () => {
+    try {
+      const filterFiles = xlFileResponse.length > 0 ? xlFileResponse : null;
+
+      const newDatas = filterFiles === null ? null : xlFileResponse.map(data => ({
+        employeeId: data.employeeId,
+        ctc: data.ctc,
+        grossSalary: data.grossSalary,
+        netSalary: data.netSalary,
+        salaryDate: data.salaryDate,
+        isRevised: true,
+        createdDate: formattedDate,
+        createdBy: data.createdBy,
+        modifiedDate: formattedDate,
+        modifiedBy: data.modifiedBy,
+        isDeleted: false
+      }));
+      for (const data of newDatas) {
+        await dispatch(postSalary(data));
+      }
+      await dispatch(getSalary());
+      setUploadError(null);
+      setExcelModal(false);
+    } catch (error) {
+      console.error('Error posting salary:', error);
+      // Handle the error, display a user-friendly message, retry logic, etc.
+      // You might want to set an error state or display a notification to the user
+    }
+  };
+
+  const currentDate = new Date();
+  const formattedDate = currentDate.toISOString().slice(0, 19);
 
   const replaceDate = (date) => {
     const parts = date === null ? null : date.split("/");
@@ -170,76 +224,38 @@ const Salary = ({excelData,fileName}) => {
 
   const FilterData = tableDATA && tableDATA.length > 0 ? tableDATA.filter(item => item.isDeleted === false) : [];
 
+  //Displaying Table Data
   const TableData = FilterData.map((sl, i) => ({
-    key:sl.id,
+    key: sl.id,
     employeeName: sl.employeeName,
     grossSalary: sl.grossSalary,
     netSalary: sl.netSalary,
     salaryDate: replaceTime(sl.salaryDate),
 
-  }))
-  console.log(TableData);
+  }));
 
   useEffect(() => {
     dispatch(getSalary());
-
   }, [dispatch])
-
-  // In your frontend component
-
-const ImportExcel = async (excelData) => {
-  try {
-    console.log(excelData); 
-    // Send the Excel data to the backend server
-    const response = await Axios.post('https://localhost:7129/api/Salary', {excelData});
-    // {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ excelData }),
-    // },);
-    console.log(response);
-
-    if (response.ok) {
-      // Data successfully imported into MySQL database
-      message.success('Excel data imported successfully.');
-      CloseExcelModal(); // Close the Excel import modal
-    } else {
-      // Handle server errors or other issues
-      message.error('Failed to import Excel data. Please try again later.');
-    }
-  } catch (error) {
-    // Handle network errors or other exceptions
-    console.error('Error importing Excel data:', error);
-    message.error('An error occurred while importing Excel data.');
-  }
-};
-
-const handleImportExcel = (data) => {
-  ImportExcel(data);
-};
-
 
   const ExporttoExcel = () => {
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const fileExtension = '.xlsx';
-  
+
     // Check if excelData is available
     if (!tableDATA) {
       message.error("No data available for export");
-    }else{
-    const ws = XLSX.utils.json_to_sheet(tableDATA);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(data, "ExcelExport" + fileExtension);
+    } else {
+      const ws = XLSX.utils.json_to_sheet(tableDATA);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(data, "ExcelExport" + fileExtension);
     }
-  
-    
   };
-  
+
+  //Pay Salary Button Function
   const PostSalary = async () => {
     if (
       !employeeSalary.grossSalary ||
@@ -261,11 +277,16 @@ const handleImportExcel = (data) => {
         // modifiedBy:employeeSalary.modifiedBy,
         isDeleted: employeeSalary.isDeleted
       };
-      await dispatch(postSalary(addSalary));
-      dispatch(getSalary());
-      SalaryModalClose();
-      message.success("Payment Successfull!");
+      try {
+        await dispatch(postSalary(addSalary));
+        dispatch(getSalary());
+        SalaryModalClose();
+        message.success("Payment Successfull!");
+      } catch (error) {
+        console.error('Error posting salary:', error);
+      }
     }
+
   };
 
   //Gross Salary Input
@@ -318,19 +339,19 @@ const handleImportExcel = (data) => {
         </Col>
 
         <Col justify="flex-end" style={{ left: "20%" }} >
-        <Button   onClick={(e) => ExporttoExcel(fileName)} type="primary"  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<UploadOutlined />} >
+          <Button onClick={(e) => ExporttoExcel(fileName)} type="primary" className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<UploadOutlined />} >
             Export Excel
           </Button>
         </Col>
-        
+
         <Col justify="flex-end" style={{ left: "10%" }} >
-        <Button onClick={OpenExcelModal} type="primary"  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<DownloadOutlined />} >
+          <Button onClick={OpenExcelModal} type="primary" className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<DownloadOutlined />} >
             Import Excel
-          </Button>                   
+          </Button>
         </Col>
 
         <Col justify="flex-end" style={{ right: "0%" }} >
-          <Button           
+          <Button
             onClick={SalaryModalOpen}
             type="primary"
             className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
@@ -343,7 +364,7 @@ const handleImportExcel = (data) => {
       </Row>
       <Divider />
       <div>
-        <Table  dataSource={TableData} columns={columns} pagination={{pageSize:6,}} onChange={onChange}/>
+        <Table dataSource={TableData} columns={columns} pagination={{ pageSize: 6, }} onChange={onChange} />
       </div>
 
       <Modal
@@ -419,7 +440,6 @@ const handleImportExcel = (data) => {
           <Form.Item
             label="Salary Date"
             style={{ marginBottom: 0, marginTop: 10 }}
-
           >
             <DatePicker style={{ width: "380px", float: "right" }} value={employeeSalary.salaryDate ? moment(employeeSalary.salaryDate, 'YYYY/MM/DD') : null} onChange={salaryDateChange}></DatePicker>
           </Form.Item>
@@ -427,36 +447,38 @@ const handleImportExcel = (data) => {
       </Modal>
 
       <Modal
-      open={excelModal}
-      // onCancel={CloseExcelModal}
-      width={"550px"}
-      footer={[
-        <Button key="1"
-          onClick={() => handleImportExcel(excelData)}
-        >
-          Ok
-        </Button>,
-        <Button key="2"
-          onClick={() => CloseExcelModal()}
-        >
-          Cancel
-        </Button>
-      ]}
-      
+        open={excelModal}
+        onCancel={CloseExcelModal}
+        // width={1000}
+        footer={[
+          <Button key="1"
+            onClick={() => handleOkButtonClick()}
+          >
+            Ok
+          </Button>,
+          <Button key="2"
+            onClick={() => CloseExcelModal()}
+          >
+            Cancel
+          </Button>
+        ]}
       >
-        <Dragger {...props}>
-    <p className="ant-upload-drag-icon">
-      <InboxOutlined />
-    </p>
-    <p className="ant-upload-text">Click or drag file to this area to upload</p>
-    <p className="ant-upload-hint">
-      Support for a single or bulk upload. Strictly prohibited from uploading company data or other
-      banned files.
-    </p>
-  </Dragger>
 
+        <div className='px-4 pt-5'>
+          <Dragger {...props}>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">Click or drag file to this area to upload</p>
+            <p className="ant-upload-hint">
+              Support for a single or bulk upload. Strictly prohibited from uploading company data or other
+              banned files.
+            </p>
+          </Dragger>
+        </div>
+        <Divider />
+        {uploadError && <Alert message={uploadError} type="error" />}
       </Modal>
-
     </>
   );
 };

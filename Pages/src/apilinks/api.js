@@ -22,5 +22,5 @@ export const ApiLink = {
     employeeleavehistory:"https://localhost:7129/api/EmployeeLeaveHistory",
     leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail",
     productsrepairhistory:"https://localhost:7129/api/ProductsRepairHistory",
-    salary:"https://localhost:7129/api/Salary"
+    salary:"https://localhost:7129/api/Salary",
   };

@@ -48,7 +48,7 @@ export const store = configureStore({
         employeeleavehistory:EmployeeLeaveHistorySlice,
         leaveconfirmation: leaveConfirmationSlice,
         productsrepairhistory:productsrepairhistorySlice,
-        salary:salarySlice
+        salary:salarySlice,
     }
 });
 
