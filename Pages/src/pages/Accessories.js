@@ -158,7 +158,7 @@ const LoginUser = EmpFilter && EmpFilter !== undefined ? EmpFilter.firstName +" 
       key: '6',
       icon: faDollar,
       label: 'Salary',
-      Content: <Salary />,
+      Content: <Salary LoginUser={LoginUser}/>,
       Components: 'Salary'
     },
     {

@@ -222,7 +222,7 @@ const Salary = ({ excelData, fileName }) => {
     return DateAndTime && DateAndTime.length > 0 ? DateAndTime[0] : null
   };
 
-  const FilterData = tableDATA && tableDATA.length > 0 ? tableDATA.filter(item => item.isDeleted === false) : [];
+  const FilterData = salary && salary.length > 0 ? salary.filter(item => item.isDeleted === false) : [];
 
   //Displaying Table Data
   const TableData = FilterData.map((sl, i) => ({
