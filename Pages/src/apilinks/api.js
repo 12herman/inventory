@@ -23,4 +23,5 @@ export const ApiLink = {
     leaveconfirmationemail:"https://localhost:7129/api/LeaveConfirmationEmail",
     productsrepairhistory:"https://localhost:7129/api/ProductsRepairHistory",
     salary:"https://localhost:7129/api/Salary",
+    pdf:"https://localhost:7129/api/PdfGenerator"
   };

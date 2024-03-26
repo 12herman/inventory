@@ -15,6 +15,7 @@ import ResetPasswordPage from "./components/ResetPasswordPage";
 import Accessories from "./pages/Accessories";
 import User from "./userpages/User";
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import SlideOne from './Assets/slider/slide-1.png';
 import SlideTwo from './Assets/slider/slide-2.png';
@@ -211,6 +212,18 @@ const [EmployeeId,setEmployeeId] = useState(null);
 <div className=" hidden lg:block ">
 <span className="w-full">
 <Swiper
+ 
+ 
+  loop={true}
+  autoplay={{
+          delay: 2500,
+          disableOnInteraction: false,
+        }}
+        pagination={{
+          clickable: true,
+        }}
+       
+        modules={[Autoplay, Pagination, Navigation]}
       spaceBetween={50}
       slidesPerView={1}
       onSlideChange={() => console.log('slide change')}
