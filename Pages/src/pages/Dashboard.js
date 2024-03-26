@@ -57,7 +57,9 @@ function DataLoading() {
     if (officeNames.length === 1) {
         //Employee Count
       var filterOneOffice = empData.filter((off) => off.officeLocationId.officename === officeNames[0]);
-      setEmpCounts(filterOneOffice.length);
+      console.log(filterOneOffice);
+      const counts = filterOneOffice.filter((emp) => emp.isDeleted ===false).length;
+      setEmpCounts(counts);
 
       //Product Count
       const filterProductOneOffice = proData ? proData.filter(products => products.isDeleted === false && products.officeName === officeNames[0]) : 0;
@@ -72,7 +74,8 @@ function DataLoading() {
       console.log(filterRepairOneOffice);
       setRepairCount(filterRepairOneOffice.length);
     } else {
-      setEmpCounts(empData.length);
+        const filterAllEmployeeOffice = empData ? empData.filter((emp) => emp.isDeleted ===false) :0;
+      setEmpCounts(filterAllEmployeeOffice.length);
 
       const filterAllOffice = proData ? proData.filter(products => products.isDeleted === false) : 0;
       setProCounts(filterAllOffice.length);

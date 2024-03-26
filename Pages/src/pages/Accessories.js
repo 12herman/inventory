@@ -269,7 +269,7 @@ const LoginUser = EmpFilter && EmpFilter !== undefined ? EmpFilter.firstName +" 
         {
           menuItems.map(data => {
             return (
-    <li key={data.key} onClick={()=>menuClcik(data.label,data.Content) } 
+    <li key={data.key} onClick={()=>menuClcik(data.label,data.Content) }  style={{ fontWeight: 'bold', fontSize: '16px', backgroundColor: Nav.menu === data.label ? '#f0f0f0' : 'inherit' }}
     className= {`grid px-2 py-3 grid-cols-2 place-items-center gap-x-3 cursor-pointer hover:bg-blue-50  border-b-[1px] border-gray-200 ${Nav.menu === data.label ? "bg-blue-100 " :""}`}>   
       <FontAwesomeIcon className={` ${Nav.menu === data.label ? "text-blue-500" :"text-gray-500"}  ${isMobile === false && Nav.open === true ? 'pl-[20px]' : 'pl-0'}`} icon={data.icon}/>
       <span className={` text-sm w-36 inline-block transition-all duration-300 ease-in-out  ${Nav.open === false && isMobile === false ? "opacity-100 visible animation-effect" : Nav.open === false && isMobile === true ? 'opacity-100' :"opacity-0 invisible"} `}> {data.label}</span> 

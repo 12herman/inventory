@@ -9,43 +9,44 @@ import { getSalary, postSalary } from '../redux/slices/salarySlice';
 import * as FileSaver from 'file-saver';
 import XLSX from 'sheetjs-style';
 
-
 const { Dragger } = Upload;
 
-
-const Salary = ({ excelData, fileName }) => {
-  // const [excelFileName,setExcelFileName] = useState(null);
+const Salary = ({ excelData, fileName,officeData }) => {
+ 
+  const [File,setFile] = useState(null);
   const [xlFileResponse, setxlFileResponse] = useState(null);
   const [uploadError, setUploadError] = useState(null);
+  const [key, setKey] = useState(0);
   const props = {
+    key:key,
     name: 'file',
-    accept: 'multipart/form-data',
-    multiple: true,
     action: 'https://localhost:7129/api/XlSalary/api/excel/upload',
     onChange(info) {
+      console.log(info);
       const { status } = info.file;
-      console.log(info.file);
 
+      console.log(info.file);
       if (status !== 'uploading') {
-        console.log(info.file.response);
-        // console.log(info.file, info.fileList);
+        // console.log(info.file.response);
       }
       if (status === 'done') {
         message.success(`${info.file.name} file uploaded successfully.`);
-        
-      } else if (status === 'error') {
+        setxlFileResponse(info.file.response);
+        setFile(info.file.name);
+        // console.log(info.file.name);
+        setUploadError(false);
+      } 
+      else if (status === 'error') {
         if (info.file.response) {
           const Names = info.file.response.unmatchedEmployees.map(name => `${name}`);
-          setUploadError(`Unmatched Employee Id " ${Names.join(', ')} ",Please Update Employee Id.`);
-          // setxlFileResponse(info.file.response);
+          setUploadError(`This Employee Name(s) have do not have Employee Id " ${Names.join(', ')} ",Please Add Employee Id.`);       
         }
-        // setUploadError(`${info.file.name} file upload failed.`);
-        //  message.error(`${info.file.response.unmatchedEmployees
-        //  } file upload failed.`);
         else {
-          // Render generic error message if response is not available
           setUploadError(`${info.file.name} file upload failed.`);
         }
+      }
+      if(status ==='removed'){
+        setUploadError(null);
       }
     },
     onDrop(e) {
@@ -56,6 +57,7 @@ const Salary = ({ excelData, fileName }) => {
   const onChange = (pagination, filters, sorter, extra) => {
     console.log('params', pagination, filters, sorter, extra);
   };
+
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
@@ -63,7 +65,9 @@ const Salary = ({ excelData, fileName }) => {
 
   const { employee } = useSelector((state) => state.employee);
 
-  const [tableDATA, setTableDATA] = useState();
+  const [salaryData,setSalaryData] = useState([]);
+
+  const [tableDATA, setTableDATA] = useState([]);
 
   const [employeeSalary, setEmployeeSalary] = useState({
     id: null,
@@ -82,7 +86,7 @@ const Salary = ({ excelData, fileName }) => {
   });
   useEffect(() => {
     dispatch(getSalary());
-    setTableDATA(salary);
+
   }, []);
 
   const clearFields = () => {
@@ -96,6 +100,7 @@ const Salary = ({ excelData, fileName }) => {
       isRevised: true,
       isDeleted: false,
     }));
+    setKey(prevKey => prevKey + 1);
   };
 
   const [SalaryModal, setSalaryModal] = useState(false);
@@ -103,14 +108,21 @@ const Salary = ({ excelData, fileName }) => {
     setSalaryModal(true);
     clearFields();
   };
-  const SalaryModalClose = () => { setSalaryModal(false) };
+  const SalaryModalClose = async() => { 
+    setSalaryModal(false);
+    await setEmployeeSalary ((pre)=>({...pre,grossSalary:"",netSalary:""})); 
+  };
 
   const [excelModal, setExcelModal] = useState(false);
-  const OpenExcelModal = () => { setExcelModal(true) };
+  const OpenExcelModal = () => { 
+    setExcelModal(true) ;
+    };
   const CloseExcelModal = () => {
     setExcelModal(false);
     setUploadError(null);
     setxlFileResponse(null);
+    setFile(null);
+    setKey(prevKey => prevKey + 1);
   };
 
   const [searchText, setSearchText] = useState("");
@@ -180,8 +192,9 @@ const Salary = ({ excelData, fileName }) => {
   //Import Excel Modal Ok Button Function
   const handleOkButtonClick = async () => {
     try {
+      // console.log(xlFileResponse);
       const filterFiles = xlFileResponse.length > 0 ? xlFileResponse : null;
-
+    
       const newDatas = filterFiles === null ? null : xlFileResponse.map(data => ({
         employeeId: data.employeeId,
         ctc: data.ctc,
@@ -197,14 +210,12 @@ const Salary = ({ excelData, fileName }) => {
       }));
       for (const data of newDatas) {
         await dispatch(postSalary(data));
-      }
+      }      
       await dispatch(getSalary());
       setUploadError(null);
       setExcelModal(false);
     } catch (error) {
       console.error('Error posting salary:', error);
-      // Handle the error, display a user-friendly message, retry logic, etc.
-      // You might want to set an error state or display a notification to the user
     }
   };
 
@@ -222,7 +233,7 @@ const Salary = ({ excelData, fileName }) => {
     return DateAndTime && DateAndTime.length > 0 ? DateAndTime[0] : null
   };
 
-  const FilterData = salary && salary.length > 0 ? salary.filter(item => item.isDeleted === false) : [];
+  const FilterData = tableDATA && tableDATA.length > 0 ? tableDATA.filter(item => item.isDeleted === false) : [];
 
   //Displaying Table Data
   const TableData = FilterData.map((sl, i) => ({
@@ -233,7 +244,7 @@ const Salary = ({ excelData, fileName }) => {
     salaryDate: replaceTime(sl.salaryDate),
 
   }));
-
+console.log(TableData);
   useEffect(() => {
     dispatch(getSalary());
   }, [dispatch])
@@ -243,10 +254,10 @@ const Salary = ({ excelData, fileName }) => {
     const fileExtension = '.xlsx';
 
     // Check if excelData is available
-    if (!tableDATA) {
+    if (!salary) {
       message.error("No data available for export");
     } else {
-      const ws = XLSX.utils.json_to_sheet(tableDATA);
+      const ws = XLSX.utils.json_to_sheet(salary);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -281,6 +292,7 @@ const Salary = ({ excelData, fileName }) => {
         await dispatch(postSalary(addSalary));
         dispatch(getSalary());
         SalaryModalClose();
+        await setEmployeeSalary((pre) => ({...pre,grossSalary:"",netSalary:""}));
         message.success("Payment Successfull!");
       } catch (error) {
         console.error('Error posting salary:', error);
@@ -322,12 +334,39 @@ const Salary = ({ excelData, fileName }) => {
     }));
   };
 
+  function DataLoading(){
+    var numberOfOffice = officeData.filter((off)=> off.isdeleted ===false);
+    console.log(numberOfOffice);
+    var officeNames = numberOfOffice.map((off) =>{
+      return off.officename;
+    });
+    // console.log(officeNames);
+    if (officeNames.length ===1){
+      const filterOneOffice = salary ? salary.filter((salary) => salary.isDeleted ===false && salary.officeName ===officeNames[0]):0;
+      console.log(filterOneOffice);
+      setTableDATA(filterOneOffice);
+    }else{
+      const filterAllOffice = salary? salary.filter((salary)=> salary.isDeleted ===false) : 0;
+      // console.log(filterAllOffice);
+      setTableDATA(filterAllOffice)
+    }
+
+  };
+
+  useEffect(()=>{
+    setSalaryData(salary);
+    DataLoading();
+  },[salary,officeData])
+
   return (
     <>
-      <Row justify="space-between" align="middle" gutter={12} className="flex justify-between items-center">
-        <Col span={10} >
+      {/* <Row justify="space-between" align="middle" gutter={12} className="flex justify-between items-center"> */}
+      <ul className="flex flex-col lg:flex-row justify-between lg:items-center gap-y-3 gap-x-2 2xl:gap-x-0 xl:gap-y-0">
+      <li className="grid grid-flow-col gap-x-10 items-center self-center xs:self-start">
+        {/* <Col span={10} > */}
           <Input.Search
-            className="block w-fit"
+            // className="block w-fit"
+            className=" w-fit hidden md:block"
             placeholder="Search here...."
             onSearch={(value) => {
               setSearchText(value);
@@ -336,42 +375,64 @@ const Salary = ({ excelData, fileName }) => {
               setSearchText(e.target.value);
             }}
           />
-        </Col>
+        </li>
 
-        <Col justify="flex-end" style={{ left: "20%" }} >
-          <Button onClick={(e) => ExporttoExcel(fileName)} type="primary" className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<UploadOutlined />} >
+        {/* <Col justify="flex-end" style={{ left: "20%" }} > */}
+        <li  className="flex flex-col  xmm:flex-row gap-x-2 gap-y-3 lg:gap-y-0">
+          <Button onClick={(e) => ExporttoExcel(fileName)} type="primary"
+          //  className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
+            className="bg-blue-500 flex justify-center items-center gap-x-1 w-full xs:w-fit"
+            icon={<UploadOutlined />} >
             Export Excel
           </Button>
-        </Col>
+        
 
-        <Col justify="flex-end" style={{ left: "10%" }} >
-          <Button onClick={OpenExcelModal} type="primary" className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3" icon={<DownloadOutlined />} >
+        {/* <Col justify="flex-end" style={{ left: "10%" }} > */}
+          <Button onClick={OpenExcelModal} type="primary" 
+          // className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
+          className="bg-blue-500 flex justify-center items-center gap-x-1 w-full xs:w-fit"  
+          icon={<DownloadOutlined />} >
             Import Excel
           </Button>
-        </Col>
+        {/* </Col> */}
 
-        <Col justify="flex-end" style={{ right: "0%" }} >
+        {/* <Col justify="flex-end" style={{ right: "0%" }} > */}
           <Button
             onClick={SalaryModalOpen}
             type="primary"
-            className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
+            // className="bg-blue-500 flex items-center gap-x-1 float-right mb-3 mt-3"
+            className="bg-blue-500 sm:col-span-2  md:col-span-1 flex justify-center items-center gap-x-1 w-full xs:w-fit"
           >
             <FontAwesomeIcon icon={faPlus} className="icon" />{" "}
             <span >Pay Salary</span>
           </Button>
-        </Col>
+          </li>
 
-      </Row>
+          <li className="block md:hidden">
+<Input.Search
+             className=" block w-full "
+            placeholder="Search here...."
+            onSearch={(value) => {
+              setSearchText(value);
+            }}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+            }}
+          />
+
+</li>
+      </ul>
       <Divider />
-      <div>
+      <div  className="w-full overflow-x-scroll sm:overflow-x-hidden">
         <Table dataSource={TableData} columns={columns} pagination={{ pageSize: 6, }} onChange={onChange} />
       </div>
 
       <Modal
+      centered={true}
         title="Pay Salary"
         open={SalaryModal}
         onCancel={SalaryModalClose}
-        width={"550px"}
+        // width={"550px"}
         footer={[
           <Button key="1"
             onClick={PostSalary}
@@ -379,13 +440,17 @@ const Salary = ({ excelData, fileName }) => {
             Pay
           </Button>,
           <Button key="2"
+          danger="red"
+          style={{ border: "0.5px solid red" }}
             onClick={() => SalaryModalClose()}
           >
             Cancel
           </Button>
         ]}
+        xs={20}
+        xl={4}
       >
-        <Form form={form}>
+        <Form form={form} className="grid grid-cols-1 gap-y-0" layout="vertical">
 
           <Form.Item
             label="Employee Name"
@@ -393,7 +458,7 @@ const Salary = ({ excelData, fileName }) => {
           >
             <Select
               showSearch
-              style={{ width: "380px", float: "right" }}
+              // style={{ width: "380px", float: "right" }}
               placeholder="Select Employee Name"
               optionFilterProp="children"
               filterOption={(input, option) =>
@@ -415,7 +480,7 @@ const Salary = ({ excelData, fileName }) => {
             style={{ marginBottom: 0, marginTop: 10 }}
           >
             <Input
-              style={{ width: "380px", float: "right" }}
+              // style={{ width: "380px", float: "right" }}
               placeholder="Gross Salary"
               name="grossSalary"
               value={employeeSalary.grossSalary}
@@ -428,7 +493,7 @@ const Salary = ({ excelData, fileName }) => {
             style={{ marginBottom: 0, marginTop: 10 }}
           >
             <Input
-              style={{ width: "380px", float: "right" }}
+              // style={{ width: "380px", float: "right" }}
               placeholder="Net Salary"
               name="netSalary"
               value={employeeSalary.netSalary}
@@ -441,12 +506,15 @@ const Salary = ({ excelData, fileName }) => {
             label="Salary Date"
             style={{ marginBottom: 0, marginTop: 10 }}
           >
-            <DatePicker style={{ width: "380px", float: "right" }} value={employeeSalary.salaryDate ? moment(employeeSalary.salaryDate, 'YYYY/MM/DD') : null} onChange={salaryDateChange}></DatePicker>
+            <DatePicker 
+            style={{ width: "470px"}}
+             value={employeeSalary.salaryDate ? moment(employeeSalary.salaryDate, 'YYYY/MM/DD') : null} onChange={salaryDateChange}></DatePicker>
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
+      centered={true}
         open={excelModal}
         onCancel={CloseExcelModal}
         // width={1000}
@@ -457,15 +525,19 @@ const Salary = ({ excelData, fileName }) => {
             Ok
           </Button>,
           <Button key="2"
+          danger="red"
+            style={{ border: "0.5px solid red" }}
             onClick={() => CloseExcelModal()}
           >
             Cancel
           </Button>
         ]}
+        xs={20}
+        xl={4}
       >
 
         <div className='px-4 pt-5'>
-          <Dragger {...props}>
+          <Dragger {...props} maxCount={1}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
