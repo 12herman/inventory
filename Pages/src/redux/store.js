@@ -22,6 +22,7 @@ import EmployeeLeaveHistorySlice from './slices/EmployeeLeaveHistorySlice';
 import leaveConfirmationSlice from './slices/leaveConfirmationSlice';
 import productsrepairhistorySlice from "./slices/productsrepairhistorySlice";
 import salarySlice from './slices/salarySlice';
+import pdfGeneratorSlice from './slices/pdfGeneratorSlice';
 
 export const store = configureStore({
     devTools:true,
@@ -49,6 +50,7 @@ export const store = configureStore({
         leaveconfirmation: leaveConfirmationSlice,
         productsrepairhistory:productsrepairhistorySlice,
         salary:salarySlice,
+        pdf:pdfGeneratorSlice,
     }
 });
 

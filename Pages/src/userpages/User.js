@@ -37,6 +37,7 @@ import { Getleavetable } from "../redux/slices/leaveTableSlice";
 import AppLogo from "../Assets/qosteqlogo.webp";
 import { RightCircleFilled } from "@ant-design/icons";
 import { useMediaQuery } from 'react-responsive';
+import { getSalary } from "../redux/slices/salarySlice";
 const { Header, Sider, Content } = Layout;
 
 
@@ -65,6 +66,9 @@ const User = ({ Id, Data }) => {
   const { productsDetail } = useSelector((state) => state.productsDetail);
   const { leaderemployee } = useSelector((state) => state.leaderemployee);
   const { leavetable } = useSelector((state) => state.leavetable);
+  const {salary} = useSelector(state => state.salary);
+
+
 
   useEffect(() => {
     dispatch(GetHoliday());
@@ -76,6 +80,7 @@ const User = ({ Id, Data }) => {
     dispatch(getProductsDetail());
     dispatch(getleaderemployee());
     dispatch(Getleavetable());
+    dispatch(getSalary());
   }, []);
 
   const EmpFilter = employee.filter((emp) => emp.id === Id);
@@ -85,6 +90,8 @@ const User = ({ Id, Data }) => {
     (leave) => leave.employeeId === Id
   );
   const ProductEmpFilter = productsDetail.filter((pr) => pr.employeeId === Id);
+  const SalaryFilter = salary.filter(data => data.employeeId === Id);
+
 
   const leaderFilter = leaderemployee.filter((le) => le.employeeId === Id);
   const leaderId = leaderFilter.length > 0 ? leaderFilter[0].leaderId : null;
@@ -143,7 +150,7 @@ const User = ({ Id, Data }) => {
       key: "4",
       icon: faMoneyBill,
       label: "Pay Info",
-      Content: <Pay Id={UpdateId} />,
+      Content: <Pay Id={UpdateId} salary={SalaryFilter} employee={EmpFilter}/>,
     },
     {
       key: "5",
