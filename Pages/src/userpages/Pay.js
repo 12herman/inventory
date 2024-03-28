@@ -28,7 +28,6 @@ const Pay = ({ Id, salary, employee }) => {
     action: 4,
   });
   
-
   const showModal = (data) => {
     setIsModalOpen(true);
     setPaySlipData({ ...employee[0], ...data });
@@ -207,7 +206,7 @@ const pdfDownload = async () => {
   await setPdfFile('block ');
   const capture = document.querySelector('.pdf-content');
  await html2canvas(capture,{
-  scale: 0.5, // Adjust scale to reduce image resolution and size
+  scale: 1, // Adjust scale to reduce image resolution and size
   logging: false, // Disable logging to improve performance
 }).then(canvas => {
     const imgData = canvas.toDataURL('image/png');
@@ -218,7 +217,7 @@ const pdfDownload = async () => {
     const offsetY = (pdf.internal.pageSize.getHeight() - imgHeight) / 4;
 
     pdf.addImage(imgData, 'PNG', offsetX, offsetY, imgWidth, imgHeight);
-    pdf.save('receipt.pdf');
+    pdf.save(`${PaySlipApiData.PaySlipMonth}.pdf`);
   });
   await setPdfFile('hidden');
   await handleOk();
@@ -236,7 +235,7 @@ const pdfDownload = async () => {
       <Modal
       closeIcon={false}
         footer={[
-          <Button onClick={handleCancel} >Cancel</Button>,
+          
           <Button onClick={pdfDownload}>
             <ul className="flex justify-center items-center gap-x-1">
               <li>
@@ -245,6 +244,7 @@ const pdfDownload = async () => {
               <li className="hidden sm:block">Download</li>
             </ul>
           </Button>,
+          <Button danger onClick={handleCancel} >Close</Button>
         ]}
         width={isMobile === false ? 1000 : undefined}
         centered={true}
